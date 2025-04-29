@@ -47,7 +47,7 @@ public class UserRepository {
 
     public Optional<User> getUserByUsername(String username) {
         try {
-            String sql = "SELECT * FROM users" +
+            String sql = "SELECT * FROM users " +
                     "WHERE username = ?";
 
             User user = jdbcTemplate.queryForObject(sql, RowMapperUtil.userRowMapper(), username);
