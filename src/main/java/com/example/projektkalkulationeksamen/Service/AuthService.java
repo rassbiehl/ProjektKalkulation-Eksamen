@@ -17,8 +17,9 @@ import javax.naming.AuthenticationException;
 
 @Service
 public class AuthService {
-
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
     private final UserService userService;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
     @Autowired
