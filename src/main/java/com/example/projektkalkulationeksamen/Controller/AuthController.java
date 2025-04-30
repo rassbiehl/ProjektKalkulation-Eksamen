@@ -1,12 +1,15 @@
 package com.example.projektkalkulationeksamen.Controller;
 
+import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Service.AuthService;
 import com.example.projektkalkulationeksamen.Service.UserService;
+import com.example.projektkalkulationeksamen.Validator.SessionValidator;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,15 +21,18 @@ public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final UserService userService;
     private final AuthService authService;
+    private final SessionValidator sessionValidator;
 
-    public AuthController(UserService userService, AuthService authService) {
+    @Autowired
+    public AuthController(UserService userService, AuthService authService, SessionValidator sessionValidator) {
         this.userService = userService;
         this.authService = authService;
+        this.sessionValidator = sessionValidator;
     }
 
     @GetMapping("/")
     public String redirectToLogin(HttpSession session){
-        if (session.getAttribute("userId") == null){
+        if (!sessionValidator.isSessionValid(session)){
             logger.info("User is not logged in for current session. Redirecting to loginform.html");
             return "redirect:/loginform";
         }
@@ -60,7 +66,19 @@ public class AuthController {
     }
 
     @GetMapping("/registerform")
-    public String showRegisterForm(Model model) {
+    public String showRegisterForm(HttpSession session, Model model) {
+
+        if (!sessionValidator.isSessionValid(session)) {
+            logger.info("User is not logged in. Redirecting to loginform.html");
+            return "redirect:/loginform";
+        }
+
+        if (!sessionValidator.isSessionValid(session, Role.ADMIN)) {
+            Integer userId = (Integer) session.getAttribute("userId");
+            logger.info("Access denied: user with ID {} lacks admin privileges", userId);
+            throw new AccessDeniedException("User lacks admin privileges");
+        }
+
         model.addAttribute("Role",Role.values());
         return "registerform";
     }
@@ -70,13 +88,19 @@ public class AuthController {
 
         logger.debug("attempting to create new user with username: {} and role: {}", username, role.toString());
 
-        System.out.println("Username: " + username + " Password: " + rawPassword + " Role: " + role);
         authService.adminRegister(username, rawPassword, role);
 
-
-        logger.info("Successfully created new user with userID: {} and role: {}", userService.getUserByUsername(username).getId(), userService.getUserByUsername(username).getRole().toString());
-
+        User createdUser = userService.getUserByUsername(username);
+        logger.info("Successfully created new user with userID: {} and role: {}",
+                createdUser.getId(), createdUser.getRole());
         return "redirect:/registerform";
+    }
+
+
+    @GetMapping("/logout")
+    public String logout (HttpSession session) {
+        authService.logout(session);
+        return "redirect:/loginform";
     }
 
 

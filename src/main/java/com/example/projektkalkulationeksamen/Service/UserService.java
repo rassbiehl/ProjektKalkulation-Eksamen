@@ -87,6 +87,10 @@ public class UserService {
         return userRepository.getUserByUsername(username).isPresent();
         }
 
+    public boolean userExistsById(int id) {
+        return userRepository.getUserById(id).isPresent();
+    }
+
 
     }
 

@@ -20,10 +20,14 @@
     </select>
 
     <button type="submit">Add user</button>
+
+    <div th:if="${errorMessage}">
+        <p th:text="${errorMessage}" style="color: red;"></p>
+    </div>
 </form>
 
 <a th:href="@{/users}">
-<button type="button">Tilbage</button>
+<button type="button">Back</button>
 </a>
 
 

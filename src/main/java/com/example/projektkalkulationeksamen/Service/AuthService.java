@@ -7,6 +7,7 @@ import com.example.projektkalkulationeksamen.Exceptions.UserNotFoundException;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Validator.UserValidator;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,11 @@ logger.error("Failed login attempt: no user found with username: {}", username, 
             logger.error("Failed to register user with username: {}", username, e);
             throw new AuthRegisterException("Failed to register user with username: " + username, e);
         }
+    }
+
+
+    public void logout(HttpSession session) {
+        session.invalidate();
     }
 
 
