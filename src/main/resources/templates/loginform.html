@@ -15,6 +15,10 @@
     <input id="password" type="password" class="input-field" name="rawPassword" required>
 
     <button class="button" type="submit">Sign in</button>
+
+    <div th:if="${errorMessage}">
+        <p th:text="${errorMessage}" style="color: red;"></p>
+    </div>
 </form>
 
 </body>

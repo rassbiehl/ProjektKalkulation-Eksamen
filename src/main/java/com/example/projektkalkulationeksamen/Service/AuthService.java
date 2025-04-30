@@ -41,8 +41,8 @@ public class AuthService {
 
 
         } catch (UserNotFoundException e) {
-logger.error("Failed login attempt: no user found with username{}", username, e);
-            throw new AuthenticationFailedException("Could not find user with Username " + username, e);
+logger.error("Failed login attempt: no user found with username: {}", username, e);
+            throw new AuthenticationFailedException("Invalid username or password", e);
         }
     }
 

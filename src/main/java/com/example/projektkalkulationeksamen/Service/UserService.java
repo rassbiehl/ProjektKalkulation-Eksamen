@@ -75,7 +75,7 @@ public class UserService {
                 logger.warn("Failed to delete user with ID " + id);
                 throw new UserNotFoundException("Failed to delete user with ID " + id);
             }
-            logger.info("Succesfully deleted user with ID " + id);
+            logger.info("Successfully deleted user with ID " + id);
         }catch (UserNotFoundException e){
             throw new UserNotFoundException("Could not find user with ID " + id, e);
         }

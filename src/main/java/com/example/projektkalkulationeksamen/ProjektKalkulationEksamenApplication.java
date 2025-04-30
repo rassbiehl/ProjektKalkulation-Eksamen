@@ -1,5 +1,7 @@
 package com.example.projektkalkulationeksamen;
 
+import com.example.projektkalkulationeksamen.Service.AuthService;
+import com.example.projektkalkulationeksamen.Service.UserService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

@@ -1,4 +1,4 @@
-package com.example.projektkalkulationeksamen.mapper;
+package com.example.projektkalkulationeksamen.Mapper;
 
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.User;

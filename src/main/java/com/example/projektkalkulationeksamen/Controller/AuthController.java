@@ -11,7 +11,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -27,11 +26,16 @@ public class AuthController {
 
     @GetMapping("/")
     public String redirectToLogin(HttpSession session){
-        if (session.getAttribute("userId") != null){
+        if (session.getAttribute("userId") == null){
             logger.info("User is not logged in for current session. Redirecting to loginform.html");
             return "redirect:/loginform";
         }
-        return "redirect:/startpage";
+
+        int userId = (Integer) session.getAttribute("userId");
+
+        Role role = userService.getUserById(userId).getRole();
+        logger.info("User already logged in. Redirecting to: " + role.toString().toLowerCase() + "Startpage");
+        return "redirect:/" + role.toString().toLowerCase() + "Startpage";
     }
 
     @GetMapping("/loginform")
@@ -42,16 +46,17 @@ public class AuthController {
     @PostMapping("/login")
     public String login (HttpSession session, @RequestParam String username, @RequestParam String rawPassword) {
 
-
         authService.login(username, rawPassword);
 
         User user = userService.getUserByUsername(username);
 
+        Role role = user.getRole();
+
         session.setAttribute("userId", user.getId());
 
-        logger.info("User successfully logged in with userID: {}", user.getId());
+        logger.info("User successfully logged in with userID: {}. Redirecting to {} Startpage", user.getId(), role.toString().toLowerCase());
 
-        return "redirect:/startpage";
+        return "redirect:/" + role.toString().toLowerCase() + "Startpage";
     }
 
     @GetMapping("/registerform")
@@ -60,7 +65,6 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-
     public String adminRegister (@RequestParam String username, @RequestParam String rawPassword, @RequestParam Role role) {
 
         logger.debug("attempting to create new user with username: {} and role: {}", username, role.toString());
@@ -72,20 +76,11 @@ public class AuthController {
         return "redirect:/registerform";
     }
 
-    @GetMapping ("/startpage")
-    public String getStartPage (HttpSession session, Model model) {
-        Integer userId = (Integer) session.getAttribute("userId");
 
-        if (userId == null) {
-            logger.info("User not logged in for current session. Redirecting to loginform.html");
-            return "redirect:/loginform";
 
-        }
 
-        Role role = userService.getUserById(userId).getRole();
 
-        return role.toString().toLowerCase() + "Startpage";
-    }
+
 
 
 

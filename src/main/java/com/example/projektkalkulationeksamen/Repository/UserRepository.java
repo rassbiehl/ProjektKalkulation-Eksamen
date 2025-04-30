@@ -1,9 +1,8 @@
 package com.example.projektkalkulationeksamen.Repository;
 
 import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
-import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.User;
-import com.example.projektkalkulationeksamen.mapper.RowMapperUtil;
+import com.example.projektkalkulationeksamen.Mapper.RowMapperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
@@ -39,7 +38,7 @@ public class UserRepository {
 
             return Optional.of(user);
         } catch (EmptyResultDataAccessException e) {
-            throw new DatabaseException("Could not find user with ID " + id, e);
+            return Optional.empty();
         } catch (IncorrectResultSizeDataAccessException e) {
             throw new DatabaseException("More users found with same ID " + id, e);
         }
@@ -54,7 +53,7 @@ public class UserRepository {
 
             return Optional.of(user);
         } catch (EmptyResultDataAccessException e) {
-            throw new DatabaseException("Could not find user with Username " + username, e);
+            return Optional.empty();
         } catch (IncorrectResultSizeDataAccessException e) {
             throw new DatabaseException("More users found with same Username " + username, e);
         }
