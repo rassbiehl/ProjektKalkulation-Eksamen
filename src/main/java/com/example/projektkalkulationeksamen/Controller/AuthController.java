@@ -60,7 +60,8 @@ public class AuthController {
     }
 
     @GetMapping("/registerform")
-    public String showRegisterForm() {
+    public String showRegisterForm(Model model) {
+        model.addAttribute("Role",Role.values());
         return "registerform";
     }
 
@@ -69,7 +70,9 @@ public class AuthController {
 
         logger.debug("attempting to create new user with username: {} and role: {}", username, role.toString());
 
+        System.out.println("Username: " + username + " Password: " + rawPassword + " Role: " + role);
         authService.adminRegister(username, rawPassword, role);
+
 
         logger.info("Successfully created new user with userID: {} and role: {}", userService.getUserByUsername(username).getId(), userService.getUserByUsername(username).getRole().toString());
 

@@ -61,7 +61,7 @@ public class UserRepository {
 
     public User addUser(User user) {
         try {
-            String sql = "INSERT INTO users (username,password_hash,role) VALUES (?,?,?)";
+            String sql = "INSERT INTO users (username,password_hash,user_role) VALUES (?,?,?)";
 
             KeyHolder keyHolder = new GeneratedKeyHolder();
 

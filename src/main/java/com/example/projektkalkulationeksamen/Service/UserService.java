@@ -57,9 +57,9 @@ public class UserService {
         }
     }
 
-    public void addUser(User user){
+    public User addUser(User user){
         try {
-            userRepository.addUser(user);
+            return userRepository.addUser(user);
         } catch (DatabaseException e) {
             throw new UserCreationException("Failed to create user", e);
         }
