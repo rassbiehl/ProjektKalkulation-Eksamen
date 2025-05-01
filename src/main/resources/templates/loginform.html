@@ -3,23 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
+
+    <link rel="stylesheet" href="/css/background.css">
+    <link rel="stylesheet" href="/css/loginform.css">
 </head>
 <body>
-<form method="post" th:action="@{/login}">
 
-    <label for="username">Username:</label>
-    <input id="username" type="text" class="input-field" name="username" required>
+<div class="background">
 
-
-    <label for="password">Password:</label>
-    <input id="password" type="password" class="input-field" name="rawPassword" required>
-
-    <button class="button" type="submit">Sign in</button>
-
-    <div th:if="${errorMessage}">
-        <p th:text="${errorMessage}" style="color: red;"></p>
+    <div class="logo">
+        <img src="/images/alphasolutionslogo.svg" alt="Logo">
     </div>
-</form>
 
+    <div class="form">
+    <form method="post" th:action="@{/login}">
+        <h1>Sign in to your Alpha Solutions account</h1>
+        <label for="username">Username:</label>
+        <input id="username" type="text" class="input-field" name="username" required>
+
+
+        <label for="password">Password:</label>
+        <input id="password" type="password" class="input-field" name="rawPassword" required>
+
+        <button class="button" type="submit">Sign in</button>
+
+        <div th:if="${errorMessage}">
+            <p th:text="${errorMessage}" style="color: red;"></p>
+        </div>
+    </form>
+    </div>
+</div>
 </body>
 </html>

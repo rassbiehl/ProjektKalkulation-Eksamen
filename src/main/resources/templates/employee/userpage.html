@@ -2,18 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-
-    <link rel="stylesheet" href="/css/background.css">
-    <link rel="stylesheet" href="/css/nav.css">
-    <link rel="stylesheet" href="/css/usertable.css">
-    <link rel="stylesheet" href="/css/userbuttons.css">
-</head>
-<body>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
     <title>Employee Userpage</title>
 
     <link rel="stylesheet" href="/css/background.css">
@@ -21,16 +9,17 @@
     <link rel="stylesheet" href="/css/usertable.css">
     <link rel="stylesheet" href="/css/userbuttons.css">
 </head>
+<body>
 <div class="background">
 
     <div class="navbar">
         <img src="/images/alphasolutionslogo.svg" alt="Logo">
 
         <ul class="nav-links">
-            <li><a th:href="@{/adminStartpage}">Dashboard</a></li>
+            <li><a th:href="@{/employeeStartpage}">Dashboard</a></li>
             <li><a th:href="@{/users}" style="text-decoration: underline;">Users</a></li>
             <li><a th:href="@{/statistics}">Statistics</a></li>
-            <li><a th:href="@{/logout}" style="color: #650d0d;">Logout</a></li>
+            <li><a class="logout" th:href="@{/logout}">Logout</a></li>
         </ul>
     </div>
 
@@ -51,17 +40,14 @@
             </tr>
             </tbody>
         </table>
-
     </div>
 
     <div class="buttons">
-    <a th:href="@{/employeeStartpage}">
-        <button type="button">Back</button>
-    </a>
+        <a th:href="@{/employeeStartpage}">
+            <button type="button">Back</button>
+        </a>
     </div>
 
 </div>
-</body>
-</html>
 </body>
 </html>

@@ -10,16 +10,17 @@
 
 </head>
 <body>
+<div class="background">
 <div class="navbar">
     <img src="/images/alphasolutionslogo.svg" alt="Logo">
 
     <ul class="nav-links">
-        <li><a th:href="@{/employeeStartpage}">Dashboard</a></li>
+        <li><a th:href="@{/employeeStartpage}" style="text-decoration: underline;">Dashboard</a></li>
         <li><a th:href="@{/users}">Users</a></li>
         <li><a th:href="@{/statistics}">Statistics</a></li>
-        <li><a th:href="@{/logout}" style="color: #650d0d;">Logout</a></li>
+        <li><a class="logout" th:href="@{/logout}">Logout</a></li>
     </ul>
 </div>
-
+</div>
 </body>
 </html>

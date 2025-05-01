@@ -19,7 +19,7 @@
             <li><a th:href="@{/adminStartpage}">Dashboard</a></li>
             <li><a th:href="@{/users}" style="text-decoration: underline;">Users</a></li>
             <li><a th:href="@{/statistics}">Statistics</a></li>
-            <li><a th:href="@{/logout}" style="color: #650d0d;">Logout</a></li>
+            <li><a class="logout" th:href="@{/logout}">Logout</a></li>
         </ul>
     </div>
 
@@ -46,13 +46,11 @@
             </tr>
             </tbody>
         </table>
-
+        <div class="buttons">
+            <a th:href="@{/registerform}">
+                <button type="button">Add user</button>
+            </a>
     </div>
-
-    <div class="buttons">
-    <a th:href="@{/registerform}">
-        <button type="button">Add user</button>
-    </a>
 
 
     <a th:href="@{/adminStartpage}">
