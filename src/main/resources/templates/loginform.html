@@ -27,7 +27,7 @@
 
         <button class="button" type="submit">Sign in</button>
 
-        <div th:if="${errorMessage}">
+        <div class="errormessage" th:if="${errorMessage}">
             <p th:text="${errorMessage}" style="color: #7e1010;"></p>
         </div>
     </form>

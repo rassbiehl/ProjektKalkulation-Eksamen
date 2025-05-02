@@ -67,3 +67,9 @@
     text-align: center;
     text-decoration: none;
 }
+
+.errormessage {
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+}

@@ -3,6 +3,7 @@ package com.example.projektkalkulationeksamen.Controller;
 import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
 import com.example.projektkalkulationeksamen.Exceptions.AuthRegisterException;
 import com.example.projektkalkulationeksamen.Exceptions.AuthenticationFailedException;
+import com.example.projektkalkulationeksamen.Exceptions.UserCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
@@ -42,5 +43,7 @@ public class GlobalExceptionHandler {
         redirectAttributes.addFlashAttribute("errorMessage", authRegisterException.getMessage());
         return "redirect:/registerform";
     }
+
+
 
 }

@@ -47,24 +47,24 @@ logger.error("Failed login attempt: no user found with username: {}", username, 
         }
     }
 
-    public User adminRegister(String username, String rawPassword, Role role) {
+    public void adminRegister(String username, String rawPassword, Role role) {
         logger.debug("Attempting to register new user with username and rawpassword");
 
         if (userService.userExistsByUsername(username)) {
             throw new AuthRegisterException("Username already taken");
         }
-
+        try {
         UserValidator.registrationValidate(username, rawPassword);
 
         String hashedPassword = passwordEncoder.encode(rawPassword);
 
 
-        try {
-            return userService.addUser(new User(username, hashedPassword,role));
+
+            userService.addUser(new User(username, hashedPassword,role));
 
         } catch (UserCreationException e) {
             logger.error("Failed to register user with username: {}", username, e);
-            throw new AuthRegisterException("Failed to register user with username: " + username, e);
+            throw new AuthRegisterException(e.getMessage(), e);
         }
     }
 

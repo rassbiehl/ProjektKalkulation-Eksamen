@@ -34,38 +34,35 @@ public class UserService {
 
             Optional<User> foundUser = userRepository.getUserById(id);
 
-            if (foundUser == null) {
-                throw new UserNotFoundException("Could not find user with ID " + id);
-            } else {
-                return foundUser.get();
-            }
-        } catch (UserNotFoundException e) {
-            throw new UserNotFoundException("Could not fint user with ID " + id, e);
+            return foundUser.orElseThrow(() -> new UserNotFoundException("Failed to find user with ID: " + id));
+        } catch (DatabaseException e) {
+            throw new UserNotFoundException("Failed to find user with ID: " + id, e);
         }
     }
 
-    public User getUserByUsername(String username){
+    public User getUserByUsername(String username) {
         try {
             logger.debug("Sends user with username " + username);
-             Optional<User> foundUser = userRepository.getUserByUsername(username);
+            Optional<User> foundUser = userRepository.getUserByUsername(username);
 
-             return foundUser.orElseThrow(() -> new UserNotFoundException("Failed to retrieve user from Database by username " + username));
+            return foundUser.orElseThrow(() -> new UserNotFoundException("Failed to find user by username: " + username));
 
-        } catch (UserNotFoundException e){
+        } catch (DatabaseException e) {
             logger.error("Failed to retrieve user from Database with username " + username, e);
-            throw new UserNotFoundException("Could not find user with Username " + username);
+            throw new UserNotFoundException("Failed to find user with username: " + username);
         }
     }
 
-    public User addUser(User user){
+    public User addUser(User user) {
         try {
             return userRepository.addUser(user);
         } catch (DatabaseException e) {
+            logger.error("Failed to add user to database with ID: {}", user.getId());
             throw new UserCreationException("Failed to create user", e);
         }
-        }
+    }
 
-        public void deleteUser(int id){
+    public void deleteUser(int id) {
         try {
             logger.debug("Attempting to delete user with id " + id);
 
@@ -76,21 +73,21 @@ public class UserService {
                 throw new UserNotFoundException("Failed to delete user with ID " + id);
             }
             logger.info("Successfully deleted user with ID " + id);
-        }catch (UserNotFoundException e){
-            throw new UserNotFoundException("Could not find user with ID " + id, e);
+        } catch (UserNotFoundException e) {
+            throw new UserNotFoundException("Failed to delete user with ID " + id, e);
         }
 
-        }
+    }
 
 
-        public boolean userExistsByUsername(String username) {
+    public boolean userExistsByUsername(String username) {
         return userRepository.getUserByUsername(username).isPresent();
-        }
+    }
 
     public boolean userExistsById(int id) {
         return userRepository.getUserById(id).isPresent();
     }
 
 
-    }
+}
 
