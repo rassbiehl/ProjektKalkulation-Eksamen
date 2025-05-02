@@ -3,33 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <title>Add user</title>
+
+    <link rel="stylesheet" href="/css/backbutton.css">
+    <link rel="stylesheet" href="/css/background.css">
+    <link rel="stylesheet" href="/css/registerform.css">
 </head>
 <body>
-<h1>Add a new user</h1>
 
-<form method="post" th:action="@{/register}">
-    <label for="username">Username</label>
-    <input id="username" type="text" class="input-field" name="username" required>
-
-    <label for="rawPassword">Password</label>
-    <input id="rawPassword" type="password" class="input-field" name="rawPassword" required>
-
-    <label for="role">Role:</label>
-    <select name="role" id="role">
-        <option th:each="role : ${Role}" th:value="${role}" th:text="${role.displayName}">Role</option>
-    </select>
-
-    <button type="submit">Add user</button>
-
-    <div th:if="${errorMessage}">
-        <p th:text="${errorMessage}" style="color: red;"></p>
+<div class="background">
+    <div class="logo">
+    <img src="/images/alphasolutionslogo.svg" alt="Logo">
     </div>
-</form>
+    <div class="form">
+        <h1>Add a new user</h1>
+    <form method="post" th:action="@{/register}">
+        <label for="username">Username</label>
+        <input id="username" type="text" class="input-field" name="username" required>
 
-<a th:href="@{/users}">
-<button class="buttons" type="button">Back</button>
-</a>
+        <label for="rawPassword">Password</label>
+        <input id="rawPassword" type="password" class="input-field" name="rawPassword" required>
+
+        <label for="role">Role:</label>
+        <select name="role" id="role">
+            <option th:each="role : ${Role}" th:value="${role}" th:text="${role.displayName}">Role</option>
+        </select>
 
 
-</body>
+        <div class="form-buttons">
+            <a th:href="@{/users}" class="back-button">← Back</a>
+            <button type="submit" class="add-button">Add user</button>
+        </div>
+
+        <div th:if="${errorMessage}">
+            <p th:text="${errorMessage}" style="color: red;"></p>
+        </div>
+    </form>
+
+    </div>
+
+    </div>
+
+
+    </body>
 </html>

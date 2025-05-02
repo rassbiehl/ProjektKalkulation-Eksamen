@@ -1,0 +1,69 @@
+.logo img {
+    height: 50px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10vw;
+}
+
+.form {
+    color: floralwhite;
+    font-family: "Poppins", sans-serif;
+    width: fit-content;
+    margin: 0 auto;
+    margin-top: 4vw;
+}
+
+.form h1 {
+    font-size: 20px;
+    text-align: center;
+}
+
+.input-field {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 10%;
+    margin-top: 15px;
+}
+
+.add-button {
+    width: 70%;
+    background-color: #615FFF;
+    color: white;
+    padding: 6px 14px;
+    font-weight: 600;
+    font-size: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+}
+
+.back-button {
+    width: 30%;
+    display: inline-block;
+    background-color: #999;
+    color: white;
+    padding: 6px 14px;
+    font-weight: 600;
+    font-size: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+}

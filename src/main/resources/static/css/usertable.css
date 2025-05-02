@@ -2,23 +2,73 @@
     display: flex;
     justify-content: center;
     margin-top: 150px;
+    color: white;
 }
 
 table {
     border-collapse: collapse;
-    background-color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     width: 80%;
     max-width: 1000px;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
 }
 
 th, td {
     padding: 12px 15px;
-    border: 1px solid #ddd;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
 }
 
 th {
-    background-color: #f4f4f4;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     font-weight: bold;
+}
+
+.add-button-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.add-button {
+    background-color: #48885b;
+    color: white;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.update-button {
+    background-color: #615FFF;
+    color: white;
+    padding: 8px 13px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.delete-button {
+    background-color: #7e1010;
+    color: white;
+    padding: 8px 13px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
 }

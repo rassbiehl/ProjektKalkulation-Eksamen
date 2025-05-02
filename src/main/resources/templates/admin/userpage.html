@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/css/background.css">
     <link rel="stylesheet" href="/css/nav.css">
     <link rel="stylesheet" href="/css/usertable.css">
-    <link rel="stylesheet" href="/css/userbuttons.css">
+
 </head>
 <body>
 <div class="background">
@@ -19,7 +19,7 @@
             <li><a th:href="@{/adminStartpage}">Dashboard</a></li>
             <li><a th:href="@{/users}" style="text-decoration: underline;">Users</a></li>
             <li><a th:href="@{/statistics}">Statistics</a></li>
-            <li><a class="logout" th:href="@{/logout}">Logout</a></li>
+            <li><a class="logout" th:href="@{/logout}">🔒 Logout</a></li>
         </ul>
     </div>
 
@@ -39,23 +39,24 @@
                 <td th:text="${user.role.getDisplayName}">role</td>
                 <td th:text="${#temporals.format(user.createdAt, 'dd-MM-yyyy HH:mm')}">createdAt</td>
                 <td>
-                    <a th:href="@{/users/delete/{id}(id=${user.id})}">
-                        <button type="button">Delete</button>
-                    </a>
+                    <div class="action-buttons">
+                        <a th:href="@{/users/update/{id}(id=${user.id})}">
+                            <button class="update-button" type="button">Update</button>
+                        </a>
+                        <a th:href="@{/users/delete/{id}(id=${user.id})}">
+                            <button class="delete-button" type="button">Delete</button>
+                        </a>
+                    </div>
                 </td>
             </tr>
             </tbody>
         </table>
-        <div class="buttons">
-            <a th:href="@{/registerform}">
-                <button type="button">Add user</button>
-            </a>
     </div>
 
-
-    <a th:href="@{/adminStartpage}">
-        <button type="button">Back</button>
-    </a>
+    <div class="add-button-wrapper">
+        <a th:href="@{/registerform}">
+            <button class="add-button" type="button">Add user</button>
+        </a>
     </div>
 
 </div>
