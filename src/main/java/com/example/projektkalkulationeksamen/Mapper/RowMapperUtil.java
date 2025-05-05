@@ -14,7 +14,7 @@ public class RowMapperUtil {
             int id = rs.getInt("id");
             String username = rs.getString("username");
             String password = rs.getString("password_hash");
-            LocalDateTime createdAt = rs.getTimestamp("createdAt").toLocalDateTime();
+            LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
             Role role = Role.valueOf(rs.getString("user_role"));
 
             return new User(id, username, password, createdAt, role);
