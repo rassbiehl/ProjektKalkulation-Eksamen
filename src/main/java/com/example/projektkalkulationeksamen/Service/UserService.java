@@ -3,6 +3,7 @@ package com.example.projektkalkulationeksamen.Service;
 import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
 import com.example.projektkalkulationeksamen.Exceptions.UserCreationException;
 import com.example.projektkalkulationeksamen.Exceptions.UserNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.UserUpdateException;
 import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Repository.UserRepository;
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ public class UserService {
 
     public User getUserById(int id) {
         try {
-            logger.debug("Sends user with ID" + id);
+            logger.debug("Sends user with ID: {}", id);
 
             Optional<User> foundUser = userRepository.getUserById(id);
 
@@ -42,7 +43,7 @@ public class UserService {
 
     public User getUserByUsername(String username) {
         try {
-            logger.debug("Sends user with username " + username);
+            logger.debug("Sends user with username: {}", username);
             Optional<User> foundUser = userRepository.getUserByUsername(username);
 
             return foundUser.orElseThrow(() -> new UserNotFoundException("Failed to find user by username: " + username));
@@ -57,26 +58,45 @@ public class UserService {
         try {
             return userRepository.addUser(user);
         } catch (DatabaseException e) {
-            logger.error("Failed to add user to database with ID: {}", user.getId());
+            logger.error("Failed to add user to database with username: {}", user.getUsername());
             throw new UserCreationException("Failed to create user", e);
         }
     }
 
     public void deleteUser(int id) {
         try {
-            logger.debug("Attempting to delete user with id " + id);
+            logger.debug("Attempting to delete user with id {}", id);
 
             boolean deleteUser = userRepository.deleteUser(id);
 
             if (!deleteUser) {
-                logger.warn("Failed to delete user with ID " + id);
+                logger.warn("Failed to delete user with ID {}", id);
                 throw new UserNotFoundException("Failed to delete user with ID " + id);
             }
-            logger.info("Successfully deleted user with ID " + id);
-        } catch (UserNotFoundException e) {
+            logger.info("Successfully deleted user with ID {}", id);
+        } catch (DatabaseException e) {
             throw new UserNotFoundException("Failed to delete user with ID " + id, e);
         }
 
+    }
+
+    public void updateUser(User user) {
+        logger.debug("Attempting to update user with ID: {}", user.getId());
+
+        try {
+            boolean updated = userRepository.updateUser(user);
+
+            if (!updated) {
+                logger.warn("No user found to update with ID {}", user.getId());
+                throw new UserNotFoundException("No user found to update with ID: " + user.getId());
+            }
+
+            logger.info("Successfully updated user with ID {}", user.getId());
+
+        } catch (DatabaseException e) {
+            logger.error("Database error while updating user with ID {}", user.getId(), e);
+            throw new UserUpdateException("Database error while updating user with ID: " + user.getId(), user.getId());
+        }
     }
 
 

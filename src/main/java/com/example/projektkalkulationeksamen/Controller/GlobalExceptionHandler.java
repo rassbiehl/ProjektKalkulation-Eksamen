@@ -1,9 +1,6 @@
 package com.example.projektkalkulationeksamen.Controller;
 
-import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
-import com.example.projektkalkulationeksamen.Exceptions.AuthRegisterException;
-import com.example.projektkalkulationeksamen.Exceptions.AuthenticationFailedException;
-import com.example.projektkalkulationeksamen.Exceptions.UserCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
@@ -44,6 +41,13 @@ public class GlobalExceptionHandler {
         return "redirect:/registerform";
     }
 
-
-
+    @ExceptionHandler(UserUpdateException.class)
+    public String handleUpdateFailed(
+            UserUpdateException userUpdateException,
+            RedirectAttributes redirectAttributes
+    ) {
+        logger.warn("Update failed: {} Redirecting to updateform/{}", userUpdateException.getMessage(), userUpdateException.getUserId());
+        redirectAttributes.addFlashAttribute("errorMessage", userUpdateException.getMessage());
+        return "redirect:/updateform/" + userUpdateException.getUserId();
+    }
 }

@@ -5,9 +5,9 @@ public enum Status {
     IN_PROGRESS("In progress"),
     NOT_STARTED("Not started");
 
-    private final String displayName;
+    private String displayName;
 
-    Status(String displayName) {
+    Status(String displayName){
         this.displayName = displayName;
     }
 
