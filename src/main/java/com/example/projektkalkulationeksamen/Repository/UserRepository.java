@@ -4,6 +4,7 @@ import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
 import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Mapper.RowMapperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -73,17 +74,24 @@ public class UserRepository {
                 ps.setString(3, user.getRole().toString());
                 return ps;
             }, keyHolder);
-            int generatedId = keyHolder.getKey().intValue();
+
+            Number key = keyHolder.getKey();
+
+            if (key == null) {
+                throw new DatabaseException("Failed to retrieve generated ID for new user");
+            }
+
+            int generatedId = key.intValue();
 
             Optional<User> optionalUser = getUserById(generatedId);
 
-            if (optionalUser.isPresent()) {
-                return optionalUser.get();
-            } else {
-                throw new DatabaseException("Failed to retrieve created user with ID " + generatedId);
-            }
-        } catch (DatabaseException e) {
-            throw new DatabaseException("Failed to create user in Database ", e);
+            return optionalUser
+                    .orElseThrow(() ->
+                            new DatabaseException("Failed to retrieve created user with generated ID " + generatedId)
+            );
+
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Failed to create user in Database: ", e);
         }
     }
 
@@ -93,8 +101,27 @@ public class UserRepository {
             int affectedRows = jdbcTemplate.update(sql, id);
 
             return affectedRows > 0;
-        } catch (DatabaseException e) {
-            throw new DatabaseException("Failed to delete user with ID " + id);
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Failed to delete user with ID " + id, e);
+        }
+    }
+
+    public boolean updateUser (User newUser) {
+        try {
+            String sql = "UPDATE users set username = ?, password_hash = ?, user_role = ? " +
+                    "WHERE id = ?";
+
+            int affectedRows = jdbcTemplate.update(sql,
+                    newUser.getUsername(),
+                    newUser.getPasswordHash(),
+                    newUser.getRole().toString(),
+
+                    newUser.getId()
+            );
+
+            return affectedRows > 0;
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Failed to update user with ID: " + newUser.getId(), e);
         }
     }
 }
