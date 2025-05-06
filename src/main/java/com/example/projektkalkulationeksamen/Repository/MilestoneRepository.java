@@ -4,6 +4,7 @@ import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
 import com.example.projektkalkulationeksamen.Mapper.RowMapperUtil;
 import com.example.projektkalkulationeksamen.Model.Milestone;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,6 +13,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,30 +82,64 @@ public class MilestoneRepository {
                 return ps;
             }, keyHolder);
 
-            int generatedId = keyHolder.getKey().intValue();
+            Number key = keyHolder.getKey();
+
+            if (key == null) {
+                throw new DatabaseException("Failed to retrieve generated key from milestone " + milestone.getId());
+            }
+
+            int generatedId = key.intValue();
+
 
             Optional<Milestone> optionalMilestone = getmilestoneById(generatedId);
 
-            if (optionalMilestone.isPresent()) {
-                return optionalMilestone.get();
-            } else {
-                throw new DatabaseException("Failed to retrieve created milestone with ID " + generatedId);
-            }
-        } catch (DatabaseException e) {
+            return optionalMilestone
+                    .orElseThrow(() -> new DatabaseException("Failed to retrieve created milestone with genereated ID " + generatedId));
+
+        } catch (DataAccessException e) {
             throw new DatabaseException("Failed to create milestone in Database ", e);
         }
     }
 
-    public boolean deleteMilestone(int id){
+    public boolean deleteMilestone(int id) {
         try {
             String sql = "DELETE FROM milestones WHERE id = ?";
 
-            int affectedRows = jdbcTemplate.update(sql,id);
+            int affectedRows = jdbcTemplate.update(sql, id);
 
             return affectedRows > 0;
 
-        } catch (DatabaseException e) {
+        } catch (DataAccessException e) {
             throw new DatabaseException("Failed to delete milestone with ID " + id);
+        }
+    }
+
+    public boolean updateMilestone(Milestone updatedMilestone) {
+        try {
+
+            String sql = "UPDATE milestones SET milestone_name = ?, milestone_description = ?, project_id = ?, estimated_hours = ?, calculated_cost = ?, actual_hours_used = ?, milestone_status = ?, deadline = ?, completed_at = ? WHERE id = ?";
+
+            Timestamp ifCompleted = null;
+
+            if (updatedMilestone.getCompleted_at() != null) {
+                ifCompleted = Timestamp.valueOf(updatedMilestone.getCompleted_at());
+            }
+
+            int affectedRows = jdbcTemplate.update(sql, updatedMilestone.getMilestoneName(),
+                    updatedMilestone.getMilestoneDescription(),
+                    updatedMilestone.getProjectId(),
+                    updatedMilestone.getEstimatedHours(),
+                    updatedMilestone.getCalculatedCost(),
+                    updatedMilestone.getActualHoursUsed(),
+                    updatedMilestone.getStatus(),
+                    updatedMilestone.getDeadline(),
+                    ifCompleted,
+                    updatedMilestone.getId()
+            );
+
+            return affectedRows > 0;
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Failed to update milestone with ID " + updatedMilestone.getId());
         }
     }
 }
