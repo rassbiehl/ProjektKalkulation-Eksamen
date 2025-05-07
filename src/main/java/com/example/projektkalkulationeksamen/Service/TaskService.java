@@ -1,5 +1,6 @@
 package com.example.projektkalkulationeksamen.Service;
 
+import com.example.projektkalkulationeksamen.DTO.TaskDTO;
 import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
 import com.example.projektkalkulationeksamen.Exceptions.TaskCreationException;
 import com.example.projektkalkulationeksamen.Exceptions.TaskNotFoundException;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class TaskService {
     private static final Logger logger = LoggerFactory.getLogger(TaskService.class);
     private final TaskRepository taskRepository;
+    private final
 
     @Autowired
     public TaskService (TaskRepository taskRepository) {
@@ -103,6 +105,15 @@ public class TaskService {
         return taskRepository.getTaskByName(name).isPresent();
     }
 
+    // DTO Object methods
+/*
+TaskDTO getTaskWithDetails(int id)	Task + coworkers
+
+List<TaskDTO> getTasksByMilestoneIdWithDetails(int milestoneId)
+ */
+    public TaskDTO getTaskWithDetails (int id) {
+        Task task =
+    }
     }
 
 

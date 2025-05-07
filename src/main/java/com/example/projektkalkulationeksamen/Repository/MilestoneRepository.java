@@ -32,7 +32,7 @@ public class MilestoneRepository {
         return jdbcTemplate.query(sql, RowMapperUtil.milestoneRowMapper());
     }
 
-    public Optional<Milestone> getmilestoneById(int id) {
+    public Optional<Milestone> getMilestoneById(int id) {
         try {
             String sql = "SELECT * FROM milestones WHERE id = ?";
 
@@ -68,7 +68,7 @@ public class MilestoneRepository {
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = connection.prepareStatement(sql, new String[] { "id" });
 
                 ps.setString(1, milestone.getMilestoneName());
                 ps.setString(2, milestone.getMilestoneDescription());
@@ -91,7 +91,7 @@ public class MilestoneRepository {
             int generatedId = key.intValue();
 
 
-            Optional<Milestone> optionalMilestone = getmilestoneById(generatedId);
+            Optional<Milestone> optionalMilestone = getMilestoneById(generatedId);
 
             return optionalMilestone
                     .orElseThrow(() -> new DatabaseException("Failed to retrieve created milestone with genereated ID " + generatedId));
@@ -125,7 +125,8 @@ public class MilestoneRepository {
                 ifCompleted = Timestamp.valueOf(updatedMilestone.getCompleted_at());
             }
 
-            int affectedRows = jdbcTemplate.update(sql, updatedMilestone.getMilestoneName(),
+            int affectedRows = jdbcTemplate.update(sql,
+                    updatedMilestone.getMilestoneName(),
                     updatedMilestone.getMilestoneDescription(),
                     updatedMilestone.getProjectId(),
                     updatedMilestone.getEstimatedHours(),
@@ -134,6 +135,7 @@ public class MilestoneRepository {
                     updatedMilestone.getStatus(),
                     updatedMilestone.getDeadline(),
                     ifCompleted,
+
                     updatedMilestone.getId()
             );
 

@@ -32,7 +32,7 @@ public class ProjectRepository {
         return jdbcTemplate.query(sql, RowMapperUtil.projectRowMapper());
     }
 
-    public Optional<Project> getProjectById(int id) {
+    public Optional<Project> findProjectById(int id) {
         try {
             String sql = "SELECT * FROM projects " +
                     "WHERE id = ?";
@@ -47,7 +47,14 @@ public class ProjectRepository {
         }
     }
 
-    public Optional<Project> getProjectByName(String projectName) {
+    public List<Project> getAllProjectsByProjectManager(int projectManagerId) {
+        String sql = "SELECT * FROM projects " +
+                "WHERE project_manager_id = ?";
+        return jdbcTemplate.query(sql, RowMapperUtil.projectRowMapper(), projectManagerId);
+    }
+
+
+    public Optional<Project> findProjectByName(String projectName) {
         try {
             String sql = "SELECT * FROM projects " +
                     "WHERE project_name = ?";
@@ -71,7 +78,7 @@ public class ProjectRepository {
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(sql, new String[] { "id" });
+                PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
 
                 ps.setString(1, project.getProjectName());
                 ps.setString(2, project.getDescription());
@@ -90,7 +97,7 @@ public class ProjectRepository {
 
             int generatedId = key.intValue();
 
-            Optional<Project> optionalProject = getProjectById(generatedId);
+            Optional<Project> optionalProject = findProjectById(generatedId);
 
             return optionalProject
                     .orElseThrow(() ->
@@ -143,7 +150,7 @@ public class ProjectRepository {
 
             return affectedRows > 0;
         } catch (DataAccessException e) {
-            throw new DatabaseException ("Failed to update with project ID: " + updatedProject.getId(), e);
+            throw new DatabaseException("Failed to update with project ID: " + updatedProject.getId(), e);
         }
     }
 

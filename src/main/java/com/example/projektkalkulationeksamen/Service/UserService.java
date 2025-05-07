@@ -64,17 +64,18 @@ public class UserService {
     }
 
     public void deleteUser(int id) {
+        logger.debug("Attempting to delete user with id {}", id);
+
         try {
-            logger.debug("Attempting to delete user with id {}", id);
+            boolean deleted = userRepository.deleteUser(id);
 
-            boolean deleteUser = userRepository.deleteUser(id);
-
-            if (!deleteUser) {
+            if (!deleted) {
                 logger.warn("Failed to delete user with ID {}", id);
                 throw new UserNotFoundException("Failed to delete user with ID " + id);
             }
             logger.info("Successfully deleted user with ID {}", id);
         } catch (DatabaseException e) {
+            logger.error("Failed to delete user with ID: {}", id);
             throw new UserNotFoundException("Failed to delete user with ID " + id, e);
         }
 

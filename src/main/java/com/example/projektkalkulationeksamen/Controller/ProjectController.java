@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class ProjectController {
@@ -24,56 +25,28 @@ public class ProjectController {
         this.sessionValidator = sessionValidator;
     }
 
-    @GetMapping("/adminStartpage")
-    public String getAdminStartPage(HttpSession session, Model model) {
-
-
-        if (!sessionValidator.isSessionValid(session)) {
-            logger.info("User is not logged in for current session. Redirecting to loginform.html");
-            return "redirect:/loginform";
-        }
-
-        if (!sessionValidator.isSessionValid(session, Role.ADMIN)) {
-            Integer userId = (Integer) session.getAttribute("userId");
-            logger.info("Access denied: user with ID {} lacks admin privileges", userId);
-            throw new AccessDeniedException("User lacks admin privileges");
-        }
-
-
-        return "admin/startpage";
-    }
-
-    @GetMapping("/projectmanagerStartpage")
-    public String getProjectManagerStartPage(HttpSession session, Model model) {
+    @GetMapping("/{role}Startpage")
+    public String getStartPage(@PathVariable String role, HttpSession session, Model model) {
 
         if (!sessionValidator.isSessionValid(session)) {
             logger.info("User is not logged in for current session. Redirecting to loginform.html");
             return "redirect:/loginform";
         }
 
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        Role requiredRole;
+        try {
+            requiredRole = Role.valueOf(role.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid role '{}' in path", role);
+            throw new AccessDeniedException("Invalid role");
+        }
+
+        if (!sessionValidator.isSessionValid(session, requiredRole)) {
             Integer userId = (Integer) session.getAttribute("userId");
-            logger.info("Access denied: user with ID {} lacks project manager privileges", userId);
-            throw new AccessDeniedException("User lacks project manager privileges");
+            logger.info("Access denied: user with ID {} lacks {} privileges", userId, requiredRole);
+            throw new AccessDeniedException("User lacks " + requiredRole + " privileges");
         }
 
-        return "projectmanager/startpage";
-    }
-
-    @GetMapping("/employeeStartpage")
-    public String getEmployeeStartPage(HttpSession session, Model model) {
-
-        if (!sessionValidator.isSessionValid(session)) {
-            logger.info("User is not logged in for current session. Redirecting to loginform.html");
-            return "redirect:/loginform";
-        }
-
-        if (!sessionValidator.isSessionValid(session, Role.EMPLOYEE)) {
-            Integer userId = (Integer) session.getAttribute("userId");
-            logger.info("Access denied: user with ID {} is not an employee", userId);
-            throw new AccessDeniedException("User is not an employee");
-        }
-
-        return "employee/startpage";
+        return role.toLowerCase() + "/startpage";
     }
 }

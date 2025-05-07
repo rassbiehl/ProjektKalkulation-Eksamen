@@ -8,9 +8,10 @@ import com.example.projektkalkulationeksamen.Model.Milestone;
 import com.example.projektkalkulationeksamen.Model.Project;
 import com.example.projektkalkulationeksamen.Repository.MilestoneRepository;
 import com.example.projektkalkulationeksamen.Repository.ProjectRepository;
-import com.example.projektkalkulationeksamen.Validator.Milestonevalidator;
+import com.example.projektkalkulationeksamen.Validator.ProjectDataValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,12 +20,11 @@ import java.util.Optional;
 @Service
 public class MilestoneService {
     private final MilestoneRepository milestoneRepository;
-    private final ProjectRepository projectRepository;
     private final static Logger logger = LoggerFactory.getLogger(MilestoneService.class);
 
-    public MilestoneService(MilestoneRepository milestoneRepository, ProjectRepository projectRepository) {
+    @Autowired
+    public MilestoneService(MilestoneRepository milestoneRepository) {
         this.milestoneRepository = milestoneRepository;
-        this.projectRepository = projectRepository;
     }
 
     public List<Milestone> getAllMilestones() {
@@ -35,7 +35,7 @@ public class MilestoneService {
     public Milestone getMilestoneById(int id) {
         try {
             logger.debug("Sends milestone with id " + id);
-            Optional<Milestone> foundMilestone = milestoneRepository.getmilestoneById(id);
+            Optional<Milestone> foundMilestone = milestoneRepository.getMilestoneById(id);
 
             return foundMilestone.orElseThrow(() -> new MilestoneNotFoundException("Could not find milestone with ID " + id));
         } catch (DatabaseException e) {
@@ -57,17 +57,10 @@ public class MilestoneService {
     public Milestone addMilestone(Milestone milestone) {
         logger.debug("Adds milestone with id " + milestone.getId());
 
-        Milestonevalidator.validateMilestone(milestone.getMilestoneName(),
+        ProjectDataValidator.validateAllFields(milestone.getMilestoneName(),
                 milestone.getMilestoneDescription(),
                 milestone.getEstimatedHours(),
                 milestone.getActualHoursUsed());
-
-        Optional<Project> project = projectRepository.getProjectById(milestone.getProjectId());
-
-        if (project.isEmpty()) {
-            logger.warn("Project with ID " + milestone.getProjectId() + " not found. Cannot create milestone.");
-            throw new ProjectNotFoundException("Project with ID " + milestone.getProjectId() + " could not be found");
-        }
 
         try {
             return milestoneRepository.addMilestone(milestone);
@@ -89,15 +82,15 @@ public class MilestoneService {
         logger.info("Succesfully deleted milestone with id " + id);
     }
 
-    public boolean updateMilestone(Milestone milestone){
-        Milestonevalidator.validateMilestone(milestone.getMilestoneName(),
+    public boolean updateMilestone(Milestone milestone) {
+        ProjectDataValidator.validateAllFields(milestone.getMilestoneName(),
                 milestone.getMilestoneDescription(),
                 milestone.getEstimatedHours(),
                 milestone.getActualHoursUsed());
 
-        Optional<Milestone> toUpdate = milestoneRepository.getmilestoneById(milestone.getId());
+        Optional<Milestone> toUpdate = milestoneRepository.getMilestoneById(milestone.getId());
 
-        if (toUpdate.isEmpty()){
+        if (toUpdate.isEmpty()) {
             logger.warn("Milestone with ID " + milestone.getId() + " Was not found");
             throw new MilestoneNotFoundException("Could not find milestone with ID " + milestone.getId());
         }
@@ -111,5 +104,10 @@ public class MilestoneService {
         return succes;
     }
 
+    // DTO Object methods
+/*
+MilestoneDTO getMilestoneWithDetails(int id)
 
+List<MilestoneDTO> getMilestonesByProjectIdWithDetails(int projectId)
+ */
 }

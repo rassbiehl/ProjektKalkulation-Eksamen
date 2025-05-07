@@ -55,8 +55,6 @@ logger.error("Failed login attempt: no user found with username: {}", username, 
 
         String hashedPassword = passwordEncoder.encode(rawPassword);
 
-
-
             userService.addUser(new User(username, hashedPassword,role));
 
         } catch (UserCreationException e) {

@@ -5,6 +5,7 @@ import com.example.projektkalkulationeksamen.Exceptions.TaskNotFoundException;
 import com.example.projektkalkulationeksamen.Mapper.RowMapperUtil;
 import com.example.projektkalkulationeksamen.Model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,20 +23,20 @@ public class TaskRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public TaskRepository(JdbcTemplate jdbcTemplate){
+    public TaskRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Task addTask (Task task) {
+    public Task addTask(Task task) {
         try {
             String sql = "INSERT INTO tasks (task_name, task_description, milestone_id, estimated_hours, actual_hours_used," +
                     " task_status, start_date, deadline, completed_at) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-            KeyHolder keyholder = new GeneratedKeyHolder();
+            KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
 
                 ps.setString(1, task.getTaskName());
                 ps.setString(2, task.getTaskDescription());
@@ -47,22 +48,28 @@ public class TaskRepository {
                 ps.setObject(8, task.getDeadline());
                 ps.setObject(9, task.getCompletedAt());
                 return ps;
-            }, keyholder);
-            int generatedId = keyholder.getKey().intValue();
+            }, keyHolder);
+
+            Number key = keyHolder.getKey();
+
+            if (key == null) {
+                throw new DatabaseException("Failed to retrieve generated ID for new user");
+            }
+
+            int generatedId = key.intValue();
 
             Optional<Task> optionalTask = getTaskById(generatedId);
 
-            if (optionalTask.isPresent()) {
-                return optionalTask.get();
-            } else {
-                throw new DatabaseException("Failed to retrieve created task with ID " + generatedId);
-            }
-        } catch (Exception e) {
+            return optionalTask
+                    .orElseThrow(() ->
+                            new DatabaseException("Failed to retrieve created task with ID " + generatedId)
+                    );
+        } catch (DataAccessException e) {
             throw new DatabaseException("Failed to create task in Database ", e);
         }
     }
 
-    public Optional<Task> getTaskById (int id) {
+    public Optional<Task> getTaskById(int id) {
         try {
             String sql = "SELECT * FROM tasks WHERE id = ?";
             Task task = jdbcTemplate.queryForObject(sql, RowMapperUtil.taskRowMapper(), id);
@@ -74,7 +81,7 @@ public class TaskRepository {
         }
     }
 
-    public Optional<Task> getTaskByName (String taskName) {
+    public Optional<Task> getTaskByName(String taskName) {
         try {
             String sql = "SELECT * FROM tasks WHERE task_name = ?";
 
@@ -93,18 +100,18 @@ public class TaskRepository {
         return jdbcTemplate.query(sql, RowMapperUtil.taskRowMapper());
     }
 
-    public boolean deleteTask (int id) {
+    public boolean deleteTask(int id) {
         try {
             String sql = "DELETE FROM tasks WHERE id = ?";
             int affectedRows = jdbcTemplate.update(sql, id);
 
             return affectedRows > 0;
-        } catch (Exception e) {
-            throw new DatabaseException("Failed to delete task with ID " + id);
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Failed to delete task with ID " + id, e);
         }
     }
 
-    public boolean updateTask (Task updatedTask) {
+    public boolean updateTask(Task updatedTask) {
         try {
             String sql = "UPDATE tasks SET task_name = ?, task_description = ?, milestone_id = ?, estimated_hours = ?, " +
                     "actual_hours_used = ?, task_status = ?, start_date = ?, deadline = ?, completed_at = ? " +
@@ -130,8 +137,8 @@ public class TaskRepository {
             );
             return affectedRows > 0;
 
-            } catch (Exception e) {
-            throw new DatabaseException ("Failed to update task with ID: " + updatedTask.getId(), e);
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to update task with ID: " + updatedTask.getId(), e);
         }
     }
 
