@@ -2,6 +2,7 @@ package com.example.projektkalkulationeksamen.Controller;
 
 import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
 import com.example.projektkalkulationeksamen.Model.Role;
+import com.example.projektkalkulationeksamen.Service.ProjectService;
 import com.example.projektkalkulationeksamen.Service.UserService;
 import com.example.projektkalkulationeksamen.Validator.SessionValidator;
 import jakarta.servlet.http.HttpSession;
@@ -18,11 +19,13 @@ public class ProjectController {
     public static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
     private final UserService userService;
     private final SessionValidator sessionValidator;
+    private final ProjectService projectService;
 
     @Autowired
-    public ProjectController(UserService userService, SessionValidator sessionValidator) {
+    public ProjectController(UserService userService, SessionValidator sessionValidator, ProjectService projectService) {
         this.userService = userService;
         this.sessionValidator = sessionValidator;
+        this.projectService = projectService;
     }
 
     @GetMapping("/{role}Startpage")
@@ -46,6 +49,8 @@ public class ProjectController {
             logger.info("Access denied: user with ID {} lacks {} privileges", userId, requiredRole);
             throw new AccessDeniedException("User lacks " + requiredRole + " privileges");
         }
+
+        model.addAttribute("allProjects", projectService.getAllProjectsWithDetails());
 
         return role.toLowerCase() + "/startpage";
     }

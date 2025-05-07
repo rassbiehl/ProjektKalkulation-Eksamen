@@ -7,6 +7,7 @@ import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
 import com.example.projektkalkulationeksamen.Exceptions.ProjectCreationException;
 import com.example.projektkalkulationeksamen.Exceptions.ProjectNotFoundException;
 import com.example.projektkalkulationeksamen.Model.Project;
+import com.example.projektkalkulationeksamen.Model.Status;
 import com.example.projektkalkulationeksamen.Repository.MilestoneRepository;
 import com.example.projektkalkulationeksamen.Repository.ProjectRepository;
 import com.example.projektkalkulationeksamen.Validator.ProjectDataValidator;
@@ -137,6 +138,25 @@ public class ProjectService {
         }
     }
 
+    public int getProjectProgress (int projectId) {
+        List <MilestoneDTO> milestonesWithDetails = milestoneService.getMilestonesByProjectIdWithDetails(projectId);
+
+        if (milestonesWithDetails.isEmpty()) {
+            return 0;
+        }
+
+        int finishedMilestones = 0;
+
+         for (MilestoneDTO milestoneDTO : milestonesWithDetails) {
+             if (milestoneDTO.getMilestoneStatus() == Status.COMPLETED) {
+                 finishedMilestones++;
+             }
+         }
+
+        return (int) Math.round((finishedMilestones * 100.0) / milestonesWithDetails.size());
+
+    }
+
 
     public boolean projectExistsByName(String name) {
         return projectRepository.findProjectByName(name).isPresent();
@@ -148,8 +168,7 @@ public class ProjectService {
     public ProjectDTO getProjectWithDetails(int id) {
         Project project = getProjectById(id);
         List<MilestoneDTO> milestonesByProjectIdWithDetails = milestoneService.getMilestonesByProjectIdWithDetails(id);
-
-
+        int progress = getProjectProgress(id);
         return new ProjectDTO(
                 project.getId(),
                 project.getProjectName(),
@@ -163,7 +182,8 @@ public class ProjectService {
                 project.getDeadline(),
                 project.getStartDate(),
                 project.getCompletedAt(),
-                milestonesByProjectIdWithDetails
+                milestonesByProjectIdWithDetails,
+                progress
                 );
     }
 
@@ -189,16 +209,5 @@ public class ProjectService {
         }
         return selectedProjects;
     }
-
-    public List<ProjectDTO> getAllProjectDTosByCoworkerId (int coworkerId) {
-        List<ProjectDTO> allProjects = getAllProjectsWithDetails();
-        List<ProjectDTO> selectedProjects = new ArrayList<>();
-
-
-        return selectedProjects;
-    }
-
-
-
 
 }
