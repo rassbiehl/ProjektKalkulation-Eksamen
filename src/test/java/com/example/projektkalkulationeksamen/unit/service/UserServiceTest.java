@@ -20,8 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -33,7 +32,6 @@ public class UserServiceTest {
 
     @InjectMocks
     private UserService userService;
-    private User user;
 
 
     @BeforeEach
@@ -69,7 +67,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void getUserById_shouldReturnUser_whenUserExists() {
+    void getUserById_shouldReturnUser_whenUserExists() {
         User bob = mockUsers.get(1);
 
         // Mock Behavior
@@ -87,7 +85,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void getByUserId_shouldThrowUserNotFoundException_whenUserDoesNotExist() {
+    void getByUserId_shouldThrowUserNotFoundException_whenUserDoesNotExist() {
 
         //Mock Behavior
         Mockito.when(userRepository.getUserById(99)).thenReturn(Optional.empty());
@@ -104,7 +102,7 @@ public class UserServiceTest {
 
 
     @Test
-    public void getUserByUsername_shouldReturnUser_whenUserExists() {
+    void getUserByUsername_shouldReturnUser_whenUserExists() {
         User bob = mockUsers.get(1);
 
         // Mock Behavior
@@ -121,7 +119,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void getUserByUsername_shouldThrowUserNotFoundException_whenUserDoesNotExist() {
+    void getUserByUsername_shouldThrowUserNotFoundException_whenUserDoesNotExist() {
 
         // Mock Behavior
         Mockito.when(userRepository.getUserByUsername("messi")).thenReturn(Optional.empty());
@@ -135,7 +133,7 @@ public class UserServiceTest {
 
 
     @Test
-    public void addUser_shouldAddUser_whenUserIsValid() {
+    void addUser_shouldAddUser_whenUserIsValid() {
         List<User> users = mockUsers;
         User rasmus = new User(4, "rasmus", "password4", createdTime, Role.ADMIN);
 
@@ -157,7 +155,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void addUser_shouldThrowUserCreationException_whenUserIsInvalid() {
+    void addUser_shouldThrowUserCreationException_whenUserIsInvalid() {
         User messi = new User();
 
         // Mock Behavior
@@ -172,7 +170,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void deleteUser_shouldDeleteUser_whenUserIsValid() {
+    void deleteUser_shouldDeleteUser_whenUserIsValid() {
         List<User> users = mockUsers;
 
         // Mock behavior
@@ -192,13 +190,50 @@ public class UserServiceTest {
     }
 
     @Test
-    public void userExistsByUsername() {
+    void deleteUser_throwsUserNotFoundException_whenUserIsNotFound() {
 
+        // Mock behavior
+        Mockito.when(userRepository.deleteUser(999)).thenThrow(new DatabaseException("Failed to delete user"));
+
+        // Act and assert
+        UserNotFoundException userNotFoundException = assertThrows(UserNotFoundException.class, () -> userService.deleteUser(999));
+
+        // assert
+        assertEquals("Failed to delete user with ID " + 999, userNotFoundException.getMessage());
     }
 
     @Test
-    public void userExistsById() {
+    void userExistsByUsername_returnsTrue_whenUserIsFound() {
+        List<User> users = mockUsers;
 
+        // Mock behavior
+        Mockito.when(userRepository.getUserByUsername("bob")).thenReturn(Optional.of(users.get(1)));
+
+        // Act
+        boolean exists = userService.userExistsByUsername("bob");
+
+        // Assert
+        assertTrue(exists);
+
+        // Verify
+        Mockito.verify(userRepository, Mockito.times(1)).getUserByUsername("bob");
     }
 
+    @Test
+    void userExistsById_returnsTrue_whenUserIsFound() {
+        List<User> users = mockUsers;
+
+        // Mock behavior
+        Mockito.when(userRepository.getUserById(2)).thenReturn(Optional.of(users.get(1)));
+
+        // Act
+        boolean exists = userService.userExistsById(2);
+
+        // Assert
+        assertTrue(exists);
+
+        // Verify
+        Mockito.verify(userRepository, Mockito.times(1)).getUserById(2);
+
+    }
 }
