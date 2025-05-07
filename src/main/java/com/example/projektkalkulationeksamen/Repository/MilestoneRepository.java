@@ -32,6 +32,13 @@ public class MilestoneRepository {
         return jdbcTemplate.query(sql, RowMapperUtil.milestoneRowMapper());
     }
 
+    public List<Milestone> getMilestonesByProjectId (int projectId) {
+        String sql = "SELECT * FROM milestones " +
+                "WHERE project_id = ?";
+
+        return jdbcTemplate.query(sql, RowMapperUtil.milestoneRowMapper(), projectId);
+    }
+
     public Optional<Milestone> getMilestoneById(int id) {
         try {
             String sql = "SELECT * FROM milestones WHERE id = ?";

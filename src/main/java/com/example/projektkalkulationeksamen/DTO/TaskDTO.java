@@ -1,5 +1,7 @@
 package com.example.projektkalkulationeksamen.DTO;
 
+import com.example.projektkalkulationeksamen.Model.Status;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -10,21 +12,21 @@ public class TaskDTO {
     private int milestoneId;
     private int estimatedHours;
     private int actualHoursUsed;
-    private String taskStatus;
+    private Status status;
     private LocalDateTime createdAt;
     private LocalDateTime startDate;
     private LocalDateTime deadline;
     private LocalDateTime completedAt;
     private List<Integer> coworkerIds;
 
-    public TaskDTO(int id, String taskName, String taskDescription, int milestoneId, int estimatedHours, int actualHoursUsed, String taskStatus, LocalDateTime createdAt, LocalDateTime startDate, LocalDateTime deadline, LocalDateTime completedAt, List<Integer> coworkerIds) {
+    public TaskDTO(int id, String taskName, String taskDescription, int milestoneId, int estimatedHours, int actualHoursUsed, Status status, LocalDateTime createdAt, LocalDateTime startDate, LocalDateTime deadline, LocalDateTime completedAt, List<Integer> coworkerIds) {
         this.id = id;
         this.taskName = taskName;
         this.taskDescription = taskDescription;
         this.milestoneId = milestoneId;
         this.estimatedHours = estimatedHours;
         this.actualHoursUsed = actualHoursUsed;
-        this.taskStatus = taskStatus;
+        this.status = status;
         this.createdAt = createdAt;
         this.startDate = startDate;
         this.deadline = deadline;
@@ -80,12 +82,12 @@ public class TaskDTO {
         this.actualHoursUsed = actualHoursUsed;
     }
 
-    public String getTaskStatus() {
-        return taskStatus;
+    public Status getStatus() {
+        return status;
     }
 
-    public void setTaskStatus(String taskStatus) {
-        this.taskStatus = taskStatus;
+    public void setTaskStatus(Status status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {

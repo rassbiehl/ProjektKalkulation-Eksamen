@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,11 +21,12 @@ import java.util.Optional;
 public class TaskService {
     private static final Logger logger = LoggerFactory.getLogger(TaskService.class);
     private final TaskRepository taskRepository;
-    private final
+    private final TaskCoworkerService taskCoworkerService;
 
     @Autowired
-    public TaskService (TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, TaskCoworkerService taskCoworkerService) {
         this.taskRepository = taskRepository;
+        this.taskCoworkerService = taskCoworkerService;
     }
 
     public List<Task> getAllTasks() {
@@ -38,13 +40,13 @@ public class TaskService {
 
             Optional<Task> foundTask = taskRepository.getTaskById(id);
 
-            return foundTask.orElseThrow(() -> new TaskNotFoundException("Failed to find task with ID: "+ id));
+            return foundTask.orElseThrow(() -> new TaskNotFoundException("Failed to find task with ID: " + id));
         } catch (DatabaseException e) {
             throw new TaskNotFoundException("Failed to find task with ID: " + id);
         }
     }
 
-    public Task getTaskByName (String taskName) {
+    public Task getTaskByName(String taskName) {
         try {
             logger.debug("Sends task with name: " + taskName);
             Optional<Task> foundTask = taskRepository.getTaskByName(taskName);
@@ -57,7 +59,7 @@ public class TaskService {
         }
     }
 
-    public Task addTask (Task task) {
+    public Task addTask(Task task) {
         try {
             return taskRepository.addTask(task);
         } catch (DatabaseException e) {
@@ -78,11 +80,11 @@ public class TaskService {
             }
             logger.info("Successfully deleted task with ID: " + id);
         } catch (TaskNotFoundException e) {
-            throw new TaskNotFoundException("Failed to delete task with ID: "+ id, e);
+            throw new TaskNotFoundException("Failed to delete task with ID: " + id, e);
         }
     }
 
-    public void updateTask (Task task) {
+    public void updateTask(Task task) {
         logger.debug("Attempting to update task with ID: {}", task.getId());
 
         getTaskById(task.getId());
@@ -97,24 +99,79 @@ public class TaskService {
         logger.info("Successfully updated task with ID: {}", task.getId());
     }
 
-    public boolean taskExistsById (int id) {
+    public boolean taskExistsById(int id) {
         return taskRepository.getTaskById(id).isPresent();
     }
 
-    public boolean taskExistsByName (String name) {
+    public boolean taskExistsByName(String name) {
         return taskRepository.getTaskByName(name).isPresent();
     }
 
     // DTO Object methods
-/*
-TaskDTO getTaskWithDetails(int id)	Task + coworkers
+    public TaskDTO getTaskWithDetails(int id) {
+        Task task = getTaskById(id);
 
-List<TaskDTO> getTasksByMilestoneIdWithDetails(int milestoneId)
- */
-    public TaskDTO getTaskWithDetails (int id) {
-        Task task =
+        List<Integer> coworkerIds = taskCoworkerService.getAllCoworkersIdsForTask(id);
+
+        return new TaskDTO(
+                task.getId(),
+                task.getTaskName(),
+                task.getTaskDescription(),
+                task.getMilestoneId(),
+                task.getEstimatedHours(),
+                task.getActualHoursUsed(),
+                task.getStatus(),
+                task.getCreatedAt(),
+                task.getStartedDate(),
+                task.getDeadline(),
+                task.getCompletedAt(),
+                coworkerIds
+        );
     }
+
+    public List<TaskDTO> getAllTasksWithDetails () {
+        List<Task> allTasks = getAllTasks();
+
+        List<TaskDTO> allTasksWithDetails = new ArrayList<>();
+
+        for (Task task : allTasks) {
+            allTasksWithDetails.add(getTaskWithDetails(task.getId()));
+        }
+        return allTasksWithDetails;
     }
+
+    public List<TaskDTO> getTasksByMilestoneIdWithDetails(int milestoneId) {
+        List<Task> tasksByMileStoneId = taskRepository.getTasksByMilestoneId(milestoneId);
+        List<TaskDTO> tasksByMileStoneIdWithDetails = new ArrayList<>();
+
+
+        for (Task task : tasksByMileStoneId) {
+            tasksByMileStoneIdWithDetails.add(getTaskWithDetails(task.getId()));
+        }
+
+        return tasksByMileStoneIdWithDetails;
+    }
+
+    public List<TaskDTO> getAllTasksForCoworker(int userId) {
+
+        List<TaskDTO> allTasksWithDetails = getAllTasksWithDetails();
+
+        List<TaskDTO> selectedTasks = new ArrayList<>();
+
+        for (TaskDTO taskDTO : allTasksWithDetails) {
+            List<Integer> taskCoworkersIds = taskDTO.getCoworkerIds();
+
+            for (Integer id : taskCoworkersIds) {
+                if (id == userId) {
+                    selectedTasks.add(taskDTO);
+                }
+            }
+        }
+
+        return selectedTasks;
+     }
+
+}
 
 
 

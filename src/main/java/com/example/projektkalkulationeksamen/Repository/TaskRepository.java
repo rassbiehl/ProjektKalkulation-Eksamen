@@ -100,6 +100,13 @@ public class TaskRepository {
         return jdbcTemplate.query(sql, RowMapperUtil.taskRowMapper());
     }
 
+    public List<Task> getTasksByMilestoneId (int milestoneId) {
+        String sql = "SELECT * FROM tasks " +
+                "WHERE milestone_id = ?";
+
+        return jdbcTemplate.query(sql, RowMapperUtil.taskRowMapper(), milestoneId);
+    }
+
     public boolean deleteTask(int id) {
         try {
             String sql = "DELETE FROM tasks WHERE id = ?";

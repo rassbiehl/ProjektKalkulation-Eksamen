@@ -1,6 +1,7 @@
 package com.example.projektkalkulationeksamen.Service;
 
 
+import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
 import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
 import com.example.projektkalkulationeksamen.Exceptions.ProjectCreationException;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -142,14 +144,10 @@ public class ProjectService {
 
 
     // DTO Object methods
-/*
-ProjectDTO getProjectWithDetails(int id)	Projekt m. milestones og tasks
-List<ProjectDTO> getAllProjectsWithDetails()	Alle projekter med alt
-List<ProjectDTO> getAllProjectDTOsByManager(int managerId)
- */
 
     public ProjectDTO getProjectWithDetails(int id) {
         Project project = getProjectById(id);
+        List<MilestoneDTO> milestonesByProjectIdWithDetails = milestoneService.getMilestonesByProjectIdWithDetails(id);
 
 
         return new ProjectDTO(
@@ -164,11 +162,43 @@ List<ProjectDTO> getAllProjectDTOsByManager(int managerId)
                 project.getStatus(),
                 project.getDeadline(),
                 project.getStartDate(),
-                project.getCompletedAt()
-
-
+                project.getCompletedAt(),
+                milestonesByProjectIdWithDetails
                 );
     }
+
+    public List<ProjectDTO> getAllProjectsWithDetails () {
+        List<ProjectDTO> allProjectsWithDetails = new ArrayList<>();
+        List<Project> allProjects = projectRepository.getAllProjects();
+
+        for (Project project : allProjects) {
+            allProjectsWithDetails.add(getProjectWithDetails(project.getId()));
+        }
+
+        return allProjectsWithDetails;
+    }
+
+    public List<ProjectDTO> getAllProjectDTOsByProjectManagerId(int projectManagerId) {
+        List<ProjectDTO> allProjects = getAllProjectsWithDetails();
+        List<ProjectDTO> selectedProjects = new ArrayList<>();
+
+        for (ProjectDTO projectDTO : allProjects) {
+            if (projectDTO.getProjectManagerId() == projectManagerId) {
+                selectedProjects.add(projectDTO);
+            }
+        }
+        return selectedProjects;
+    }
+
+    public List<ProjectDTO> getAllProjectDTosByCoworkerId (int coworkerId) {
+        List<ProjectDTO> allProjects = getAllProjectsWithDetails();
+        List<ProjectDTO> selectedProjects = new ArrayList<>();
+
+
+        return selectedProjects;
+    }
+
+
 
 
 }

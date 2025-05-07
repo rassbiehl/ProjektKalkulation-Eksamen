@@ -1,5 +1,7 @@
 package com.example.projektkalkulationeksamen.Service;
 
+import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
+import com.example.projektkalkulationeksamen.DTO.TaskDTO;
 import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
 import com.example.projektkalkulationeksamen.Exceptions.MilestoneCreationException;
 import com.example.projektkalkulationeksamen.Exceptions.MilestoneNotFoundException;
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,10 +24,12 @@ import java.util.Optional;
 public class MilestoneService {
     private final MilestoneRepository milestoneRepository;
     private final static Logger logger = LoggerFactory.getLogger(MilestoneService.class);
+    private final TaskService taskService;
 
     @Autowired
-    public MilestoneService(MilestoneRepository milestoneRepository) {
+    public MilestoneService(MilestoneRepository milestoneRepository, TaskService taskService) {
         this.milestoneRepository = milestoneRepository;
+        this.taskService = taskService;
     }
 
     public List<Milestone> getAllMilestones() {
@@ -105,9 +110,34 @@ public class MilestoneService {
     }
 
     // DTO Object methods
-/*
-MilestoneDTO getMilestoneWithDetails(int id)
+    public MilestoneDTO getMilestoneWithDetails(int milestoneId) {
+        List<TaskDTO> milestoneTasksWithDetails = taskService.getTasksByMilestoneIdWithDetails(milestoneId);
+        Milestone milestone = getMilestoneById(milestoneId);
 
-List<MilestoneDTO> getMilestonesByProjectIdWithDetails(int projectId)
- */
+        return new MilestoneDTO(
+                milestone.getId(),
+                milestone.getMilestoneName(),
+                milestone.getMilestoneDescription(),
+                milestone.getProjectId(),
+                milestone.getEstimatedHours(),
+                milestone.getCalculatedCost(),
+                milestone.getActualHoursUsed(),
+                milestone.getStatus(),
+                milestone.getCreatedAt(),
+                milestone.getDeadline(),
+                milestone.getCompleted_at(),
+                milestoneTasksWithDetails
+        );
+    }
+
+    public List<MilestoneDTO> getMilestonesByProjectIdWithDetails(int projectId) {
+        List<MilestoneDTO> milestonesByProjectIdWithDetails = new ArrayList<>();
+        List<Milestone> milestonesByProjectId = milestoneRepository.getMilestonesByProjectId(projectId);
+
+        for (Milestone milestone : milestonesByProjectId) {
+            milestonesByProjectIdWithDetails.add(getMilestoneWithDetails(milestone.getId()));
+        }
+        return milestonesByProjectIdWithDetails;
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.example.projektkalkulationeksamen.DTO;
 
+import com.example.projektkalkulationeksamen.Model.Status;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,13 +13,13 @@ public class MilestoneDTO {
     private int estimatedHours;
     private int calculatedCost;
     private int actualHoursUsed;
-    private String milestoneStatus;
+    private Status milestoneStatus;
     private LocalDateTime createdAt;
     private LocalDateTime deadline;
     private LocalDateTime completedAt;
     private List<TaskDTO> tasks;
 
-    public MilestoneDTO(int id, String milestoneName, String milestoneDescription, int projectId, int estimatedHours, int calculatedCost, int actualHoursUsed, String milestoneStatus, LocalDateTime createdAt, LocalDateTime deadline, LocalDateTime completedAt, List<TaskDTO> tasks) {
+    public MilestoneDTO(int id, String milestoneName, String milestoneDescription, int projectId, int estimatedHours, int calculatedCost, int actualHoursUsed, Status milestoneStatus, LocalDateTime createdAt, LocalDateTime deadline, LocalDateTime completedAt, List<TaskDTO> tasks) {
         this.id = id;
         this.milestoneName = milestoneName;
         this.milestoneDescription = milestoneDescription;
@@ -88,11 +90,11 @@ public class MilestoneDTO {
         this.actualHoursUsed = actualHoursUsed;
     }
 
-    public String getMilestoneStatus() {
+    public Status getMilestoneStatus() {
         return milestoneStatus;
     }
 
-    public void setMilestoneStatus(String milestoneStatus) {
+    public void setMilestoneStatus(Status milestoneStatus) {
         this.milestoneStatus = milestoneStatus;
     }
 
