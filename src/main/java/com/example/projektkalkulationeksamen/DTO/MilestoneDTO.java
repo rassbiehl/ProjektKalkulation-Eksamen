@@ -2,6 +2,7 @@ package com.example.projektkalkulationeksamen.DTO;
 
 import com.example.projektkalkulationeksamen.Model.Status;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,11 +16,11 @@ public class MilestoneDTO {
     private int actualHoursUsed;
     private Status milestoneStatus;
     private LocalDateTime createdAt;
-    private LocalDateTime deadline;
+    private LocalDate deadline;
     private LocalDateTime completedAt;
     private List<TaskDTO> tasks;
 
-    public MilestoneDTO(int id, String milestoneName, String milestoneDescription, int projectId, int estimatedHours, int calculatedCost, int actualHoursUsed, Status milestoneStatus, LocalDateTime createdAt, LocalDateTime deadline, LocalDateTime completedAt, List<TaskDTO> tasks) {
+    public MilestoneDTO(int id, String milestoneName, String milestoneDescription, int projectId, int estimatedHours, int calculatedCost, int actualHoursUsed, Status milestoneStatus, LocalDateTime createdAt, LocalDate deadline, LocalDateTime completedAt, List<TaskDTO> tasks) {
         this.id = id;
         this.milestoneName = milestoneName;
         this.milestoneDescription = milestoneDescription;
@@ -106,11 +107,11 @@ public class MilestoneDTO {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getDeadline() {
+    public LocalDate getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(LocalDateTime deadline) {
+    public void setDeadline(LocalDate deadline) {
         this.deadline = deadline;
     }
 

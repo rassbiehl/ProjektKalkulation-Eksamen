@@ -31,6 +31,10 @@ public class Task {
         this.completedAt = completedAt;
     }
 
+    public Task() {
+
+    }
+
     public int getId() {
         return id;
     }
