@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -20,8 +20,8 @@
             <li><a th:href="@{/statistics}">Statistics</a></li>
             <li><a class="logout" th:href="@{/logout}">🔒 Logout</a></li>
         </ul>
+        <a th:href="'/addMilestone/'+${projectId}">Add milestone</a>
     </div>
-
 
 </div>
 </body>

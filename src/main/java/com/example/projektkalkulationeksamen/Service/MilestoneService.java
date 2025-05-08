@@ -37,6 +37,16 @@ public class MilestoneService {
         return milestoneRepository.getAllMilestones();
     }
 
+    public List<Milestone> getMilestonesByProjectId(int projectId){
+        logger.info("Sends list of all milestones with project ID " + projectId);
+
+        List<Milestone> milestones = milestoneRepository.getMilestonesByProjectId(projectId);
+        if (milestones.isEmpty()){
+            throw new ProjectNotFoundException("Project with ID " + projectId + " was not found");
+        }
+        return milestones;
+    }
+
     public Milestone getMilestoneById(int id) {
         try {
             logger.debug("Sends milestone with id " + id);

@@ -5,7 +5,13 @@ import com.example.projektkalkulationeksamen.Model.Status;
 import com.example.projektkalkulationeksamen.Model.Task;
 import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Model.*;
+import com.fasterxml.jackson.databind.ser.std.TimeZoneSerializer;
+import org.springframework.cglib.core.Local;
 import org.springframework.jdbc.core.RowMapper;
+
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
@@ -28,21 +34,25 @@ public class RowMapperUtil {
         return (rs,rowNum) -> {
             int id = rs.getInt("id");
             String name = rs.getString("milestone_name");
-            String description = rs.getString("milestone_decription");
+            String description = rs.getString("milestone_description");
             int project_id = rs.getInt("project_id");
             int estimatedHours = rs.getInt("estimated_hours");
             int calculatedCost = rs.getInt("calculated_cost");
             LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
             int actualHoursUsed = rs.getInt("actual_hours_used");
             Status status = Status.valueOf(rs.getString("milestone_status"));
-            LocalDateTime deadline = rs.getTimestamp("deadline").toLocalDateTime();
-
-            Timestamp completedAtTimestamp = rs.getTimestamp("completed_at");
-            LocalDateTime completedAt = null;
-
-            if (completedAtTimestamp != null) {
-                completedAt = completedAtTimestamp.toLocalDateTime();
+            //Null safe handler af deadline
+            LocalDate deadline = null;
+            Timestamp deadlineTs = rs.getTimestamp("deadline");
+            if(deadlineTs != null){
+                deadline = deadlineTs.toLocalDateTime().toLocalDate();
             }
+            LocalDateTime completedAt = null;
+            Timestamp completedAtTs = rs.getTimestamp("completed_at");
+            if (completedAtTs != null){
+                completedAt = completedAtTs.toLocalDateTime();
+            }
+
 
             return new Milestone(id,name ,description,project_id,estimatedHours,calculatedCost,createdAt,actualHoursUsed,status,deadline,completedAt);
         };
@@ -59,16 +69,24 @@ public class RowMapperUtil {
             int estimatedHours = rs.getInt("estimated_hours");
             int calculatedCost = rs.getInt("calculated_cost");
             Status status = Status.valueOf(rs.getString("project_status"));
-            LocalDateTime deadline = rs.getTimestamp("deadline").toLocalDateTime();
-            LocalDateTime startDate = rs.getTimestamp("start_date").toLocalDateTime();
 
-            Timestamp completedAtTimestamp = rs.getTimestamp("completed_at");
-            LocalDateTime completedAt = null;
-
-            if (completedAtTimestamp != null) {
-                completedAt = completedAtTimestamp.toLocalDateTime();
+            LocalDateTime deadline = null;
+            Timestamp deadlineTs = rs.getTimestamp("deadline");
+            if (deadlineTs != null){
+                deadline = deadlineTs.toLocalDateTime();
             }
 
+            LocalDateTime startDate = null;
+            Timestamp startDateTs = rs.getTimestamp("start_date");
+            if (startDateTs != null){
+                startDate = startDateTs.toLocalDateTime();
+            }
+
+            LocalDateTime completedAt = null;
+            Timestamp completedAtTs = rs.getTimestamp("completed_at");
+            if (completedAtTs != null){
+                completedAt = completedAtTs.toLocalDateTime();
+            }
             return new Project(id, projectName, description, createdAt, projectManagerId,actualHoursUsed, estimatedHours, calculatedCost, status, deadline, startDate, completedAt);
         };
     }

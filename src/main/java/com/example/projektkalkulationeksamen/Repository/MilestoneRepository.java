@@ -85,7 +85,7 @@ public class MilestoneRepository {
                 ps.setInt(6, milestone.getActualHoursUsed());
                 ps.setString(7, milestone.getStatus().toString());
                 ps.setString(8, milestone.getDeadline().toString());
-                ps.setString(9, milestone.getCompleted_at().toString());
+                ps.setString(9, milestone.getCompletedAt().toString());
                 return ps;
             }, keyHolder);
 
@@ -124,12 +124,12 @@ public class MilestoneRepository {
     public boolean updateMilestone(Milestone updatedMilestone) {
         try {
 
-            String sql = "UPDATE milestones SET milestone_name = ?, milestone_description = ?, project_id = ?, estimated_hours = ?, calculated_cost = ?, actual_hours_used = ?, milestone_status = ?, deadline = ?, completed_at = ? WHERE id = ?";
+            String sql = "UPDATE milestones SET milestone_name = ?, milestone_description = ?, milestone_status = ?, deadline = ?, completed_at = ? WHERE id = ?";
 
             Timestamp ifCompleted = null;
 
-            if (updatedMilestone.getCompleted_at() != null) {
-                ifCompleted = Timestamp.valueOf(updatedMilestone.getCompleted_at());
+            if (updatedMilestone.getCompletedAt() != null) {
+                ifCompleted = Timestamp.valueOf(updatedMilestone.getCompletedAt());
             }
 
             int affectedRows = jdbcTemplate.update(sql,

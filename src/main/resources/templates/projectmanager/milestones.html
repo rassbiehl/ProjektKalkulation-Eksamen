@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/css/background.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    <link rel="stylesheet" href="/css/usertable.css">
+    <link rel="stylesheet" href="/css/userbuttons.css">
+    <link rel="stylesheet" href="/css/bottom.css">
+</head>
+<body>
+<div class="background">
+    <div class="navbar">
+        <img src="/images/alphasolutionslogo.svg" alt="Logo">
+
+        <ul class="nav-links">
+            <li><a th:href="@{/projectmanagerStartpage}">Dashboard</a></li>
+            <li><a th:href="@{/users}" style="text-decoration: underline;">Users</a></li>
+            <li><a th:href="@{/statistics}">Statistics</a></li>
+            <li><a class="logout" th:href="@{/logout}">🔒 Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="table">
+        <table>
+            <thead>
+            <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="milestone : ${milestones}">
+            <td th:text="${milestone.milestoneName}">Name</td>
+                <td th:text="${milestone.milestoneDescription}">Description</td>
+                <td th:text="${milestone.status}">Status</td>
+                <td>
+                    <div class="action-buttons">
+                        <form th:action="@{/delete/{id}(id=${milestone.id})}" method="post" onsubmit="return confirm('Do you want to delete?');">
+                            <button class="delete-button" type="submit">Delete</button>
+                        </form>
+                    </div>
+
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

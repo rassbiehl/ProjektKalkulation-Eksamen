@@ -1,23 +1,31 @@
 package com.example.projektkalkulationeksamen.Model;
 
+import org.springframework.cglib.core.Local;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Milestone {
-private int id;
-private String milestoneName;
-private String milestoneDescription;
-private int projectId;
-private int estimatedHours;
-private int calculatedCost;
-private LocalDateTime createdAt;
-private int actualHoursUsed;
-private Status status;
-private LocalDateTime deadline;
-private LocalDateTime completed_at;
+    private int id;
+    private String milestoneName;
+    private String milestoneDescription;
+    private int projectId;
+    private int estimatedHours;
+    private int calculatedCost;
+    private LocalDateTime createdAt;
+    private int actualHoursUsed;
+    private Status status;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate deadline;
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime completedAt;
 
     public Milestone(int id, String milestoneName, String milestoneDescription, int projectId,
                      int estimatedHours, int calculatedCost, LocalDateTime createdAt, int actualHoursUsed,
-                     Status status, LocalDateTime deadline, LocalDateTime completed_at) {
+                     Status status, LocalDate deadline, LocalDateTime completedAt) {
         this.id = id;
         this.milestoneName = milestoneName;
         this.milestoneDescription = milestoneDescription;
@@ -28,7 +36,18 @@ private LocalDateTime completed_at;
         this.actualHoursUsed = actualHoursUsed;
         this.status = status;
         this.deadline = deadline;
-        this.completed_at = completed_at;
+        this.completedAt = completedAt;
+    }
+
+    public Milestone() {
+    }
+
+    public Milestone(String milestoneName, String milestoneDescription, Status status, LocalDate deadline, LocalDateTime completedAt) {
+        this.milestoneName = milestoneName;
+        this.milestoneDescription = milestoneDescription;
+        this.status = status;
+        this.deadline = deadline;
+        this.completedAt = completedAt;
     }
 
     public int getId() {
@@ -103,19 +122,19 @@ private LocalDateTime completed_at;
         this.status = status;
     }
 
-    public LocalDateTime getDeadline() {
+    public LocalDate getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(LocalDateTime deadline) {
+    public void setDeadline(LocalDate deadline) {
         this.deadline = deadline;
     }
 
-    public LocalDateTime getCompleted_at() {
-        return completed_at;
+    public LocalDateTime getCompletedAt() {
+        return completedAt;
     }
 
-    public void setCompleted_at(LocalDateTime completed_at) {
-        this.completed_at = completed_at;
+    public void setCompletedAt(LocalDateTime completedAt) {
+        this.completedAt = completedAt;
     }
 }

@@ -63,6 +63,7 @@ public class AuthController {
         Role role = user.getRole();
 
         session.setAttribute("userId", user.getId());
+        session.setAttribute("user_role",user.getRole());
 
         logger.info("User successfully logged in with userID: {}. Redirecting to {} Startpage", user.getId(), role.toString().toLowerCase());
 

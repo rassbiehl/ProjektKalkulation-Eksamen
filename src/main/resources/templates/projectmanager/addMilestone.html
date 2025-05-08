@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add a Milestone</title>
+</head>
+<body>
+<div>
+  <h1>Add a Milestone</h1>
+
+  <form method="post" th:action="@{/save}" th:object="${milestone}">
+    <input type="hidden" name="projectId" th:value="${projectId}"/>
+
+<div>
+  <label for="name">Name:</label>
+  <input id="name" class="input-field" type="text" th:field="*{milestoneName}" required>
+</div>
+
+    <div class="input">
+      <p>Add Description:</p>
+      <textarea class="input-field-description" th:field="*{milestoneDescription}"></textarea>
+    </div>
+
+    <div class="input">
+      <p>Estimated hours</p>
+      <input type="number" th:field="*{estimatedHours}">
+    </div>
+
+    <div>
+      <label for="status">Status:</label>
+      <select name="status" id="status">
+        <option th:each="status : ${status}" th:value="${status}" th:text="${status.displayName}"></option>
+      </select>
+    </div>
+
+    <div>
+      <label for="deadline">Deadline:</label>
+      <input id="deadline" type="date" th:field="*{deadline}" required>
+    </div>
+
+    <div>
+      <label for="completedAt">Is milestone completed?</label>
+      <input id="completedAt" type="datetime-local" th:field="*{completedAt}">
+    </div>
+
+    <div>
+      <button type="submit">Add Milestone</button>
+    </div>
+
+  </form>
+
+
+</div>
+
+</body>
+</html>
