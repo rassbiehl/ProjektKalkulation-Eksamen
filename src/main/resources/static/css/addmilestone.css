@@ -1,0 +1,94 @@
+/* Reset og generel stil */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    font-family: "Poppins", sans-serif;
+    color: floralwhite;
+    overflow-x: hidden;
+}
+
+/* Baggrund */
+.background {
+    min-height: 100vh;
+    overflow-x: hidden;
+    height: auto;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+    url("https://wallpapercat.com/w/full/7/f/7/116359-3840x2160-desktop-4k-firewatch-background-photo.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 2rem;
+}
+
+/* Overskrift */
+h1 {
+    text-align: center;
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    text-shadow: 2px 2px 5px #615FFF;
+}
+
+/* Formular-styling */
+form {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: rgba(28, 36, 51, 0.85);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.6);
+}
+
+/* Labels og inputs */
+form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.input, div {
+    margin-bottom: 1.5rem;
+}
+
+/* Input-felter */
+.input-field,
+.input-field-description,
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+select {
+    width: 100%;
+    padding: 10px;
+    background-color: #1c2433;
+    border: 1px solid #3b4252;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: floralwhite;
+}
+
+.input-field-description {
+    height: 100px;
+    resize: vertical;
+}
+
+/* Knap */
+button[type="submit"] {
+    width: 100%;
+    background-color: #615FFF;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #8d8dd8;
+}
