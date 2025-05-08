@@ -49,6 +49,7 @@ public class ProjectController {
             logger.info("Access denied: user with ID {} lacks {} privileges", userId, requiredRole);
             throw new AccessDeniedException("User lacks " + requiredRole + " privileges");
         }
+
         model.addAttribute("projectId",1);
 
         model.addAttribute("allProjects", projectService.getAllProjectsWithDetails());

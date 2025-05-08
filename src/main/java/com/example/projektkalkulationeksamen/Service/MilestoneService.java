@@ -135,7 +135,7 @@ public class MilestoneService {
                 milestone.getStatus(),
                 milestone.getCreatedAt(),
                 milestone.getDeadline(),
-                milestone.getCompleted_at(),
+                milestone.getCompletedAt(),
                 milestoneTasksWithDetails
         );
     }

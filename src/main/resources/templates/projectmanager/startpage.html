@@ -6,8 +6,7 @@
 
     <link rel="stylesheet" href="/css/background.css">
     <link rel="stylesheet" href="/css/nav.css">
-    <link rel="stylesheet" href="/css/usertable.css">
-    <link rel="stylesheet" href="/css/userbuttons.css">
+    <link rel="stylesheet" href="/css/grid-boxes.css">
 </head>
 <body>
 <div class="background">
@@ -19,8 +18,35 @@
             <li><a th:href="@{/users}">Users</a></li>
             <li><a th:href="@{/statistics}">Statistics</a></li>
             <li><a class="logout" th:href="@{/logout}">🔒 Logout</a></li>
+            <a th:href="'/addMilestone/'+${projectId}">Add milestone</a>
         </ul>
-        <a th:href="'/addMilestone/'+${projectId}">Add milestone</a>
+    </div>
+
+    <div class="allprojects">
+        <h2>Ongoing projects</h2>
+
+        <div class="project-content">
+
+            <div class="project-item" th:each="project : ${allProjects}">
+                <p class="name" th:text="${project.projectName}"></p>
+                <p th:text="${project.status.displayName}"></p>
+
+                <p>
+                    📅 Startdate: <span th:text="${#temporals.format(project.startDate, 'dd.MM.YYYY')}"></span>
+                </p>
+                <p>
+                    ⏰ Deadline: <span th:text="${#temporals.format(project.deadline, 'dd.MM.YYYY')}"></span>
+                </p>
+
+                <div class="progress-container">
+                    <div class="progress-fill" th:style="'width:' + ${project.progress} + '%'"></div>
+                </div>
+                <p><span th:text="${project.progress} + '%'"></span> done</p>
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>
