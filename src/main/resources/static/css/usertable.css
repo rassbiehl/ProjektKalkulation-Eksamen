@@ -47,7 +47,7 @@ th {
 .update-button {
     background-color: #615FFF;
     color: white;
-    padding: 8px 13px;
+    padding: 4px 7px;
     font-size: 14px;
     font-weight: 600;
     border: none;
@@ -58,7 +58,7 @@ th {
 .delete-button {
     background-color: #7e1010;
     color: white;
-    padding: 8px 13px;
+    padding: 4px 7px;
     font-size: 14px;
     font-weight: 600;
     border: none;

@@ -1,10 +1,14 @@
-
+* {
+    box-sizing: border-box;
+}
 .allprojects {
     margin: 0 auto;
     margin-top: 8vw;
     text-align: center;
     color: white;
     font-family: 'Montserrat', sans-serif;
+    width: 90%;
+
 }
 
 .project-content {
