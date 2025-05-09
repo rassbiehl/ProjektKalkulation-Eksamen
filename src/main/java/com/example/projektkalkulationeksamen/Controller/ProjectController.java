@@ -1,5 +1,6 @@
 package com.example.projektkalkulationeksamen.Controller;
 
+import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
 import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Service.ProjectService;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
 
 @Controller
 public class ProjectController {
@@ -50,12 +53,43 @@ public class ProjectController {
             throw new AccessDeniedException("User lacks " + requiredRole + " privileges");
         }
 
-        model.addAttribute("projectId",1);
+        List<ProjectDTO> ongoingProjects = projectService.getAllOngoingProjects();
 
-        model.addAttribute("ongoingProjects", projectService.getAllOngoingProjects());
+        if (!ongoingProjects.isEmpty()) {
+            model.addAttribute("ongoingProjects", ongoingProjects);
+        }
 
-        model.addAttribute("finishedProjects", projectService.getAllFinishedProjectsWithDetails());
+        List<ProjectDTO> finishedProjects = projectService.getAllFinishedProjectsWithDetails();
+
+        if (!finishedProjects.isEmpty()) {
+            model.addAttribute("finishedProjects", finishedProjects);
+        }
 
         return role.toLowerCase() + "/startpage";
+    }
+
+
+    @GetMapping("/project/{id}")
+    public String getProjectPage(@PathVariable int id, HttpSession session, Model model) {
+
+        if (!sessionValidator.isSessionValid(session)) {
+            logger.info("User is not logged in for current session. Redirecting to loginform.html");
+            return "redirect:/loginform";
+        }
+
+        Integer userId = (Integer) session.getAttribute("userId");
+
+        if (!userService.userExistsById(userId)) {
+            logger.warn("User ID {} not found in DB. Invalidating session.", userId);
+            session.invalidate();
+            return "redirect:/loginform";
+        }
+
+        Role role = userService.getUserById(userId).getRole();
+
+        model.addAttribute("project", projectService.getProjectWithDetails(id));
+        String rolePath = role.toString().toLowerCase();
+
+        return rolePath + "/" + rolePath + "projectpage";
     }
 }

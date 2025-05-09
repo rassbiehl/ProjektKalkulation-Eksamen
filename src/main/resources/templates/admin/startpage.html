@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/css/background.css">
     <link rel="stylesheet" href="/css/nav.css">
     <link rel="stylesheet" href="/css/grid-boxes.css">
+    <link rel="stylesheet" href="/css/usertable.css">
 </head>
 <body>
 
@@ -23,7 +24,7 @@
         </ul>
     </div>
 
-    <div class="allprojects">
+    <div th:if="${ongoingProjects}" class="allprojects">
         <h2>Ongoing projects</h2>
 
         <div class="project-content">
@@ -45,6 +46,43 @@
                     <div class="progress-fill" th:style="'width:' + ${project.progress} + '%'"></div>
                 </div>
                 <p><span th:text="${project.progress} + '%'"></span> progress</p>
+
+                <a th:href="@{/project/{id}(id=${project.id})}">
+                    <button class="update-button" type="button">➡️ View project</button>
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div th:if="${finishedProjects}" class="allprojects">
+        <h2>Finished projects</h2>
+
+        <div class="project-content">
+
+            <div class="project-item" th:each="project : ${finishedProjects}">
+                <p class="name" th:text="${project.projectName}"></p>
+                <p>
+                    📍 <span th:text="${project.status.displayName}"></span>
+                </p>
+
+                <p>
+                    📅 Startdate: <span th:text="${#temporals.format(project.startDate, 'dd.MM.YYYY')}"></span>
+                </p>
+                <p>
+                    ⏰ Deadline: <span th:text="${#temporals.format(project.deadline, 'dd.MM.YYYY')}"></span>
+                </p>
+
+                <div class="progress-container">
+                    <div class="progress-fill" th:style="'width:' + ${project.progress} + '%'"></div>
+                </div>
+                <p><span th:text="${project.progress} + '%'"></span> progress</p>
+
+                <a th:href="@{/project/{id}(id=${project.id})}">
+                    <button class="update-button" type="button">➡️ View project</button>
+                </a>
 
             </div>
 

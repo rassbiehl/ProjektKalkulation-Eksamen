@@ -35,7 +35,8 @@
 
             <div class="form-buttons">
                 <a th:href="@{/users}" class="back-button">← Back</a>
-                <button type="submit" class="add-button">Update user</button>
+                <button type="submit" class="add-button"
+                        onclick="return confirm('Do you want to update this user?')">Update user</button>
             </div>
 
             <div class="errormessage" th:if="${errorMessage}">
