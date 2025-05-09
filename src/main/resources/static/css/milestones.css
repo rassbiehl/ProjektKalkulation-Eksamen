@@ -1,0 +1,97 @@
+.project-title-wrapper {
+    text-align: center;
+    margin-top: 150px;  /* Reducer margin-top for at bringe titlen tættere på indholdet */
+}
+
+.project-title {
+    font-size: 2em;
+    color: white;
+}
+
+.table {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+    color: white;
+}
+
+table {
+    border-collapse: collapse;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 80%;
+    max-width: 1000px;
+    text-align: center;
+    color: white;
+}
+
+th, td {
+    padding: 8px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    font-size: 14px;
+}
+
+th {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: bold;
+}
+
+.add-button-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;  /* Juster margin-top for at reducere afstanden til knappen */
+}
+
+.add-button {
+    background-color: #48885b;
+    color: white;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.update-button {
+    background-color: #615FFF;
+    color: white;
+    padding: 8px 13px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.delete-button {
+    background-color: #7e1010;
+    color: white;
+    padding: 8px 13px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-milestones {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    color: white !important;
+    font-size: 1.5em !important;
+    margin-top: 50px;  /* Reducer margin-top for at bringe teksten tættere på titlen */
+    margin-bottom: 20px;  /* Tilføjer lidt plads mellem teksten og knappen */
+}
+
+

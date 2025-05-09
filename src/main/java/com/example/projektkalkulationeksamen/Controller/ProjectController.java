@@ -50,8 +50,6 @@ public class ProjectController {
             throw new AccessDeniedException("User lacks " + requiredRole + " privileges");
         }
 
-        model.addAttribute("projectId",1);
-
         model.addAttribute("allProjects", projectService.getAllProjectsWithDetails());
 
         return role.toLowerCase() + "/startpage";

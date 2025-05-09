@@ -5,23 +5,23 @@ import com.example.projektkalkulationeksamen.Model.Milestone;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.Status;
 import com.example.projektkalkulationeksamen.Service.MilestoneService;
-import com.example.projektkalkulationeksamen.Validator.SessionValidator;
+import com.example.projektkalkulationeksamen.Service.ProjectService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
 public class MilestoneController {
 
     private final MilestoneService milestoneService;
+    private final ProjectService projectService;
 
-    public MilestoneController(MilestoneService milestoneService) {
+    public MilestoneController(MilestoneService milestoneService, ProjectService projectService) {
         this.milestoneService = milestoneService;
+        this.projectService = projectService;
     }
 
     @GetMapping("/milestones/{project_id}")
@@ -34,8 +34,9 @@ public class MilestoneController {
         }
 
         List<Milestone> milestones = milestoneService.getMilestonesByProjectId(project_id);
-
         model.addAttribute("milestones", milestones);
+        model.addAttribute("project", projectService.getProjectById(project_id));
+
         return "projectmanager/milestones";
     }
 
@@ -70,17 +71,16 @@ public class MilestoneController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteMilestone(@PathVariable int id) {
+    public String deleteMilestone(@PathVariable int id, @RequestParam int projectId) {
 
-        int projectID = milestoneService.getMilestoneById(id).getProjectId();
         milestoneService.deleteMilestone(id);
 
 
-        return "redirect:/milestones/" + projectID;
+        return "redirect:/milestones/" + projectId;
 
     }
 
-    @GetMapping("/updateForm/{milestoneId}")
+    @GetMapping("/updateMilestoneForm/{milestoneId}")
     public String showUpdateForm(Model model, @PathVariable int milestoneId, HttpSession session) {
 
         Integer userId = (Integer) session.getAttribute("userId");
@@ -91,39 +91,30 @@ public class MilestoneController {
 
         try {
             Milestone milestone = milestoneService.getMilestoneById(milestoneId);
-            model.addAttribute("milestoneId", milestone.getId());
-            model.addAttribute("name", milestone.getMilestoneName());
-            model.addAttribute("description", milestone.getMilestoneDescription());
-            model.addAttribute("milestoneStatus", milestone.getStatus());
-            model.addAttribute("deadline", milestone.getDeadline());
-            model.addAttribute("completedAt", milestone.getCompletedAt());
-
+            model.addAttribute("milestone",milestone);
+            model.addAttribute("status",Status.values());
         } catch (MilestoneNotFoundException e) {
             return "redirect:/loginform";
         }
 
-        return "updateMilestoneForm";
+        return "projectmanager/updateMilestoneForm";
     }
 
     @PostMapping("/milestone/update")
-    public String updateMileStone(HttpSession session, @RequestParam int milestoneId, @RequestParam String name, @RequestParam String description,
-                                  @RequestParam Status status, @RequestParam LocalDate deadline, @RequestParam LocalDateTime completedAt) {
+    public String updateMileStone(HttpSession session,@RequestParam int milestoneId, @ModelAttribute Milestone milestone) {
 
         Integer userId = (Integer) session.getAttribute("userId");
         Role role = (Role) session.getAttribute("user_role");
         if (userId == null || role == null || !role.equals(Role.PROJECTMANAGER)) {
             return "redirect:/loginform";
         }
-        Milestone milestone = milestoneService.getMilestoneById(milestoneId);
-        milestone.setMilestoneName(name);
-        milestone.setMilestoneDescription(description);
-        milestone.setStatus(status);
-        milestone.setDeadline(deadline);
-        milestone.setCompletedAt(completedAt);
+        milestone.setId(milestoneId);
+         milestoneService.updateMilestone(milestone);
 
-        milestoneService.updateMilestone(milestone);
+         int projectId = milestoneService.getMilestoneById(milestoneId).getProjectId();
 
-        return "redirect:/milestones/" + milestone.getProjectId();
+
+        return "redirect:/milestones/" + projectId;
     }
 
 }

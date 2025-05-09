@@ -18,19 +18,21 @@
             <li><a th:href="@{/users}">Users</a></li>
             <li><a th:href="@{/statistics}">Statistics</a></li>
             <li><a class="logout" th:href="@{/logout}">🔒 Logout</a></li>
-            <a th:href="'/addMilestone/'+${projectId}">Add milestone</a>
         </ul>
     </div>
 
     <div class="allprojects">
         <h2>Ongoing projects</h2>
-        <h1>HEEEEJSA</h1>
 
         <div class="project-content">
 
             <div class="project-item" th:each="project : ${allProjects}">
-                <p class="name" th:text="${project.projectName}"></p>
+                <p class="name">
+                    <a th:href="@{/milestones/{id}(id=${project.id})}" th:text="${project.projectName}"></a>
+
+                </p>
                 <p th:text="${project.status.displayName}"></p>
+
 
                 <p>
                     📅 Startdate: <span th:text="${#temporals.format(project.startDate, 'dd.MM.YYYY')}"></span>
