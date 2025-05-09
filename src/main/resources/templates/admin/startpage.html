@@ -28,9 +28,11 @@
 
         <div class="project-content">
 
-            <div class="project-item" th:each="project : ${allProjects}">
+            <div class="project-item" th:each="project : ${ongoingProjects}">
                 <p class="name" th:text="${project.projectName}"></p>
-                <p th:text="${project.status.displayName}"></p>
+                <p>
+                    📍 <span th:text="${project.status.displayName}"></span>
+                </p>
 
                 <p>
                     📅 Startdate: <span th:text="${#temporals.format(project.startDate, 'dd.MM.YYYY')}"></span>
@@ -42,7 +44,7 @@
                 <div class="progress-container">
                     <div class="progress-fill" th:style="'width:' + ${project.progress} + '%'"></div>
                 </div>
-                <p><span th:text="${project.progress} + '%'"></span> done</p>
+                <p><span th:text="${project.progress} + '%'"></span> progress</p>
 
             </div>
 
@@ -51,6 +53,5 @@
     </div>
 
 </div>
-
 </body>
 </html>
