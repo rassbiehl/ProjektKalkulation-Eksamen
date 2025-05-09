@@ -52,7 +52,9 @@ public class ProjectController {
 
         model.addAttribute("projectId",1);
 
-        model.addAttribute("allProjects", projectService.getAllProjectsWithDetails());
+        model.addAttribute("ongoingProjects", projectService.getAllOngoingProjects());
+
+        model.addAttribute("finishedProjects", projectService.getAllFinishedProjectsWithDetails());
 
         return role.toLowerCase() + "/startpage";
     }
