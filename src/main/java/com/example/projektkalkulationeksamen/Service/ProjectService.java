@@ -138,8 +138,8 @@ public class ProjectService {
         }
     }
 
-    public int getProjectProgress (int projectId) {
-        List <MilestoneDTO> milestonesWithDetails = milestoneService.getMilestonesByProjectIdWithDetails(projectId);
+    public int getProjectProgress(int projectId) {
+        List<MilestoneDTO> milestonesWithDetails = milestoneService.getMilestonesByProjectIdWithDetails(projectId);
 
         if (milestonesWithDetails.isEmpty()) {
             return 0;
@@ -147,11 +147,11 @@ public class ProjectService {
 
         int finishedMilestones = 0;
 
-         for (MilestoneDTO milestoneDTO : milestonesWithDetails) {
-             if (milestoneDTO.getMilestoneStatus() == Status.COMPLETED) {
-                 finishedMilestones++;
-             }
-         }
+        for (MilestoneDTO milestoneDTO : milestonesWithDetails) {
+            if (milestoneDTO.getMilestoneStatus() == Status.COMPLETED) {
+                finishedMilestones++;
+            }
+        }
 
         return (int) Math.round((finishedMilestones * 100.0) / milestonesWithDetails.size());
 
@@ -184,10 +184,10 @@ public class ProjectService {
                 project.getCompletedAt(),
                 milestonesByProjectIdWithDetails,
                 progress
-                );
+        );
     }
 
-    public List<ProjectDTO> getAllProjectsWithDetails () {
+    public List<ProjectDTO> getAllProjectsWithDetails() {
         List<ProjectDTO> allProjectsWithDetails = new ArrayList<>();
         List<Project> allProjects = projectRepository.getAllProjects();
 
@@ -196,6 +196,31 @@ public class ProjectService {
         }
 
         return allProjectsWithDetails;
+    }
+
+    public List<ProjectDTO> getAllFinishedProjectsWithDetails() {
+        List<ProjectDTO> allProjects = getAllProjectsWithDetails();
+        List<ProjectDTO> finishedProjects = new ArrayList<>();
+
+        for (ProjectDTO projectDTO : allProjects) {
+            if (projectDTO.getStatus() == Status.COMPLETED) {
+                finishedProjects.add(projectDTO);
+            }
+        }
+        return finishedProjects;
+    }
+
+    public List<ProjectDTO> getAllOngoingProjects() {
+        List<ProjectDTO> allProjects = getAllProjectsWithDetails();
+        List<ProjectDTO> ongoingProjects = new ArrayList<>();
+
+        for (ProjectDTO projectDTO : allProjects) {
+            if (projectDTO.getStatus() != Status.COMPLETED) {
+                ongoingProjects.add(projectDTO);
+            }
+        }
+
+        return ongoingProjects;
     }
 
     public List<ProjectDTO> getAllProjectDTOsByProjectManagerId(int projectManagerId) {

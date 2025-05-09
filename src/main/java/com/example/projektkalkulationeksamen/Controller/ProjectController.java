@@ -14,6 +14,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.List;
+
 @Controller
 public class ProjectController {
     public static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
@@ -50,8 +52,44 @@ public class ProjectController {
             throw new AccessDeniedException("User lacks " + requiredRole + " privileges");
         }
 
+        List<ProjectDTO> ongoingProjects = projectService.getAllOngoingProjects();
+
+        if (!ongoingProjects.isEmpty()) {
+            model.addAttribute("ongoingProjects", ongoingProjects);
+        }
+
+        List<ProjectDTO> finishedProjects = projectService.getAllFinishedProjectsWithDetails();
+
+        if (!finishedProjects.isEmpty()) {
+            model.addAttribute("finishedProjects", finishedProjects);
+        }
         model.addAttribute("allProjects", projectService.getAllProjectsWithDetails());
 
         return role.toLowerCase() + "/startpage";
+    }
+
+
+    @GetMapping("/project/{id}")
+    public String getProjectPage(@PathVariable int id, HttpSession session, Model model) {
+
+        if (!sessionValidator.isSessionValid(session)) {
+            logger.info("User is not logged in for current session. Redirecting to loginform.html");
+            return "redirect:/loginform";
+        }
+
+        Integer userId = (Integer) session.getAttribute("userId");
+
+        if (!userService.userExistsById(userId)) {
+            logger.warn("User ID {} not found in DB. Invalidating session.", userId);
+            session.invalidate();
+            return "redirect:/loginform";
+        }
+
+        Role role = userService.getUserById(userId).getRole();
+
+        model.addAttribute("project", projectService.getProjectWithDetails(id));
+        String rolePath = role.toString().toLowerCase();
+
+        return rolePath + "/" + rolePath + "projectpage";
     }
 }

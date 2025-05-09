@@ -1,6 +1,7 @@
 package com.example.projektkalkulationeksamen.Controller;
 
 import com.example.projektkalkulationeksamen.Model.Role;
+import com.example.projektkalkulationeksamen.Service.AuthService;
 import com.example.projektkalkulationeksamen.Service.UserService;
 import com.example.projektkalkulationeksamen.Validator.SessionValidator;
 import jakarta.servlet.http.HttpSession;
@@ -19,11 +20,13 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
     private final SessionValidator sessionValidator;
+    private final AuthService authService;
 
     @Autowired
-    public UserController(UserService userService, SessionValidator sessionValidator) {
+    public UserController(UserService userService, SessionValidator sessionValidator, AuthService authService) {
         this.userService = userService;
         this.sessionValidator = sessionValidator;
+        this.authService = authService;
     }
 
     @GetMapping
@@ -37,7 +40,7 @@ public class UserController {
 
         if (!userService.userExistsById(userId)) {
             logger.warn("User ID {} not found in DB. Invalidating session.", userId);
-            session.invalidate();
+            authService.logout(session);
             return "redirect:/loginform";
         }
 
