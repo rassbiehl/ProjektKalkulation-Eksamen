@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project Page</title>
+
+    <link rel="stylesheet" href="/css/background.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    <link rel="stylesheet" href="/css/usertable.css">
+    <link rel="stylesheet" href="/css/projectpage.css">
+
+</head>
+<body>
+
+<div class="background">
+
+    <div class="shadow">
+        <div class="headline">
+            <img src="/images/logonotext.svg" alt="Logo">
+            <h1 th:text="${project.projectName}"></h1>
+        </div>
+
+        <div class="projectinfo">
+
+            <p>
+                 <span th:if="${projectManager}">
+        👑 Project manager: <span th:text="${projectManager.username}"></span>   &nbsp;
+    </span>
+                <span th:if="${project.completedAt != null}">
+        ✅ Completed at: <span th:text="${#temporals.format(project.completedAt, 'dd.MM.yyyy')}"></span>   &nbsp;
+    </span>
+                🕒 Created at: <span th:text="${#temporals.format(project.createdAt, 'dd.MM.yyyy')}"></span> &nbsp;
+                📅 Startdate: <span th:text="${#temporals.format(project.startDate, 'dd.MM.yyyy')}"></span> &nbsp;
+                ⏰ Deadline: <span th:text="${#temporals.format(project.deadline, 'dd.MM.yyyy')}"></span>
+            </p>
+
+            <span th:if="${project.description != null}">
+
+                📝 <span th:text="${project.description}"></span>
+    </span>
+
+            <p>
+               <span th:if="${project.estimatedHours}">
+        ⏳ Estimated remaining work: <span th:text="${project.estimatedHours}"></span> hours   &nbsp;
+    </span>
+
+                📊 Hours spent: <span th:text="${project.actualHoursUsed}"></span> hours &nbsp;
+
+                💰 Calculated cost: <span th:text="${project.calculatedCost}"></span> &nbsp;
+            </p>
+
+
+            <div class="progress-container">
+                <div class="progress-fill" th:style="'width:' + ${project.progress} + '%'"></div>
+            </div>
+            <p><span th:text="${project.progress} + '%'"></span> progress</p>
+
+        </div>
+
+        <div th:if="${projectMilestones}" class="projectMilestones">
+            <h2>Milestones</h2>
+
+            <div class="project-content">
+
+                <div class="project-item" th:each="project : ${ongoingProjects}">
+                    <p class="name" th:text="${project.projectName}"></p>
+                    <p>
+                        📍 <span th:text="${project.status.displayName}"></span>
+                    </p>
+
+                    <p>
+                        📅 Startdate: <span th:text="${#temporals.format(project.startDate, 'dd.MM.YYYY')}"></span>
+                    </p>
+                    <p>
+                        ⏰ Deadline: <span th:text="${#temporals.format(project.deadline, 'dd.MM.YYYY')}"></span>
+                    </p>
+
+                    <div class="progress-container">
+                        <div class="progress-fill" th:style="'width:' + ${project.progress} + '%'"></div>
+                    </div>
+                    <p><span th:text="${project.progress} + '%'"></span> progress</p>
+
+                    <a th:href="@{/project/{id}(id=${project.id})}">
+                        <button class="update-button" type="button">➡️ View Milestone</button>
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+</body>
+</html>

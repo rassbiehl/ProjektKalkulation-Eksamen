@@ -1,0 +1,92 @@
+* {
+    box-sizing: border-box;
+}
+
+.shadow {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 2rem;
+    width: 85%;
+    margin: 2rem auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.headline {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.headline h1 {
+    margin: 0;
+}
+
+
+
+.headline img {
+    height: 40px;
+    max-width: 150px;
+    margin: 0;
+    vertical-align: middle;
+}
+
+
+.projectinfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+}
+
+.progress-container {
+    width: 40%;
+    height: 20px;
+    background-color: #eee;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #4caf50; /* grøn */
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.allprojects {
+    margin: 0 auto;
+    margin-top: 8vw;
+    text-align: center;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    width: 90%;
+
+}
+
+.project-content {
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    width: 100%;
+}
+
+.project-item {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.name {
+    font-size: 1.5vw;
+    display: inline-block;
+    border-bottom: 1px solid white;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+}

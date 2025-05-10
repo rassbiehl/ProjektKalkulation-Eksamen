@@ -87,9 +87,17 @@ public class ProjectController {
 
         Role role = userService.getUserById(userId).getRole();
 
-        model.addAttribute("project", projectService.getProjectWithDetails(id));
-        String rolePath = role.toString().toLowerCase();
+        ProjectDTO projectDTO = projectService.getProjectWithDetails(id);
 
-        return rolePath + "/" + rolePath + "projectpage";
+        model.addAttribute("project", projectDTO);
+
+        model.addAttribute("projectMilestones", projectDTO.getMilestones());
+
+        model.addAttribute("projectManager", userService.getUserById(projectDTO.getProjectManagerId()));
+
+        if (role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId) {
+            model.addAttribute("isOwner", true);
+        }
+            return "projectpage";
     }
 }
