@@ -16,6 +16,8 @@
 
     <div class="shadow">
         <div class="headline">
+            <a th:href="@{/{role}Startpage(role=${userRole})}" class="back-button">← Back</a>
+
             <img src="/images/logonotext.svg" alt="Logo">
             <h1 th:text="${project.projectName}"></h1>
         </div>
@@ -57,20 +59,17 @@
 
         </div>
 
-        <div th:if="${projectMilestones}" class="projectMilestones">
-            <h2>Milestones</h2>
+        <div class="projectMilestones">
+            <h2>Project milestones</h2>
 
             <div class="project-content">
 
-                <div class="project-item" th:each="project : ${ongoingProjects}">
-                    <p class="name" th:text="${project.projectName}"></p>
+                <div class="project-item" th:each="milestone : ${projectMilestones}">
+                    <p class="name" th:text="${milestone.milestoneName}"></p>
                     <p>
-                        📍 <span th:text="${project.status.displayName}"></span>
+                        📍 <span th:text="${milestone.milestoneStatus.displayName}"></span>
                     </p>
 
-                    <p>
-                        📅 Startdate: <span th:text="${#temporals.format(project.startDate, 'dd.MM.YYYY')}"></span>
-                    </p>
                     <p>
                         ⏰ Deadline: <span th:text="${#temporals.format(project.deadline, 'dd.MM.YYYY')}"></span>
                     </p>
@@ -84,6 +83,14 @@
                         <button class="update-button" type="button">➡️ View Milestone</button>
                     </a>
 
+                </div>
+
+                <div class="project-item" th:if="${#lists.isEmpty(projectMilestones)}">
+                    <h3>No milestones created yet.</h3>
+
+                    <a th:if="${isOwner}" th:href="@{/addMilestone/{projectId}(projectId=${project.id})}">
+                        <button class="add-button" type="button">✚ Add milestone</button>
+                    </a>
                 </div>
 
             </div>

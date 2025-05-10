@@ -1,5 +1,6 @@
 package com.example.projektkalkulationeksamen.Controller;
 
+import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
 import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
 import com.example.projektkalkulationeksamen.Model.Role;
@@ -34,6 +35,8 @@ public class ProjectController {
     @GetMapping("/{role}Startpage")
     public String getStartPage(@PathVariable String role, HttpSession session, Model model) {
 
+        Integer userId = (Integer) session.getAttribute("userId");
+
         if (!sessionValidator.isSessionValid(session)) {
             logger.info("User is not logged in for current session. Redirecting to loginform.html");
             return "redirect:/loginform";
@@ -43,14 +46,19 @@ public class ProjectController {
         try {
             requiredRole = Role.valueOf(role.toUpperCase());
         } catch (IllegalArgumentException e) {
-            logger.warn("Invalid role '{}' in path", role);
+            logger.warn("Invalid role: {} in path", role);
             throw new AccessDeniedException("Invalid role");
         }
 
         if (!sessionValidator.isSessionValid(session, requiredRole)) {
-            Integer userId = (Integer) session.getAttribute("userId");
             logger.info("Access denied: user with ID {} lacks {} privileges", userId, requiredRole);
             throw new AccessDeniedException("User lacks " + requiredRole + " privileges");
+        }
+
+        List<ProjectDTO> projectsByManager = projectService.getAllProjectDTOsByProjectManagerId(userId);
+
+        if (!projectsByManager.isEmpty()) {
+            model.addAttribute("myProjects", projectsByManager);
         }
 
         List<ProjectDTO> ongoingProjects = projectService.getAllOngoingProjects();
@@ -91,8 +99,13 @@ public class ProjectController {
 
         model.addAttribute("project", projectDTO);
 
-        model.addAttribute("projectMilestones", projectDTO.getMilestones());
+        List<MilestoneDTO> projectMilestones = projectDTO.getMilestones();
 
+        if (!projectMilestones.isEmpty()) {
+            model.addAttribute("projectMilestones", projectMilestones);
+        }
+
+        model.addAttribute("userRole", role.toString().toLowerCase());
         model.addAttribute("projectManager", userService.getUserById(projectDTO.getProjectManagerId()));
 
         if (role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId) {
