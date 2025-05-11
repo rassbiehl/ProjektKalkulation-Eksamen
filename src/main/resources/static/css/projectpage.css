@@ -1,8 +1,16 @@
 * {
     box-sizing: border-box;
     color: white;
+    margin: 0;
+    padding: 0;
 }
 
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #111;
+}
+
+/* Wrapper */
 .shadow {
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 12px;
@@ -12,39 +20,54 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
+/* Header */
 .headline {
     display: flex;
-    flex-direction: row;
     align-items: center;
     justify-content: center;
+    gap: 1rem;
+    margin-bottom: 50px;
 }
-
-.headline h1 {
-    margin: 0;
-}
-
-
 
 .headline img {
     height: 40px;
     max-width: 150px;
-    margin: 0;
-    vertical-align: middle;
 }
 
+.headline h1 {
+    font-size: 2rem;
+}
 
+/* Project Info */
 .projectinfo {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
-    gap: 1rem;
+    gap: 2rem;
+    width: 100%;
 }
 
-.progress-container {
-    width: 40%;
+section {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+/* Progress bars */
+.progress-container,
+.milestone-progress {
+    width: 80%;
     height: 20px;
     background-color: #eee;
     border-radius: 10px;
@@ -53,53 +76,89 @@
 
 .progress-fill {
     height: 100%;
-    background-color: #4caf50; /* grøn */
+    background-color: #4caf50;
     width: 0%;
     transition: width 0.3s ease;
 }
 
-.allprojects {
-    margin: 0 auto;
-    margin-top: 8vw;
-    text-align: center;
-    color: white;
-    font-family: 'Montserrat', sans-serif;
-    width: 90%;
-
-}
-
-.project-content {
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1rem;
-    padding: 1rem;
-    width: 100%;
-}
-
-.project-item {
-    background-color: rgba(0, 0, 0, 0.3);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.name {
-    font-size: 1.5vw;
-    display: inline-block;
-    border-bottom: 1px solid white;
-    padding-bottom: 4px;
-    margin-bottom: 10px;
-}
-
+/* Project Milestones */
 .projectMilestones {
-    text-align: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    width: 100%;
+    margin-top: 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    text-align: center;
+    max-width: 800px;
 }
-.add-button {
+
+.project-content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    justify-content: center;
+}
+
+.project-item {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 240px;
+    min-height: 200px;
+}
+.project-item p {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}
+
+.name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid white;
+    padding-bottom: 4px;
+}
+
+/* Buttons */
+.add-button,
+.update-button,
+.back-button {
     background-color: #48885b;
+    color: white;
+    padding: 4px 7px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.button-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.update-button {
+    background-color: #615FFF;
+}
+
+.back-button {
+    background-color: #999;
     color: white;
     padding: 8px 20px;
     font-size: 14px;
@@ -107,21 +166,10 @@
     border: none;
     border-radius: 6px;
     cursor: pointer;
-}
-
-.back-button {
-    background-color: #999;
-    color: white;
-    padding: 6px 14px;
-    font-weight: 600;
-    font-size: 12px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    text-align: center;
     text-decoration: none;
-    position: absolute;
-    left: 8rem;
-    top: 2rem;
 
+    align-self: flex-start;
+    margin-bottom: 1rem;
 }
+
+

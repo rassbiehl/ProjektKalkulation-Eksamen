@@ -80,37 +80,47 @@ public class ProjectController {
     @GetMapping("/project/{id}")
     public String getProjectPage(@PathVariable int id, HttpSession session, Model model) {
 
+        logger.info("Attempting to load project page with project ID: {}", id);
+
         if (!sessionValidator.isSessionValid(session)) {
-            logger.info("User is not logged in for current session. Redirecting to loginform.html");
+            logger.warn("Invalid session. Redirecting to login.");
             return "redirect:/loginform";
         }
 
         Integer userId = (Integer) session.getAttribute("userId");
-
         if (!userService.userExistsById(userId)) {
-            logger.warn("User ID {} not found in DB. Invalidating session.", userId);
+            logger.warn("User ID {} does not exist. Invalidating session.", userId);
             session.invalidate();
             return "redirect:/loginform";
         }
 
+        ProjectDTO project = projectService.getProjectWithDetails(id);
+
+
         Role role = userService.getUserById(userId).getRole();
+        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+        logger.debug("User ID {} has role {}. Is owner: {}", userId, role, isOwner);
 
-        ProjectDTO projectDTO = projectService.getProjectWithDetails(id);
-
-        model.addAttribute("project", projectDTO);
-
-        List<MilestoneDTO> projectMilestones = projectDTO.getMilestones();
-
-        if (!projectMilestones.isEmpty()) {
-            model.addAttribute("projectMilestones", projectMilestones);
-        }
-
+        model.addAttribute("project", project);
         model.addAttribute("userRole", role.toString().toLowerCase());
-        model.addAttribute("projectManager", userService.getUserById(projectDTO.getProjectManagerId()));
+        model.addAttribute("projectManager", userService.getUserById(project.getProjectManagerId()));
+        model.addAttribute("isOwner", isOwner);
+        model.addAttribute("projectMilestones", project.getMilestones());
 
-        if (role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId) {
-            model.addAttribute("isOwner", true);
+        List<MilestoneDTO> ongoing = projectService.getOngoingMileStonesFromProject(id);
+        if (!ongoing.isEmpty()) {
+            logger.debug("Found {} ongoing milestones.", ongoing.size());
+            model.addAttribute("ongoingMilestones", ongoing);
         }
-            return "projectpage";
+
+        List<MilestoneDTO> finished = projectService.getFinishedMileStonesFromProject(id);
+        if (!finished.isEmpty()) {
+            logger.debug("Found {} finished milestones.", finished.size());
+            model.addAttribute("finishedMilestones", finished);
+        }
+
+        logger.info("Returning projectpage.html");
+        return "projectpage";
     }
+
 }

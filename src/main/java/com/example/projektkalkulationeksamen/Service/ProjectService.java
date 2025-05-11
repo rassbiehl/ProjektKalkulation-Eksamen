@@ -6,6 +6,7 @@ import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
 import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
 import com.example.projektkalkulationeksamen.Exceptions.ProjectCreationException;
 import com.example.projektkalkulationeksamen.Exceptions.ProjectNotFoundException;
+import com.example.projektkalkulationeksamen.Model.Milestone;
 import com.example.projektkalkulationeksamen.Model.Project;
 import com.example.projektkalkulationeksamen.Model.Status;
 import com.example.projektkalkulationeksamen.Repository.MilestoneRepository;
@@ -164,6 +165,37 @@ public class ProjectService {
 
 
     // DTO Object methods
+    public List<MilestoneDTO> getFinishedMileStonesFromProject (int projectId) {
+
+        ProjectDTO projectDTO = getProjectWithDetails(projectId);
+
+        List<MilestoneDTO> allProjectMileStonesWithDetails = projectDTO.getMilestones();
+
+        List<MilestoneDTO> finishedMileStones = new ArrayList<>();
+
+        for (MilestoneDTO milestoneDTO : allProjectMileStonesWithDetails) {
+            if (milestoneDTO.getMilestoneStatus() == Status.COMPLETED) {
+                finishedMileStones.add(milestoneDTO);
+            }
+        }
+        return finishedMileStones;
+    }
+
+    public List<MilestoneDTO> getOngoingMileStonesFromProject (int projectId) {
+
+        ProjectDTO projectDTO = getProjectWithDetails(projectId);
+
+        List<MilestoneDTO> allProjectMileStonesWithDetails = projectDTO.getMilestones();
+
+        List<MilestoneDTO> ongoingMileStones = new ArrayList<>();
+
+        for (MilestoneDTO milestoneDTO : allProjectMileStonesWithDetails) {
+            if (milestoneDTO.getMilestoneStatus() != Status.COMPLETED) {
+                ongoingMileStones.add(milestoneDTO);
+            }
+        }
+        return ongoingMileStones;
+    }
 
     public ProjectDTO getProjectWithDetails(int id) {
         Project project = getProjectById(id);

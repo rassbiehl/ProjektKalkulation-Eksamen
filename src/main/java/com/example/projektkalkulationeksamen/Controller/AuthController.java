@@ -1,7 +1,6 @@
 package com.example.projektkalkulationeksamen.Controller;
 
 import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
-import com.example.projektkalkulationeksamen.Exceptions.UserCreationException;
 import com.example.projektkalkulationeksamen.Exceptions.UserNotFoundException;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.User;
@@ -85,7 +84,7 @@ public class AuthController {
         logger.info("loading registerform.html");
 
         model.addAttribute("roles",Role.values());
-        return "registerform";
+        return "admin/registerform";
     }
 
     @PostMapping("/register")
@@ -95,9 +94,9 @@ public class AuthController {
             logger.info("User is not logged in. Redirecting to loginform.html");
             return "redirect:/loginform";
         }
+        Integer userId = (Integer) session.getAttribute("userId");
 
         if (!sessionValidator.isSessionValid(session, Role.ADMIN)) {
-            Integer userId = (Integer) session.getAttribute("userId");
             logger.info("Access denied: user with ID {} lacks admin privileges", userId);
             throw new AccessDeniedException("User lacks admin privileges");
         }
@@ -139,7 +138,7 @@ public class AuthController {
             return "redirect:/users";
         }
 
-        return "updateform";
+        return "admin/updateform";
     }
 
     @PostMapping ("/update")
