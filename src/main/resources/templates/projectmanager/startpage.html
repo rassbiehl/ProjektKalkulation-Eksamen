@@ -18,8 +18,41 @@
             <li><a th:href="@{/projectmanagerStartpage}" style="text-decoration: underline;">Dashboard</a></li>
             <li><a th:href="@{/users}">Users</a></li>
             <li><a th:href="@{/statistics}">Statistics</a></li>
+            <li><a class="add" th:href="@{/addproject}">✚ Add project</a></li>
             <li><a class="logout" th:href="@{/logout}">🔒 Logout</a></li>
         </ul>
+    </div>
+    <div th:if="${myProjects}" class="allprojects">
+        <h2>My projects</h2>
+
+        <div class="project-content">
+
+            <div class="project-item" th:each="project : ${myProjects}">
+                <p class="name" th:text="${project.projectName}"></p>
+                <p>
+                    📍 <span th:text="${project.status.displayName}"></span>
+                </p>
+
+                <p>
+                    📅 Startdate: <span th:text="${#temporals.format(project.startDate, 'dd.MM.YYYY')}"></span>
+                </p>
+                <p>
+                    ⏰ Deadline: <span th:text="${#temporals.format(project.deadline, 'dd.MM.YYYY')}"></span>
+                </p>
+
+                <div class="progress-container">
+                    <div class="progress-fill" th:style="'width:' + ${project.progress} + '%'"></div>
+                </div>
+                <p><span th:text="${project.progress} + '%'"></span> progress</p>
+
+                <a th:href="@{/project/{id}(id=${project.id})}">
+                    <button class="update-button" type="button">➡️ View project</button>
+                </a>
+
+            </div>
+
+        </div>
+
     </div>
 
     <div th:if="${ongoingProjects}" class="allprojects">

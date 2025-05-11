@@ -1,5 +1,6 @@
 package com.example.projektkalkulationeksamen.Controller;
 
+import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
 import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
 import com.example.projektkalkulationeksamen.Model.Role;
@@ -34,6 +35,8 @@ public class ProjectController {
     @GetMapping("/{role}Startpage")
     public String getStartPage(@PathVariable String role, HttpSession session, Model model) {
 
+        Integer userId = (Integer) session.getAttribute("userId");
+
         if (!sessionValidator.isSessionValid(session)) {
             logger.info("User is not logged in for current session. Redirecting to loginform.html");
             return "redirect:/loginform";
@@ -43,14 +46,19 @@ public class ProjectController {
         try {
             requiredRole = Role.valueOf(role.toUpperCase());
         } catch (IllegalArgumentException e) {
-            logger.warn("Invalid role '{}' in path", role);
+            logger.warn("Invalid role: {} in path", role);
             throw new AccessDeniedException("Invalid role");
         }
 
         if (!sessionValidator.isSessionValid(session, requiredRole)) {
-            Integer userId = (Integer) session.getAttribute("userId");
             logger.info("Access denied: user with ID {} lacks {} privileges", userId, requiredRole);
             throw new AccessDeniedException("User lacks " + requiredRole + " privileges");
+        }
+
+        List<ProjectDTO> projectsByManager = projectService.getAllProjectDTOsByProjectManagerId(userId);
+
+        if (!projectsByManager.isEmpty()) {
+            model.addAttribute("myProjects", projectsByManager);
         }
 
         List<ProjectDTO> ongoingProjects = projectService.getAllOngoingProjects();
@@ -73,24 +81,47 @@ public class ProjectController {
     @GetMapping("/project/{id}")
     public String getProjectPage(@PathVariable int id, HttpSession session, Model model) {
 
+        logger.info("Attempting to load project page with project ID: {}", id);
+
         if (!sessionValidator.isSessionValid(session)) {
-            logger.info("User is not logged in for current session. Redirecting to loginform.html");
+            logger.warn("Invalid session. Redirecting to login.");
             return "redirect:/loginform";
         }
 
         Integer userId = (Integer) session.getAttribute("userId");
-
         if (!userService.userExistsById(userId)) {
-            logger.warn("User ID {} not found in DB. Invalidating session.", userId);
+            logger.warn("User ID {} does not exist. Invalidating session.", userId);
             session.invalidate();
             return "redirect:/loginform";
         }
 
+        ProjectDTO project = projectService.getProjectWithDetails(id);
+
+
         Role role = userService.getUserById(userId).getRole();
+        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+        logger.debug("User ID {} has role {}. Is owner: {}", userId, role, isOwner);
 
-        model.addAttribute("project", projectService.getProjectWithDetails(id));
-        String rolePath = role.toString().toLowerCase();
+        model.addAttribute("project", project);
+        model.addAttribute("userRole", role.toString().toLowerCase());
+        model.addAttribute("projectManager", userService.getUserById(project.getProjectManagerId()));
+        model.addAttribute("isOwner", isOwner);
+        model.addAttribute("projectMilestones", project.getMilestones());
 
-        return rolePath + "/" + rolePath + "projectpage";
+        List<MilestoneDTO> ongoing = projectService.getOngoingMileStonesFromProject(id);
+        if (!ongoing.isEmpty()) {
+            logger.debug("Found {} ongoing milestones.", ongoing.size());
+            model.addAttribute("ongoingMilestones", ongoing);
+        }
+
+        List<MilestoneDTO> finished = projectService.getFinishedMileStonesFromProject(id);
+        if (!finished.isEmpty()) {
+            logger.debug("Found {} finished milestones.", finished.size());
+            model.addAttribute("finishedMilestones", finished);
+        }
+
+        logger.info("Returning projectpage.html");
+        return "projectpage";
     }
+
 }
