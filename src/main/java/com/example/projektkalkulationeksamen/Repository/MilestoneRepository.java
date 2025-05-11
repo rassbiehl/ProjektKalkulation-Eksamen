@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,7 +86,11 @@ public class MilestoneRepository {
                 ps.setInt(6, milestone.getActualHoursUsed());
                 ps.setString(7, milestone.getStatus().toString());
                 ps.setString(8, milestone.getDeadline().toString());
-                ps.setString(9, milestone.getCompletedAt().toString());
+                if(milestone.getCompletedAt() != null){
+                    ps.setTimestamp(9,Timestamp.valueOf(milestone.getCompletedAt()));
+                } else {
+                    ps.setNull(9, Types.TIMESTAMP);
+                }
                 return ps;
             }, keyHolder);
 
@@ -135,11 +140,7 @@ public class MilestoneRepository {
             int affectedRows = jdbcTemplate.update(sql,
                     updatedMilestone.getMilestoneName(),
                     updatedMilestone.getMilestoneDescription(),
-                    updatedMilestone.getProjectId(),
-                    updatedMilestone.getEstimatedHours(),
-                    updatedMilestone.getCalculatedCost(),
-                    updatedMilestone.getActualHoursUsed(),
-                    updatedMilestone.getStatus(),
+                    updatedMilestone.getStatus().toString(),
                     updatedMilestone.getDeadline(),
                     ifCompleted,
 

@@ -78,7 +78,7 @@
                 </div>
                 <p><span th:text="${project.progress} + '%'"></span> progress</p>
 
-                <a th:href="@{/project/{id}(id=${project.id})}">
+                <a th:href="@{/milestones/{id}(id=${project.id})}">
                     <button class="update-button" type="button">➡️ View project</button>
                 </a>
 
@@ -93,11 +93,18 @@
 
         <div class="project-content">
 
+            <div class="project-item" th:each="project : ${allProjects}">
+                <p class="name">
+                    <a th:href="@{/milestones/{id}(id=${project.id})}" th:text="${project.projectName}"></a>
+
+                </p>
+                <p th:text="${project.status.displayName}"></p>
             <div class="project-item" th:each="project : ${finishedProjects}">
                 <p class="name" th:text="${project.projectName}"></p>
                 <p>
                     📍 <span th:text="${project.status.displayName}"></span>
                 </p>
+
 
                 <p>
                     📅 Startdate: <span th:text="${#temporals.format(project.startDate, 'dd.MM.YYYY')}"></span>

@@ -72,6 +72,7 @@ public class ProjectController {
         if (!finishedProjects.isEmpty()) {
             model.addAttribute("finishedProjects", finishedProjects);
         }
+        model.addAttribute("allProjects", projectService.getAllProjectsWithDetails());
 
         return role.toLowerCase() + "/startpage";
     }
