@@ -12,7 +12,7 @@ import com.example.projektkalkulationeksamen.Model.Task;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping
+@RequestMapping("/tasks")
 public class TaskController {
 
     private final TaskService taskService;
@@ -24,7 +24,7 @@ public class TaskController {
         this.sessionValidator = sessionValidator;
     }
 
-    @GetMapping
+    @GetMapping("")
     public String showAllTasks (HttpSession session, Model model) {
         if (!sessionValidator.isSessionValid(session)) {
             return "redirect:/loginform";
@@ -72,8 +72,8 @@ public class TaskController {
         return "redirect:/tasks";
     }
 
-    @GetMapping("/delete({id}")
-    public String deleteTask (HttpSession session, @PathVariable int id ) {
+    @GetMapping("/delete/{id}")
+    public String deleteTask (HttpSession session, @PathVariable int id) {
         if(!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             throw new AccessDeniedException("Only project managers can update tasks");
         }

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Task List</title>
+    <link rel="stylesheet" href="/css/background.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    <link rel="stylesheet" href="/css/usertable.css">
+    <link rel="stylesheet" href="/css/userbuttons.css">
+    <link rel="stylesheet" href="/css/bottom.css">
+</head>
+<body>
+<div class="background">
+    <div class="navbar">
+        <img src="/images/alphasolutionslogo.svg" alt="Logo">
+
+        <ul class="nav-links">
+            <li><a th:href="@{/projectmanagerStartpage}">Dashboard</a></li>
+            <li><a th:href="@{/tasks}" style="text-decoration: underline;">Tasks</a></li>
+            <li><a th:href="@{/statistics}">Statistics</a></li>
+            <li><a class="logout" th:href="@{/logout}">🔒 Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="table">
+        <table>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="task : ${tasks}">
+                <td th:text="${task.taskName}">Name</td>
+                <td th:text="${task.taskDescription}">Description</td>
+                <td th:text="${task.status}">Status</td>
+                <td>
+                    <div class="action-buttons">
+                        <a th:href="@{/edit/{id}(id=${task.id})}">
+                            <button class="update-button" type="button">Update</button>
+                        </a>
+                        <a th:href="@{/delete/{id}(id=${task.id})}">
+                            <button class="delete-button" type="button" onclick="return confirm('Delete this task?');">Delete</button>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="add-button-wrapper">
+        <a th:href="@{/create}">
+            <button class="add-button" type="button">Add Task</button>
+        </a>
+    </div>
+
+</div>
+
+<div class="bottom"></div>
+</body>
+</html>
