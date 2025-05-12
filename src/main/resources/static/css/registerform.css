@@ -68,8 +68,18 @@
     text-decoration: none;
 }
 
-.errormessage {
+.error-message {
     width: 100%;
     text-align: center;
-    margin-top: 10px;
+    margin-top: 20px;
+}
+
+.error-message p {
+    display: inline-block;
+    color: #7e1010;
+    background-color: #ffe5e5;
+    padding: 10px 20px;
+    border: 1px solid #7e1010;
+    border-radius: 5px;
+    font-weight: bold;
 }

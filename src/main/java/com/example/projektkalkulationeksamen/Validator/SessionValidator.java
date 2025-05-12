@@ -16,15 +16,18 @@ public class SessionValidator {
         this.userService = userService;
     }
 
+    // bruges ved session og rolle validering
     public boolean isSessionValid(HttpSession session, Role requiredRole) {
         Integer userId = (Integer) session.getAttribute("userId");
-        if (userId == null) return false;
+        if (userId == null || !userService.userExistsById(userId)) return false;
 
         Role role = userService.getUserById(userId).getRole();
         return role == requiredRole;
     }
 
+    // bruges ved simpel session validering
     public boolean isSessionValid(HttpSession session) {
-        return session.getAttribute("userId") != null;
+        Integer userId = (Integer) session.getAttribute("userId");
+        return userId != null && userService.userExistsById(userId);
     }
 }
