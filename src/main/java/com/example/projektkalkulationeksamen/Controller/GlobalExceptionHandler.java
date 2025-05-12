@@ -39,4 +39,19 @@ public class GlobalExceptionHandler {
         redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         return "redirect:/updateform/" + e.getUserId();
     }
+
+    @ExceptionHandler(ProjectCreationException.class)
+    public String handleProjectCreationFailed(ProjectCreationException e, RedirectAttributes redirectAttributes) {
+        logger.warn("Project creation failed: {}", e.getMessage());
+        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        return "redirect:/addproject";
+    }
+
+
+    @ExceptionHandler(MilestoneCreationException.class)
+    public String handleMilestoneCreationFailed(MilestoneCreationException e, RedirectAttributes redirectAttributes) {
+        logger.warn("Milestone creation failed: {}", e.getMessage());
+        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        return "redirect:/addproject";
+    }
 }

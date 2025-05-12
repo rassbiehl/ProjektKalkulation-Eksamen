@@ -3,6 +3,7 @@ package com.example.projektkalkulationeksamen.Service;
 
 import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
+import com.example.projektkalkulationeksamen.DTO.TaskDTO;
 import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
 import com.example.projektkalkulationeksamen.Exceptions.ProjectCreationException;
 import com.example.projektkalkulationeksamen.Exceptions.ProjectNotFoundException;
@@ -17,9 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ProjectService {
@@ -265,6 +264,34 @@ public class ProjectService {
             }
         }
         return selectedProjects;
+    }
+
+    public List<ProjectDTO> getAllProjectsByEmployeeId(int employeeId) {
+        List<ProjectDTO> allProjects = getAllProjectsWithDetails();
+        Set<Integer> foundProjectIds= new HashSet<>();
+
+        for (ProjectDTO projectDTO : allProjects) {
+            for (MilestoneDTO milestoneDTO : projectDTO.getMilestones()) {
+                List<TaskDTO> tasks = milestoneDTO.getTasks();
+
+                for (TaskDTO taskDTO : tasks) {
+                    List<Integer> coworkerIds = taskDTO.getCoworkerIds();
+
+                    for (Integer integer : coworkerIds) {
+                        if (integer == employeeId) {
+                            foundProjectIds.add(projectDTO.getId());
+                        }
+                    }
+                }
+            }
+        }
+
+        List<ProjectDTO> foundProjects = new ArrayList<>();
+
+        for (Integer integer : foundProjectIds) {
+           foundProjects.add(getProjectWithDetails(integer));
+        }
+        return foundProjects;
     }
 
 }

@@ -3,9 +3,11 @@ package com.example.projektkalkulationeksamen.Controller;
 import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
 import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
+import com.example.projektkalkulationeksamen.Model.Project;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Service.ProjectService;
 import com.example.projektkalkulationeksamen.Service.UserService;
+import com.example.projektkalkulationeksamen.Validator.ProjectDataValidator;
 import com.example.projektkalkulationeksamen.Validator.SessionValidator;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -14,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -61,6 +65,13 @@ public class ProjectController {
             model.addAttribute("myProjects", projectsByManager);
         }
 
+
+        List<ProjectDTO> projectsByEmployee = projectService.getAllProjectsByEmployeeId(userId);
+
+        if (!projectsByEmployee.isEmpty()) {
+            model.addAttribute("assignedProjects", projectsByEmployee);
+        }
+
         List<ProjectDTO> ongoingProjects = projectService.getAllOngoingProjects();
 
         if (!ongoingProjects.isEmpty()) {
@@ -89,11 +100,6 @@ public class ProjectController {
         }
 
         Integer userId = (Integer) session.getAttribute("userId");
-        if (!userService.userExistsById(userId)) {
-            logger.warn("User ID {} does not exist. Invalidating session.", userId);
-            session.invalidate();
-            return "redirect:/loginform";
-        }
 
         ProjectDTO project = projectService.getProjectWithDetails(id);
 
@@ -122,6 +128,36 @@ public class ProjectController {
 
         logger.info("Returning projectpage.html");
         return "projectpage";
+    }
+
+    @GetMapping("/addproject")
+    public String getAddProjectPage (HttpSession session, Model model) {
+
+        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+            logger.warn("Access denied: User is not a project manager");
+            throw new AccessDeniedException("Only project managers can add projects");
+        }
+
+        model.addAttribute("project", new Project());
+
+
+        return "projectmanager/addProject";
+    }
+
+    @PostMapping("/saveproject")
+    public String saveProject (HttpSession session, @ModelAttribute Project project) {
+
+        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+            logger.warn("Access denied: User is not a project manager");
+            throw new AccessDeniedException("Only project managers can add projects");
+        }
+        Integer userId = (Integer) session.getAttribute("userId");
+        project.setProjectManagerId(userId);
+
+        projectService.addProject(project);
+
+
+        return "redirect:/projectmanagerStartpage";
     }
 
 }

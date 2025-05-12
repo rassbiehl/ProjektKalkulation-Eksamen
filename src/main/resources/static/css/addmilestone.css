@@ -92,3 +92,16 @@ button[type="submit"] {
 button[type="submit"]:hover {
     background-color: #8d8dd8;
 }
+
+.error-message {
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.error-message p {
+    display: inline-block;
+    color: #7e1010 !important;
+    padding: 10px 20px;
+
+}

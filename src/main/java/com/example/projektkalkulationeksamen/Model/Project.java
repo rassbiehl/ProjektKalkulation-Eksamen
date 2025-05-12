@@ -31,6 +31,9 @@ public class Project {
         this.completedAt = completedAt;
     }
 
+    public Project() {
+    }
+
     public int getId() {
         return id;
     }
