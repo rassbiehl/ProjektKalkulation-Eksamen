@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${task.id} != null ? 'Edit Task' : 'Create Task'">Task Form</title>
+    <link rel="stylesheet" href="/css/background.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    <link rel="stylesheet" href="/css/addmilestone.css">
+</head>
+<body>
+<div class="background">
+    <h1 th:text="${task.id} != null ? 'Edit Task' : 'Create Task'"></h1>
+
+    <form th:action="@{${task.id} != null ? '/tasks/update' : '/tasks/create'}" th:object="${task}" method="post">
+        <input type="hidden" th:field="*{id}"/>
+
+        <div>
+            <label for="taskName">Name:</label>
+            <input id="taskName" class="input-field" type="text" th:field="*{taskName}" required>
+        </div>
+
+        <div class="input">
+            <p>Description:</p>
+            <textarea class="input-field-description" th:field="*{taskDescription}" required></textarea>
+        </div>
+
+        <div class="input">
+            <p>Milestone ID:</p>
+            <input type="number" class="input-field" th:field="*{milestoneId}" required>
+        </div>
+
+        <div class="input">
+            <p>Estimated Hours:</p>
+            <input type="number" class="input-field" min="0" th:field="*{estimatedHours}" required>
+        </div>
+
+        <div class="input">
+            <p>Actual Hours Used:</p>
+            <input type="number" class="input-field" min="0" th:field="*{actualHoursUsed}">
+        </div>
+
+        <div class="input">
+            <label for="status">Status:</label>
+            <select id="status" th:field="*{status}">
+                <option value="NOT_STARTED">Not Started</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="COMPLETED">Completed</option>
+            </select>
+        </div>
+
+        <div class="input">
+            <p>Start Date:</p>
+            <input type="datetime-local" class="input-field" th:field="*{startedDate}">
+        </div>
+
+        <div class="input">
+            <p>Deadline:</p>
+            <input type="datetime-local" class="input-field" th:field="*{deadline}">
+        </div>
+
+        <div class="input">
+            <p>Completed At:</p>
+            <input type="datetime-local" class="input-field" th:field="*{completedAt}">
+        </div>
+
+        <div>
+            <button type="submit">Save</button>
+            <a th:href="@{/tasks}">Cancel</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>
