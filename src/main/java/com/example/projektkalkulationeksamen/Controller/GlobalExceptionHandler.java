@@ -12,42 +12,31 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-
     @ExceptionHandler(AuthenticationFailedException.class)
-    public String handleLoginFailed(
-            AuthenticationFailedException authenticationFailedException,
-            RedirectAttributes redirectAttributes
-    ) {
-        logger.warn("Authentication failed: {}. Redirecting to loginform.", authenticationFailedException.getMessage());
-        redirectAttributes.addFlashAttribute("errorMessage", authenticationFailedException.getMessage());
+    public String handleLoginFailed(AuthenticationFailedException e, RedirectAttributes redirectAttributes) {
+        logger.warn("Login failed: {}", e.getMessage());
+        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         return "redirect:/loginform";
     }
 
-
     @ExceptionHandler(AccessDeniedException.class)
-    public String handleAccessDenied(AccessDeniedException accessDeniedException, Model model) {
-        model.addAttribute("errorMessage", accessDeniedException.getMessage());
-
+    public String handleAccessDenied(AccessDeniedException e, Model model) {
+        logger.warn("Access denied: {}", e.getMessage());
+        model.addAttribute("errorMessage", e.getMessage());
         return "error/403";
     }
 
     @ExceptionHandler(AuthRegisterException.class)
-    public String handleRegisterFailed(
-            AuthRegisterException authRegisterException,
-            RedirectAttributes redirectAttributes
-    ) {
-        logger.warn("Authentication failed: {} Redirecting to registerform", authRegisterException.getMessage());
-        redirectAttributes.addFlashAttribute("errorMessage", authRegisterException.getMessage());
+    public String handleRegisterFailed(AuthRegisterException e, RedirectAttributes redirectAttributes) {
+        logger.warn("Register failed: {}", e.getMessage());
+        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         return "redirect:/registerform";
     }
 
     @ExceptionHandler(UserUpdateException.class)
-    public String handleUpdateFailed(
-            UserUpdateException userUpdateException,
-            RedirectAttributes redirectAttributes
-    ) {
-        logger.warn("Update failed: {} Redirecting to updateform/{}", userUpdateException.getMessage(), userUpdateException.getUserId());
-        redirectAttributes.addFlashAttribute("errorMessage", userUpdateException.getMessage());
-        return "redirect:/updateform/" + userUpdateException.getUserId();
+    public String handleUpdateFailed(UserUpdateException e, RedirectAttributes redirectAttributes) {
+        logger.warn("User update failed for user ID {}: {}", e.getUserId(), e.getMessage());
+        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        return "redirect:/updateform/" + e.getUserId();
     }
 }

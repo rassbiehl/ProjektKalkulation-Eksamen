@@ -8,8 +8,10 @@ import com.example.projektkalkulationeksamen.Exceptions.MilestoneNotFoundExcepti
 import com.example.projektkalkulationeksamen.Exceptions.ProjectNotFoundException;
 import com.example.projektkalkulationeksamen.Model.Milestone;
 import com.example.projektkalkulationeksamen.Model.Project;
+import com.example.projektkalkulationeksamen.Model.Status;
 import com.example.projektkalkulationeksamen.Repository.MilestoneRepository;
 import com.example.projektkalkulationeksamen.Repository.ProjectRepository;
+import com.example.projektkalkulationeksamen.Service.comparators.DeadlineComparator;
 import com.example.projektkalkulationeksamen.Validator.ProjectDataValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,13 +40,15 @@ public class MilestoneService {
         return milestoneRepository.getAllMilestones();
     }
 
-    public List<Milestone> getMilestonesByProjectId(int projectId){
+    public List<Milestone> getMilestonesByProjectId(int projectId) {
         logger.info("Sends list of all milestones with project ID " + projectId);
 
         List<Milestone> milestones = milestoneRepository.getMilestonesByProjectId(projectId);
-        if (milestones.isEmpty()){
-            throw new ProjectNotFoundException("Project with ID " + projectId + " was not found");
-        }
+if (milestones.isEmpty()) {
+    throw new ProjectNotFoundException("Project with ID " + projectId + " was not found");
+}
+
+milestones.sort(new DeadlineComparator());
         return milestones;
     }
 
@@ -98,12 +103,14 @@ public class MilestoneService {
     }
 
     public boolean updateMilestone(Milestone milestone) {
+
         ProjectDataValidator.validateAllFields(milestone.getMilestoneName(),
                 milestone.getMilestoneDescription(),
                 milestone.getEstimatedHours(),
                 milestone.getActualHoursUsed());
 
         Optional<Milestone> toUpdate = milestoneRepository.getMilestoneById(milestone.getId());
+
 
         if (toUpdate.isEmpty()) {
             logger.warn("Milestone with ID " + milestone.getId() + " Was not found");
@@ -119,11 +126,30 @@ public class MilestoneService {
         return succes;
     }
 
+    public int getMilestoneProgress(int milestoneId) {
+        List<TaskDTO> tasksWithDetails = taskService.getTasksByMilestoneIdWithDetails(milestoneId);
+
+
+        if (tasksWithDetails.isEmpty()) {
+            return 0;
+        }
+
+        int finishedTasks = 0;
+
+        for (TaskDTO taskDTO : tasksWithDetails) {
+            if (taskDTO.getStatus() == Status.COMPLETED) {
+                finishedTasks++;
+            }
+        }
+
+        return (int) Math.round(finishedTasks * 100.0) / tasksWithDetails.size();
+    }
+
     // DTO Object methods
     public MilestoneDTO getMilestoneWithDetails(int milestoneId) {
         List<TaskDTO> milestoneTasksWithDetails = taskService.getTasksByMilestoneIdWithDetails(milestoneId);
         Milestone milestone = getMilestoneById(milestoneId);
-
+        int progress = getMilestoneProgress(milestoneId);
         return new MilestoneDTO(
                 milestone.getId(),
                 milestone.getMilestoneName(),
@@ -136,7 +162,8 @@ public class MilestoneService {
                 milestone.getCreatedAt(),
                 milestone.getDeadline(),
                 milestone.getCompletedAt(),
-                milestoneTasksWithDetails
+                milestoneTasksWithDetails,
+                progress
         );
     }
 

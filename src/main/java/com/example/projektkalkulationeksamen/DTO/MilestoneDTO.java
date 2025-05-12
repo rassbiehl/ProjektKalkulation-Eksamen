@@ -19,8 +19,9 @@ public class MilestoneDTO {
     private LocalDate deadline;
     private LocalDateTime completedAt;
     private List<TaskDTO> tasks;
+    private int progress;
 
-    public MilestoneDTO(int id, String milestoneName, String milestoneDescription, int projectId, int estimatedHours, int calculatedCost, int actualHoursUsed, Status milestoneStatus, LocalDateTime createdAt, LocalDate deadline, LocalDateTime completedAt, List<TaskDTO> tasks) {
+    public MilestoneDTO(int id, String milestoneName, String milestoneDescription, int projectId, int estimatedHours, int calculatedCost, int actualHoursUsed, Status milestoneStatus, LocalDateTime createdAt, LocalDate deadline, LocalDateTime completedAt, List<TaskDTO> tasks, int progress) {
         this.id = id;
         this.milestoneName = milestoneName;
         this.milestoneDescription = milestoneDescription;
@@ -33,6 +34,7 @@ public class MilestoneDTO {
         this.deadline = deadline;
         this.completedAt = completedAt;
         this.tasks = tasks;
+        this.progress = progress;
     }
 
     public int getId() {
@@ -129,5 +131,13 @@ public class MilestoneDTO {
 
     public void setTasks(List<TaskDTO> tasks) {
         this.tasks = tasks;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
     }
 }

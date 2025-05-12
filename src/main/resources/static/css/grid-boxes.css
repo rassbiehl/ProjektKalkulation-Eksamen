@@ -1,11 +1,16 @@
-
+* {
+    box-sizing: border-box;
+}
 .allprojects {
     margin: 0 auto;
     margin-top: 8vw;
     text-align: center;
     color: white;
     font-family: 'Montserrat', sans-serif;
+    width: 90%;
+
 }
+
 .project-content {
     margin: 0 auto;
     display: grid;
@@ -19,7 +24,14 @@
     background-color: rgba(0, 0, 0, 0.3);
     padding: 1rem;
     border-radius: 0.5rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.project-item a {
+    color: white !important;
+}
+.project-item a:hover {
+    color: white !important;
 }
 
 .progress-container {
@@ -37,6 +49,26 @@
     transition: width 0.3s ease;
 }
 
-.name {
+.name a {
     font-size: 1.5vw;
+    display: inline-block;
+    border-bottom: 1px solid white;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+    color: white !important;
+    text-decoration: none;
 }
+.name a:hover {
+    color: white !important;
+    text-decoration: none;
+}
+
+
+
+.project-title-wrapper a {
+    color: white !important;
+    text-decoration: none;
+}
+
+
+

@@ -5,9 +5,9 @@
     <title>Title</title>
     <link rel="stylesheet" href="/css/background.css">
     <link rel="stylesheet" href="/css/nav.css">
-    <link rel="stylesheet" href="/css/usertable.css">
     <link rel="stylesheet" href="/css/userbuttons.css">
     <link rel="stylesheet" href="/css/bottom.css">
+    <link rel="stylesheet" href="/css/milestones.css">
 </head>
 <body>
 <div class="background">
@@ -22,31 +22,63 @@
         </ul>
     </div>
 
+
+    <div class="project-title-wrapper">
+        <h2 class="project-title" th:text="${project.projectName} + ' - Milestones'">Project name and milestones</h2>
+    </div>
+
+    <div th:if="${milestones.isEmpty()}" class="no-milestones">
+        <p>Project has no milestones yet</p>
+    </div>
+
+    <div th:if="${!milestones.isEmpty()}">
     <div class="table">
         <table>
             <thead>
             <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Status</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Deadline</th>
+                <th>Estimated Hours</th>
+                <th>Delete</th>
+                <th>Update</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="milestone : ${milestones}">
-            <td th:text="${milestone.milestoneName}">Name</td>
+                <td th:text="${milestone.milestoneName}">Name</td>
                 <td th:text="${milestone.milestoneDescription}">Description</td>
-                <td th:text="${milestone.status}">Status</td>
+                <td th:text="${milestone.status.displayName}">Status</td>
+                <td th:text="${#temporals.format(milestone.deadline, 'dd-MM-yyyy')}">Deadline</td>
+                <td th:text="${milestone.estimatedHours}">Estimated Hours</td>
                 <td>
                     <div class="action-buttons">
-                        <form th:action="@{/delete/{id}(id=${milestone.id})}" method="post" onsubmit="return confirm('Do you want to delete?');">
+                        <form th:action="@{/delete/{id}(id=${milestone.id})}" method="post"
+                              onsubmit="return confirm('Do you want to delete?');">
+                            <input type="hidden" name="projectId" th:value="${project_id}">
                             <button class="delete-button" type="submit">Delete</button>
                         </form>
                     </div>
 
                 </td>
+                <td>
+                    <div class="action-buttons">
+                        <form th:action="@{/updateMilestoneForm/{id}(id=${milestone.id})}">
+                            <button class="update-button" type="submit">Update</button>
+                        </form>
+                    </div>
+                </td>
             </tr>
             </tbody>
         </table>
+    </div>
+    </div>
+
+    <div class="add-button-wrapper">
+        <a th:href="@{/addMilestone/{projectId}(projectId=${project.id})}">
+            <button class="add-button" type="submit">Add Milestone</button>
+        </a>
     </div>
 
 </div>
