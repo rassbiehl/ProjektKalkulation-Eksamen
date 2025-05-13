@@ -28,7 +28,7 @@
             <section th:if="${isOwner}" class="owner-actions">
                 <h2>Project Actions:</h2>
                 <div class="action-buttons">
-                    <a th:href="@{projects/update/{id}(id=${project.id})}">
+                    <a th:href="@{/projects/updateproject/{id}(id=${project.id})}">
                         <button class="update-button" type="button">🔄 Update project</button>
                     </a>
                     <form th:action="@{/projects/delete/{id}(id=${project.id})}" method="post" onsubmit="return confirm('Are you sure?')">
@@ -102,7 +102,7 @@
                 </div>
 
                 <p>
-                    <span th:text="${project.progress} + '%'"></span> progress
+                    <span th:text="${project.progress} + '%'"></span> of milestones completed
                 </p>
             </section>
 
@@ -169,7 +169,7 @@
                 </div>
 
                 <div class="project-item" th:if="${!#lists.isEmpty(projectMilestones) and isOwner}">
-                    <div class="button-wrapper">
+                    <div class="button-wrapper" id="#add-milestone">
                         <a th:href="@{/milestones/add/{projectId}(projectId=${project.id})}">
                             <button class="add-button" type="button">✚ Add milestone</button>
                         </a>

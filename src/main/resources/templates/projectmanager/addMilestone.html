@@ -16,7 +16,7 @@
 
   <form method="post" th:action="@{/milestones/save}" th:object="${milestone}">
 
-      <a th:href="@{/projects/{role}Startpage(role=${userRole})}" class="back-button">← Back</a>
+      <a th:href="@{/projects/view/{id}(id=${projectId})}" class="back-button">← Back</a>
 
     <input type="hidden" name="projectId" th:value="${projectId}"/>
 

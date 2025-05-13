@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -123,18 +124,23 @@ public class ProjectService {
             if (!currentProject.getProjectName().equals(updatedProject.getProjectName()) && projectExistsByName(updatedProject.getProjectName())) {
                 throw new ProjectCreationException("Project name already taken");
             }
-            ProjectDataValidator.validateAllFields(updatedProject.getProjectName(), updatedProject.getDescription(), updatedProject.getEstimatedHours(), updatedProject.getActualHoursUsed());
+
+            if (updatedProject.getStatus().equals(Status.COMPLETED) && currentProject.getCompletedAt() == null) {
+                updatedProject.setCompletedAt(LocalDateTime.now());
+            } else if (updatedProject.getStatus() != Status.COMPLETED) {
+                updatedProject.setCompletedAt(null);
+            }
             boolean updated = projectRepository.updateProject(updatedProject);
 
             if (!updated) {
                 logger.warn("Cannot update. No project found with ID: {}", updatedProject.getId());
-                throw new ProjectNotFoundException("Cannot update. No project found with ID: " + updatedProject.getId());
+                throw new ProjectCreationException("Cannot update. No project found with ID: " + updatedProject.getId());
             }
 
             logger.info("Succesfully updated project with ID: {}", updatedProject.getId());
         } catch (DatabaseException e) {
             logger.error("Database error while trying to update project with ID: {}", updatedProject.getId(), e);
-            throw new ProjectNotFoundException("Database error while updating project with ID: " + updatedProject.getId(), e);
+            throw new ProjectCreationException("Database error while updating project with ID: " + updatedProject.getId(), e);
         }
     }
 

@@ -3,8 +3,10 @@ package com.example.projektkalkulationeksamen.Controller;
 import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
 import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
+import com.example.projektkalkulationeksamen.Exceptions.ProjectCreationException;
 import com.example.projektkalkulationeksamen.Model.Project;
 import com.example.projektkalkulationeksamen.Model.Role;
+import com.example.projektkalkulationeksamen.Model.Status;
 import com.example.projektkalkulationeksamen.Service.ProjectService;
 import com.example.projektkalkulationeksamen.Service.UserService;
 import com.example.projektkalkulationeksamen.Validator.ProjectDataValidator;
@@ -16,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequestMapping("/projects")
@@ -193,5 +197,82 @@ public class ProjectController {
 
         return "redirect:/projects/" + role.toString().toLowerCase() + "Startpage";
     }
+
+    @GetMapping("/updateproject/{id}")
+    public String getUpdateProjectPage(HttpSession session, @PathVariable int id, Model model, RedirectAttributes redirectAttributes) {
+        logger.debug("Attempting to get update page for project with ID: {}", id);
+        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+            logger.warn("Access denied: User is not a project manager");
+            throw new AccessDeniedException("Only project managers can update projects");
+        }
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        ProjectDTO project = projectService.getProjectWithDetails(id);
+        Role role = userService.getUserById(userId).getRole();
+        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+
+        if (isOwner) {
+
+            model.addAttribute("projectId", id);
+            model.addAttribute("project", project);
+            model.addAttribute("status", Status.values());
+
+            return "projectmanager/updateProject";
+        } else {
+            logger.warn("Failed to get update page for project with ID: {} because of missing owner id in session", id);
+            throw new AccessDeniedException("Access denied: User does not own the project");
+        }
+    }
+
+    @PostMapping("/update")
+    public String updateProject(
+            HttpSession session,
+            @RequestParam int id,
+            @RequestParam String projectName,
+            @RequestParam String description,
+            @RequestParam LocalDateTime deadline,
+            @RequestParam LocalDateTime startDate,
+            @RequestParam Status status,
+            RedirectAttributes redirectAttributes
+    ) {
+
+        logger.debug("Trying to update project with ID: {}", id);
+
+        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+            logger.warn("User is not a project manager. Access denied.");
+            throw new AccessDeniedException("Only project managers can update projects");
+        }
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        ProjectDTO project = projectService.getProjectWithDetails(id);
+        Role role = userService.getUserById(userId).getRole();
+        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+
+        if (isOwner) {
+            Project projectToUpdate = projectService.getProjectById(id);
+
+            if (projectName != null) projectToUpdate.setProjectName(projectName);
+            if (description != null) projectToUpdate.setDescription(description);
+            if (deadline != null) projectToUpdate.setDeadline(deadline);
+            if (startDate != null) projectToUpdate.setStartDate(startDate);
+            if (status != null) projectToUpdate.setStatus(status);
+
+            try {
+                projectService.updateProject(projectToUpdate);
+                logger.info("Project with ID {} was successfully updated by user {}", id, userId);
+            } catch (ProjectCreationException e) {
+                logger.error("Could not update project with ID {}. Reason: {}", id, e.getMessage());
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                return "redirect:/projects/updateproject/" + id;
+            }
+        } else {
+            logger.warn("User with ID {} is not the owner of project ID {}. Access denied.", userId, id);
+            throw new AccessDeniedException("Access denied: User does not own the project");
+        }
+
+        return "redirect:/projects/view/" + id;
+    }
+
+
 }
 
