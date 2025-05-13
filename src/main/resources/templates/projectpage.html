@@ -49,6 +49,10 @@
                     📝 <span th:text="${project.description}"></span>
                 </p>
 
+                <p th:if="${project.completedAt != null}">
+                    ✅ Completed at: <span th:text="${#temporals.format(project.completedAt, 'dd.MM.yyyy')}"></span>
+                </p>
+
             </section>
 
             <!-- Progress % Status -->
@@ -84,9 +88,6 @@
                     Deadline: <span th:text="${#temporals.format(project.deadline, 'dd.MM.yyyy')}"></span>
                 </p>
 
-                <p th:if="${project.completedAt != null}">
-                    ✅ Completed at: <span th:text="${#temporals.format(project.completedAt, 'dd.MM.yyyy')}"></span>
-                </p>
             </section>
 
             <!-- Project Status -->

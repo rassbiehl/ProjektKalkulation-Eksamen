@@ -16,12 +16,12 @@ public class MilestoneDTO {
     private int actualHoursUsed;
     private Status milestoneStatus;
     private LocalDateTime createdAt;
-    private LocalDate deadline;
+    private LocalDateTime deadline;
     private LocalDateTime completedAt;
     private List<TaskDTO> tasks;
     private int progress;
 
-    public MilestoneDTO(int id, String milestoneName, String milestoneDescription, int projectId, int estimatedHours, int calculatedCost, int actualHoursUsed, Status milestoneStatus, LocalDateTime createdAt, LocalDate deadline, LocalDateTime completedAt, List<TaskDTO> tasks, int progress) {
+    public MilestoneDTO(int id, String milestoneName, String milestoneDescription, int projectId, int estimatedHours, int calculatedCost, int actualHoursUsed, Status milestoneStatus, LocalDateTime createdAt, LocalDateTime deadline, LocalDateTime completedAt, List<TaskDTO> tasks, int progress) {
         this.id = id;
         this.milestoneName = milestoneName;
         this.milestoneDescription = milestoneDescription;
@@ -109,11 +109,11 @@ public class MilestoneDTO {
         this.createdAt = createdAt;
     }
 
-    public LocalDate getDeadline() {
+    public LocalDateTime getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(LocalDate deadline) {
+    public void setDeadline(LocalDateTime deadline) {
         this.deadline = deadline;
     }
 

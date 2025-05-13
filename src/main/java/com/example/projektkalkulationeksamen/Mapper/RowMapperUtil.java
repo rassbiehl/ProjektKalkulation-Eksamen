@@ -42,10 +42,10 @@ public class RowMapperUtil {
             int actualHoursUsed = rs.getInt("actual_hours_used");
             Status status = Status.valueOf(rs.getString("milestone_status"));
             //Null safe handler af deadline
-            LocalDate deadline = null;
+            LocalDateTime deadline = null;
             Timestamp deadlineTs = rs.getTimestamp("deadline");
             if(deadlineTs != null){
-                deadline = deadlineTs.toLocalDateTime().toLocalDate();
+                deadline = deadlineTs.toLocalDateTime();
             }
             LocalDateTime completedAt = null;
             Timestamp completedAtTs = rs.getTimestamp("completed_at");

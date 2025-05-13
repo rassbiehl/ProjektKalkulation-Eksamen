@@ -71,25 +71,22 @@ public class MilestoneRepository {
 
     public Milestone addMilestone(Milestone milestone) {
         try {
-            String sql = "INSERT INTO milestones (milestone_name,milestone_description,project_id,estimated_hours,calculated_cost,actual_hours_used,milestone_status,deadline,completed_at) VALUES(?,?,?,?,?,?,?,?,?)";
+            String sql = """
+            INSERT INTO milestones (milestone_name, milestone_description, project_id, deadline)
+            VALUES (?, ?, ?, ?)
+        """;
 
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(sql, new String[] { "id" });
-
+                PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
                 ps.setString(1, milestone.getMilestoneName());
                 ps.setString(2, milestone.getMilestoneDescription());
                 ps.setInt(3, milestone.getProjectId());
-                ps.setInt(4, milestone.getEstimatedHours());
-                ps.setInt(5, milestone.getCalculatedCost());
-                ps.setInt(6, milestone.getActualHoursUsed());
-                ps.setString(7, milestone.getStatus().toString());
-                ps.setString(8, milestone.getDeadline().toString());
-                if(milestone.getCompletedAt() != null){
-                    ps.setTimestamp(9,Timestamp.valueOf(milestone.getCompletedAt()));
+                if (milestone.getDeadline() != null) {
+                    ps.setTimestamp(4, Timestamp.valueOf(milestone.getDeadline()));
                 } else {
-                    ps.setNull(9, Types.TIMESTAMP);
+                    ps.setNull(4, Types.TIMESTAMP);
                 }
                 return ps;
             }, keyHolder);
@@ -97,19 +94,14 @@ public class MilestoneRepository {
             Number key = keyHolder.getKey();
 
             if (key == null) {
-                throw new DatabaseException("Failed to retrieve generated key from milestone " + milestone.getId());
+                throw new DatabaseException("Failed to retrieve generated key from milestone.");
             }
 
-            int generatedId = key.intValue();
-
-
-            Optional<Milestone> optionalMilestone = getMilestoneById(generatedId);
-
-            return optionalMilestone
-                    .orElseThrow(() -> new DatabaseException("Failed to retrieve created milestone with genereated ID " + generatedId));
+            return getMilestoneById(key.intValue())
+                    .orElseThrow(() -> new DatabaseException("Failed to fetch created milestone with ID: " + key.intValue()));
 
         } catch (DataAccessException e) {
-            throw new DatabaseException("Failed to create milestone in Database ", e);
+            throw new DatabaseException("Failed to create milestone in database", e);
         }
     }
 

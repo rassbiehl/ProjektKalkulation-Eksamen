@@ -1,11 +1,4 @@
 package com.example.projektkalkulationeksamen.Model;
-
-import org.springframework.cglib.core.Local;
-import org.springframework.format.annotation.DateTimeFormat;
-
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class Milestone {
@@ -18,14 +11,12 @@ public class Milestone {
     private LocalDateTime createdAt;
     private int actualHoursUsed;
     private Status status;
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate deadline;
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime deadline;
     private LocalDateTime completedAt;
 
     public Milestone(int id, String milestoneName, String milestoneDescription, int projectId,
                      int estimatedHours, int calculatedCost, LocalDateTime createdAt, int actualHoursUsed,
-                     Status status, LocalDate deadline, LocalDateTime completedAt) {
+                     Status status, LocalDateTime deadline, LocalDateTime completedAt) {
         this.id = id;
         this.milestoneName = milestoneName;
         this.milestoneDescription = milestoneDescription;
@@ -42,7 +33,7 @@ public class Milestone {
     public Milestone() {
     }
 
-    public Milestone(String milestoneName, String milestoneDescription, Status status, LocalDate deadline, LocalDateTime completedAt) {
+    public Milestone(String milestoneName, String milestoneDescription, Status status, LocalDateTime deadline, LocalDateTime completedAt) {
         this.milestoneName = milestoneName;
         this.milestoneDescription = milestoneDescription;
         this.status = status;
@@ -122,11 +113,11 @@ public class Milestone {
         this.status = status;
     }
 
-    public LocalDate getDeadline() {
+    public LocalDateTime getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(LocalDate deadline) {
+    public void setDeadline(LocalDateTime deadline) {
         this.deadline = deadline;
     }
 
