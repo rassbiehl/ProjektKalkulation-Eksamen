@@ -2,17 +2,22 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Add a Milestone</title>
+    <title>Create project</title>
     <link rel="stylesheet" href="/css/background.css">
     <link rel="stylesheet" href="/css/nav.css">
     <link rel="stylesheet" href="/css/addmilestone.css">
 </head>
 <body>
 <div class="background">
+    <div class="headline">
+        <img src="/images/logonotext.svg" alt="Logo">
+        <h1><span>Create a new project</span></h1>
+    </div>
 
-    <h1>Create a new project</h1>
+    <form method="post" th:action="@{/projects/save}" th:object="${project}">
 
-    <form method="post" th:action="@{/save}" th:object="${project}">
+        <a th:href="@{/projects/{role}Startpage(role=${userRole})}" class="back-button">← Back</a>
+
         <input type="hidden" name="projectId" th:value="${projectId}"/>
 
         <div>
@@ -21,7 +26,7 @@
         </div>
 
         <div class="input">
-            <p>Add Description:</p>
+            <p>Description:</p>
             <textarea class="input-field-description" th:field="*{description}"></textarea>
         </div>
 

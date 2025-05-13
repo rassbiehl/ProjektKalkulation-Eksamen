@@ -139,6 +139,12 @@ public class ProjectController {
 
         model.addAttribute("project", new Project());
 
+        Integer userId = (Integer) session.getAttribute("userId");
+
+        Role role = userService.getUserById(userId).getRole();
+
+        model.addAttribute("userRole", role.toString().toLowerCase());
+
         logger.info("Loading add project page");
         return "projectmanager/addProject";
     }
@@ -152,12 +158,15 @@ public class ProjectController {
         }
         Integer userId = (Integer) session.getAttribute("userId");
 
+
         project.setProjectManagerId(userId);
 
         projectService.addProject(project);
         logger.info("Successfully added new project to database with ID: {} and projectmanager ID: {}", project.getId(), userId);
 
-        return "redirect:/projectmanagerStartpage";
+        Role role = userService.getUserById(userId).getRole();
+
+        return "redirect:/projects/" + role.toString().toLowerCase() + "Startpage";
     }
 
     @PostMapping("/delete/{id}")
@@ -181,7 +190,8 @@ public class ProjectController {
             throw new AccessDeniedException("Access denied: User does not own the project");
         }
 
-        return "redirect:/projects/projectmanagerStartpage";
+
+        return "redirect:/projects/" + role.toString().toLowerCase() + "Startpage";
     }
 }
 
