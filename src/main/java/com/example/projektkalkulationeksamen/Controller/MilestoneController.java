@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
+@RequestMapping("milestones")
 @Controller
 public class MilestoneController {
     private final static Logger logger = LoggerFactory.getLogger(MilestoneController.class);
@@ -51,7 +52,7 @@ public class MilestoneController {
         return "projectmanager/milestones";
     } */
 
-    @GetMapping("addMilestone/{projectId}")
+    @GetMapping("add/{projectId}")
     public String showAddForm(HttpSession session, @PathVariable int projectId, Model model) {
 
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
@@ -65,7 +66,7 @@ public class MilestoneController {
         return "/projectmanager/addMilestone";
     }
 
-    @PostMapping("/savemilestone")
+    @PostMapping("/save")
     public String addMilestone(HttpSession session, RedirectAttributes redirectAttributes, @ModelAttribute Milestone milestone, @RequestParam int projectId) {
 
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
@@ -79,10 +80,10 @@ public class MilestoneController {
             milestoneService.addMilestone(milestone);
         } catch (MilestoneCreationException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/addMilestone/" + projectId;
+            return "redirect:/add/" + projectId;
         }
 
-        return "redirect:/milestones/" + projectId;
+        return "redirect:/projects/view/" + projectId;
     }
 
     @PostMapping("/delete/{id}")
@@ -95,7 +96,7 @@ public class MilestoneController {
 
     }
 
-    @GetMapping("/updateMilestoneForm/{milestoneId}")
+    @GetMapping("/update/{milestoneId}")
     public String showUpdateForm(Model model, @PathVariable int milestoneId, HttpSession session) {
 
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
@@ -114,7 +115,7 @@ public class MilestoneController {
         return "projectmanager/updateMilestoneForm";
     }
 
-    @PostMapping("/milestone/update")
+    @PostMapping("/update")
     public String updateMileStone(HttpSession session, @RequestParam int milestoneId, @ModelAttribute Milestone milestone) {
 
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {

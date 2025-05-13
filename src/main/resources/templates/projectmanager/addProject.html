@@ -12,7 +12,7 @@
 
     <h1>Create a new project</h1>
 
-    <form method="post" th:action="@{/saveproject}" th:object="${project}">
+    <form method="post" th:action="@{/save}" th:object="${project}">
         <input type="hidden" name="projectId" th:value="${projectId}"/>
 
         <div>
