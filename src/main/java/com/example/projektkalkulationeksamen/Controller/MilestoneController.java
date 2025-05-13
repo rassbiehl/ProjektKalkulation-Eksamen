@@ -8,6 +8,7 @@ import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.Status;
 import com.example.projektkalkulationeksamen.Service.MilestoneService;
 import com.example.projektkalkulationeksamen.Service.ProjectService;
+import com.example.projektkalkulationeksamen.Service.UserService;
 import com.example.projektkalkulationeksamen.Validator.SessionValidator;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -27,31 +28,17 @@ public class MilestoneController {
     private final MilestoneService milestoneService;
     private final ProjectService projectService;
     private final SessionValidator sessionValidator;
+    private final UserService userService;
+
 
     @Autowired
-    public MilestoneController(MilestoneService milestoneService, ProjectService projectService, SessionValidator sessionValidator) {
+    public MilestoneController(MilestoneService milestoneService, ProjectService projectService, SessionValidator sessionValidator, UserService userService) {
         this.milestoneService = milestoneService;
         this.projectService = projectService;
         this.sessionValidator = sessionValidator;
+        this.userService = userService;
     }
-
-    /*
-    @GetMapping("/milestones/{project_id}")
-    public String getAllMilestonesByProjectId(@PathVariable int project_id, HttpSession session, Model model) {
-
-        Integer userId = (Integer) session.getAttribute("userId");
-
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
-            return "redirect:/loginform";
-        }
-
-        List<Milestone> milestones = milestoneService.getMilestonesByProjectId(project_id);
-        model.addAttribute("milestones", milestones);
-        model.addAttribute("project", projectService.getProjectById(project_id));
-
-        return "projectmanager/milestones";
-    } */
-
+    
     @GetMapping("add/{projectId}")
     public String showAddForm(HttpSession session, @PathVariable int projectId, Model model) {
 
@@ -59,6 +46,13 @@ public class MilestoneController {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can add projects");
         }
+
+        Integer userId = (Integer) session.getAttribute("userId");
+
+        Role role = userService.getUserById(userId).getRole();
+
+        model.addAttribute("userRole", role.toString().toLowerCase());
+
         model.addAttribute("milestone", new Milestone());
         model.addAttribute("projectId", projectId);
         model.addAttribute("status", Status.values());

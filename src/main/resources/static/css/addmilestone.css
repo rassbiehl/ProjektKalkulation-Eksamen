@@ -27,10 +27,11 @@ html, body {
 /* Overskrift */
 h1 {
     text-align: center;
-    font-size: 3rem;
+    font-size: 2rem;
     font-weight: bold;
     margin-bottom: 2rem;
-    text-shadow: 2px 2px 5px #615FFF;
+    color: white;
+
 }
 
 /* Formular-styling */
@@ -68,6 +69,17 @@ select {
     border-radius: 6px;
     font-size: 1rem;
     color: floralwhite;
+    margin-top: 20px;
+}
+
+form label[for="projectName"] {
+    margin-top: 2rem;
+    display: block;
+}
+
+form label[for="name"] {
+    margin-top: 2rem;
+    display: block;
 }
 
 .input-field-description {
@@ -105,3 +117,37 @@ button[type="submit"]:hover {
     padding: 10px 20px;
 
 }
+
+.headline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 50px;
+    text-align: left;
+}
+
+.headline h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.headline img {
+    height: 60px;
+    width: auto;
+}
+
+.back-button {
+    background-color: #999;
+    color: white;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    align-self: flex-start;
+}
+

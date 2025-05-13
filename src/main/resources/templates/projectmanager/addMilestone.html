@@ -9,14 +9,19 @@
 </head>
 <body>
 <div class="background">
-
-  <h1>Add a Milestone</h1>
+    <div class="headline">
+        <img src="/images/logonotext.svg" alt="Logo">
+        <h1><span>Add a milestone to the project</span></h1>
+    </div>
 
   <form method="post" th:action="@{/milestones/save}" th:object="${milestone}">
+
+      <a th:href="@{/projects/view/{id}(id=${projectId})}" class="back-button">← Back</a>
+
     <input type="hidden" name="projectId" th:value="${projectId}"/>
 
 <div>
-  <label for="name">Name:</label>
+  <label for="name">Milestone name:</label>
   <input id="name" class="input-field" type="text" th:field="*{milestoneName}" required>
 </div>
 
@@ -25,23 +30,10 @@
       <textarea class="input-field-description" th:field="*{milestoneDescription}"></textarea>
     </div>
 
-    <div class="input">
-      <p>Estimated hours</p>
-      <input type="number" th:field="*{estimatedHours}">
-    </div>
-
-    <div>
-      <label for="status">Status:</label>
-      <select name="status" id="status">
-        <option th:each="status : ${status}" th:value="${status}" th:text="${status.displayName}"></option>
-      </select>
-    </div>
-
     <div>
       <label for="deadline">Deadline:</label>
       <input id="deadline" type="date" th:field="*{deadline}" required>
     </div>
-
 
     <div>
       <button type="submit">Add Milestone</button>

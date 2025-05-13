@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Update project</title>
+    <link rel="stylesheet" href="/css/background.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    <link rel="stylesheet" href="/css/addmilestone.css">
+</head>
+<body>
+<div class="background">
+    <div class="headline">
+        <img src="/images/logonotext.svg" alt="Logo">
+        <h1><span>Update project</span></h1>
+    </div>
+
+    <form method="post" th:action="@{/projects/update}">
+
+        <input type="hidden" name="id" th:value="${projectId}">
+
+        <a th:href="@{/projects/view/{id}(id=${projectId})}" class="back-button">← Back</a>
+
+        <div>
+            <label for="projectName">New project name:</label>
+            <input id="projectName" class="input-field" type="text" name="projectName" th:placeholder="${project.projectName}">
+        </div>
+
+        <div>
+            <label for="description">New project description:</label>
+            <input id="description" class="input-field" type="text" name="description" th:placeholder="${project.description}">
+        </div>
+
+        <div>
+            <label for="startDate">New project start date:</label>
+            <input id="startDate" type="datetime-local"
+                   th:value="${#temporals.format(project.startDate, 'yyyy-MM-dd''T''HH:mm')}"
+                   name="startDate"
+                   class="input-field"/>
+        </div>
+
+        <div>
+            <label for="deadline">New project deadline:</label>
+            <input id="deadline" type="datetime-local"
+                   th:value="${#temporals.format(project.deadline, 'yyyy-MM-dd''T''HH:mm')}"
+                   name="deadline"
+                   class="input-field"/>
+        </div>
+
+        <div>
+            <label for="status">Status:</label>
+            <select name="status" id="status">
+                <option th:each="status : ${status}"
+                        th:value="${status}"
+                        th:text="${status.displayName}"
+                        th:selected="${status == project.status}">
+                </option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit">Update project</button>
+        </div>
+
+        <div th:if="${errorMessage}" class="error-message">
+            <p th:text="${errorMessage}" style="text-align: center; color: #7e1010 "></p>
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>
