@@ -12,7 +12,7 @@
 
   <h1>Add a Milestone</h1>
 
-  <form method="post" th:action="@{/savemilestone}" th:object="${milestone}">
+  <form method="post" th:action="@{/milestones/save}" th:object="${milestone}">
     <input type="hidden" name="projectId" th:value="${projectId}"/>
 
 <div>

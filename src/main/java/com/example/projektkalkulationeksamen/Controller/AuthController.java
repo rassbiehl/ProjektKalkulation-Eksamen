@@ -44,7 +44,7 @@ public class AuthController {
 
         Role role = userService.getUserById(userId).getRole();
         logger.info("User already logged in. Redirecting to: " + role.toString().toLowerCase() + "Startpage");
-        return "redirect:/" + role.toString().toLowerCase() + "Startpage";
+        return "redirect:/projects/" + role.toString().toLowerCase() + "Startpage";
     }
 
     @GetMapping("/loginform")
@@ -66,7 +66,7 @@ public class AuthController {
 
         logger.info("User successfully logged in with userID: {}. Redirecting to {} Startpage", user.getId(), role.toString().toLowerCase());
 
-        return "redirect:/" + role.toString().toLowerCase() + "Startpage";
+        return "redirect:/projects/" + role.toString().toLowerCase() + "Startpage";
     }
 
     @GetMapping("/registerform")
@@ -141,7 +141,7 @@ public class AuthController {
         return "admin/updateform";
     }
 
-    @PostMapping ("/update")
+    @PostMapping ("/updateuser")
     public String adminUpdate (HttpSession session, @RequestParam String username, @RequestParam String rawPassword, @RequestParam Role role, @RequestParam int id, RedirectAttributes redirectAttributes) {
         if (!sessionValidator.isSessionValid(session)) {
             logger.info("User is not logged in. Redirecting to loginform.html");

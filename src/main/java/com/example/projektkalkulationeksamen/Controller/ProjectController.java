@@ -15,19 +15,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequestMapping("/projects")
 @Controller
 public class ProjectController {
     public static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
     private final UserService userService;
     private final SessionValidator sessionValidator;
     private final ProjectService projectService;
+
 
     @Autowired
     public ProjectController(UserService userService, SessionValidator sessionValidator, ProjectService projectService) {
@@ -89,7 +88,7 @@ public class ProjectController {
     }
 
 
-    @GetMapping("/project/{id}")
+    @GetMapping("view/{id}")
     public String getProjectPage(@PathVariable int id, HttpSession session, Model model) {
 
         logger.info("Attempting to load project page with project ID: {}", id);
@@ -130,9 +129,9 @@ public class ProjectController {
         return "projectpage";
     }
 
-    @GetMapping("/addproject")
-    public String getAddProjectPage (HttpSession session, Model model) {
-
+    @GetMapping("/add")
+    public String getAddProjectPage(HttpSession session, Model model) {
+        logger.debug("Attempting to load add project page");
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can add projects");
@@ -140,24 +139,49 @@ public class ProjectController {
 
         model.addAttribute("project", new Project());
 
-
+        logger.info("Loading add project page");
         return "projectmanager/addProject";
     }
 
-    @PostMapping("/saveproject")
-    public String saveProject (HttpSession session, @ModelAttribute Project project) {
-
+    @PostMapping("/save")
+    public String saveProject(HttpSession session, @ModelAttribute Project project) {
+        logger.debug("Attempting to add new project to database with ID: {}", project.getId());
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can add projects");
         }
         Integer userId = (Integer) session.getAttribute("userId");
+
         project.setProjectManagerId(userId);
 
         projectService.addProject(project);
-
+        logger.info("Successfully added new project to database with ID: {} and projectmanager ID: {}", project.getId(), userId);
 
         return "redirect:/projectmanagerStartpage";
     }
 
+    @PostMapping("/delete/{id}")
+    public String deleteProject(HttpSession session, @PathVariable int id) {
+        logger.debug("Attempting to delete project with ID: {}", id);
+        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+            logger.warn("Access denied: User is not a project manager");
+            throw new AccessDeniedException("Only project managers can delete projects");
+        }
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        ProjectDTO project = projectService.getProjectWithDetails(id);
+        Role role = userService.getUserById(userId).getRole();
+        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+
+        if (isOwner) {
+            projectService.deleteProject(id);
+            logger.info("Succesfully deleted project with ID: {}", id);
+        } else {
+            logger.warn("Failed to delete project with ID: {} because of missing owner id in session", id);
+            throw new AccessDeniedException("Access denied: User does not own the project");
+        }
+
+        return "redirect:/projects/projectmanagerStartpage";
+    }
 }
+

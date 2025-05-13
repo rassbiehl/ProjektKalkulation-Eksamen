@@ -16,7 +16,7 @@
 
     <div class="shadow">
 
-        <a th:href="@{/{role}Startpage(role=${userRole})}" class="back-button">← Back</a>
+        <a th:href="@{/projects/{role}Startpage(role=${userRole})}" class="back-button">← Back</a>
 
         <div class="headline">
             <img src="/images/logonotext.svg" alt="Logo">
@@ -28,12 +28,12 @@
             <section th:if="${isOwner}" class="owner-actions">
                 <h2>Project Actions:</h2>
                 <div class="action-buttons">
-                    <a th:href="@{/editProject/{id}(id=${project.id})}">
+                    <a th:href="@{projects/update/{id}(id=${project.id})}">
                         <button class="update-button" type="button">🔄 Update project</button>
                     </a>
-                    <a th:href="@{/deleteProject/{id}(id=${project.id})}">
-                        <button class="delete-button" type="button" onclick="return confirm('Are you sure you want to delete this project?')">❌ Delete project</button>
-                    </a>
+                    <form th:action="@{/projects/delete/{id}(id=${project.id})}" method="post" onsubmit="return confirm('Are you sure?')">
+                        <button class="delete-button" type="submit">❌ Delete project</button>
+                    </form>
                 </div>
             </section>
 
@@ -163,14 +163,14 @@
                 <div class="project-item" th:if="${#lists.isEmpty(projectMilestones)}">
                     <h3>No milestones created yet.</h3>
 
-                    <a th:if="${isOwner}" th:href="@{/addMilestone/{projectId}(projectId=${project.id})}">
+                    <a th:if="${isOwner}" th:href="@{/milestones/add/{projectId}(projectId=${project.id})}">
                         <button class="add-button" type="button">✚ Add milestone</button>
                     </a>
                 </div>
 
                 <div class="project-item" th:if="${!#lists.isEmpty(projectMilestones) and isOwner}">
                     <div class="button-wrapper">
-                        <a th:href="@{/addMilestone/{projectId}(projectId=${project.id})}">
+                        <a th:href="@{/milestones/add/{projectId}(projectId=${project.id})}">
                             <button class="add-button" type="button">✚ Add milestone</button>
                         </a>
                     </div>
