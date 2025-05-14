@@ -32,7 +32,9 @@
             <div class="project-item" th:each="project : ${ongoingProjects}">
                 <p class="name" th:text="${project.projectName}"></p>
                 <p>
-                    📍 <span th:text="${project.status.displayName}"></span>
+                    <span th:if="${project.status.name() == 'COMPLETED'}">✅</span>
+                    <span th:if="${project.status.name() != 'COMPLETED'}">📍</span>
+                    <span th:text="${project.status.displayName}"></span>
                 </p>
 
                 <p>
@@ -65,7 +67,9 @@
             <div class="project-item" th:each="project : ${finishedProjects}">
                 <p class="name" th:text="${project.projectName}"></p>
                 <p>
-                    📍 <span th:text="${project.status.displayName}"></span>
+                    <span th:if="${project.status.name() == 'COMPLETED'}">✅</span>
+                    <span th:if="${project.status.name() != 'COMPLETED'}">📍</span>
+                    <span th:text="${project.status.displayName}"></span>
                 </p>
 
                 <p>
