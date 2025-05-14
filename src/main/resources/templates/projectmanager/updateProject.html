@@ -11,7 +11,7 @@
 <div class="background">
     <div class="headline">
         <img src="/images/logonotext.svg" alt="Logo">
-        <h1><span>Update project</span></h1>
+        <h1>Update project: '<span th:text="${project.projectName}"></span>'</h1>
     </div>
 
     <form method="post" th:action="@{/projects/update}">
@@ -22,12 +22,12 @@
 
         <div>
             <label for="projectName">New project name:</label>
-            <input id="projectName" class="input-field" type="text" name="projectName" th:placeholder="${project.projectName}">
+            <input id="projectName" class="input-field" type="text" name="projectName" th:value="${project.projectName}">
         </div>
 
         <div>
             <label for="description">New project description:</label>
-            <input id="description" class="input-field" type="text" name="description" th:placeholder="${project.description}">
+            <input id="description" class="input-field" type="text" name="description" th:value="${project.description}">
         </div>
 
         <div>

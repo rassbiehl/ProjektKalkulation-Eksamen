@@ -40,7 +40,11 @@ public class ProjectController {
     }
 
     @GetMapping("/{role}Startpage")
-    public String getStartPage(@PathVariable String role, HttpSession session, Model model) {
+    public String getStartPage(
+            @PathVariable String role,
+            HttpSession session,
+            Model model
+    ) {
 
         Integer userId = (Integer) session.getAttribute("userId");
 
@@ -92,9 +96,12 @@ public class ProjectController {
     }
 
 
-    @GetMapping("view/{id}")
-    public String getProjectPage(@PathVariable int id, HttpSession session, Model model) {
-
+    @GetMapping("/view/{id}")
+    public String getProjectPage(
+            @PathVariable int id,
+            HttpSession session,
+            Model model
+    ) {
         logger.info("Attempting to load project page with project ID: {}", id);
 
         if (!sessionValidator.isSessionValid(session)) {
@@ -134,7 +141,10 @@ public class ProjectController {
     }
 
     @GetMapping("/add")
-    public String getAddProjectPage(HttpSession session, Model model) {
+    public String getAddProjectPage(
+            HttpSession session,
+            Model model
+    ) {
         logger.debug("Attempting to load add project page");
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
@@ -154,7 +164,10 @@ public class ProjectController {
     }
 
     @PostMapping("/save")
-    public String saveProject(HttpSession session, @ModelAttribute Project project) {
+    public String saveProject(
+            HttpSession session,
+            @ModelAttribute Project project
+    ) {
         logger.debug("Attempting to add new project to database with ID: {}", project.getId());
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
@@ -174,7 +187,10 @@ public class ProjectController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteProject(HttpSession session, @PathVariable int id) {
+    public String deleteProject(
+            HttpSession session,
+            @PathVariable int id
+    ) {
         logger.debug("Attempting to delete project with ID: {}", id);
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
@@ -198,8 +214,12 @@ public class ProjectController {
         return "redirect:/projects/" + role.toString().toLowerCase() + "Startpage";
     }
 
-    @GetMapping("/updateproject/{id}")
-    public String getUpdateProjectPage(HttpSession session, @PathVariable int id, Model model, RedirectAttributes redirectAttributes) {
+    @GetMapping("/update/{id}")
+    public String getUpdateProjectPage(
+            HttpSession session,
+            @PathVariable int id,
+            Model model
+    ) {
         logger.debug("Attempting to get update page for project with ID: {}", id);
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
@@ -235,7 +255,6 @@ public class ProjectController {
             @RequestParam Status status,
             RedirectAttributes redirectAttributes
     ) {
-
         logger.debug("Trying to update project with ID: {}", id);
 
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {

@@ -1,3 +1,4 @@
+/*
 package com.example.projektkalkulationeksamen.Validator;
 
 import com.example.projektkalkulationeksamen.Exceptions.MilestoneCreationException;
@@ -37,3 +38,4 @@ public class MilestoneDataValidator {
     }
 
 }
+*/

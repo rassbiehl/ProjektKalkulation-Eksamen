@@ -28,7 +28,7 @@
             <section th:if="${isOwner}" class="owner-actions">
                 <h2>Project Actions:</h2>
                 <div class="action-buttons">
-                    <a th:href="@{/projects/updateproject/{id}(id=${project.id})}">
+                    <a th:href="@{/projects/update/{id}(id=${project.id})}">
                         <button class="update-button" type="button">🔄 Update project</button>
                     </a>
                     <form th:action="@{/projects/delete/{id}(id=${project.id})}" method="post" onsubmit="return confirm('Are you sure?')">
@@ -51,6 +51,10 @@
 
                 <p th:if="${project.completedAt != null}">
                     ✅ Completed at: <span th:text="${#temporals.format(project.completedAt, 'dd.MM.yyyy')}"></span>
+                </p>
+
+                <p>
+                    🎯 Number of milestones: <span th:text="${#lists.size(project.milestones)}"></span>
                 </p>
 
             </section>
@@ -111,10 +115,11 @@
 
 
         <div class="projectMilestones">
-            <h2>Project milestones</h2>
+            <h2>🎯 Project milestones</h2>
 
             <div class="project-content">
 
+                <!-- ongoing milestones -->
                 <div class="project-item" th:each="milestone : ${ongoingMilestones}">
                     <p class="name" th:text="${milestone.milestoneName}"></p>
                     <p>
@@ -131,12 +136,13 @@
 
                     <p><span th:text="${milestone.progress} + '%'"></span> progress</p>
 
-                    <a th:href="@{/project/{id}(id=${project.id})}">
+                    <a th:href="@{/milestones/view/{id}(id=${milestone.id})}">
                         <button class="update-button" type="button">➡️ View Milestone</button>
                     </a>
-
                 </div>
 
+
+                <!-- finished milestones -->
                 <div class="project-item" th:each="milestone : ${finishedMilestones}">
                     <p class="name" th:text="${milestone.milestoneName}"></p>
                     <p>
@@ -153,16 +159,14 @@
 
                     <p><span th:text="${milestone.progress} + '%'"></span> progress</p>
 
-                    <a th:href="@{/project/{id}(id=${project.id})}">
+                    <a th:href="@{/milestones/view/{id}(id=${milestone.id})}">
                         <button class="update-button" type="button">➡️ View Milestone</button>
                     </a>
-
                 </div>
 
 
-
                 <div class="project-item" th:if="${#lists.isEmpty(projectMilestones)}">
-                    <h3>No milestones created yet.</h3>
+                    <h3>This project has no milestones</h3>
 
                     <a th:if="${isOwner}" th:href="@{/milestones/add/{projectId}(projectId=${project.id})}">
                         <button class="add-button" type="button">✚ Add milestone</button>

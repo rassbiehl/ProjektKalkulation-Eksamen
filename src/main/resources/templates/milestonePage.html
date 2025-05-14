@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Milestone page</title>
+
+    <link rel="stylesheet" href="/css/background.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    <link rel="stylesheet" href="/css/usertable.css">
+    <link rel="stylesheet" href="/css/projectpage.css">
+</head>
+<body>
+
+<div class="background">
+
+    <div class="shadow">
+
+        <a th:href="@{/projects/view/{id}(id=${project.id})}" class="back-button">← Back</a>
+
+        <div class="headline">
+            <img src="/images/logonotext.svg" alt="Logo">
+            <h1 th:text="${milestone.milestoneName}"></h1>
+        </div>
+
+        <div class="projectinfo">
+            <!-- Owner buttons-->
+            <section th:if="${isOwner}" class="owner-actions">
+                <h2>Milestone Actions:</h2>
+                <div class="action-buttons">
+                    <a th:href="@{/milestones/update/{id}(id=${milestone.id})}">
+                        <button class="update-button" type="button">🔄 Update Milestone</button>
+                    </a>
+                    <form th:action="@{/milestones/delete/{id}(id=${milestone.id})}" method="post"
+                          onsubmit="return confirm('Are you sure?')">
+                        <button class="delete-button" type="submit">❌ Delete milestone</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Project Overview -->
+            <section class="project-overview">
+                <h2>Milestone Overview</h2>
+
+                <p th:if="${projectManager}">
+                    👑 Project Manager: <span th:text="${projectManager.username}"></span>
+                </p>
+
+                <p th:if="${milestone.milestoneDescription != null}">
+                    📝 <span th:text="${milestone.milestoneDescription}"></span>
+                </p>
+
+                <p th:if="${milestone.completedAt != null}">
+                    ✅ Completed at: <span th:text="${#temporals.format(milestone.completedAt, 'dd.MM.yyyy')}"></span>
+                </p>
+
+                <p>
+                    🔧 Number of tasks: <span th:text="${#lists.size(milestone.tasks)}"></span>
+                </p>
+
+            </section>
+
+            <!-- Progress % Status -->
+            <section class="project-metrics">
+                <h2>⛏️ Work Metrics </h2>
+
+                <p>
+                    📊 Hours spent: <span th:text="${milestone.actualHoursUsed}"></span> hours
+                </p>
+
+                <p th:if="${project.estimatedHours}">
+                    ⏳ Estimated remaining: <span th:text="${milestone.estimatedHours}"></span> hours
+                </p>
+
+                <p>
+                    💰 Calculated cost: <span th:text="${milestone.calculatedCost}"></span> kr
+                </p>
+            </section>
+
+            <!-- Timeline -->
+            <section class="project-timeline">
+                <h2>🕒 Timestamps</h2>
+
+                <p>
+                    Created at: <span th:text="${#temporals.format(milestone.createdAt, 'dd.MM.yyyy')}"></span>
+                </p>
+
+                <p>
+                    Deadline: <span th:text="${#temporals.format(milestone.deadline, 'dd.MM.yyyy')}"></span>
+                </p>
+
+            </section>
+
+            <!-- Project Status -->
+            <section class="project-status">
+                <h2>📊 Progress & Status</h2>
+
+                <p>
+                    📍 <span th:text="${milestone.milestoneStatus.displayName}"></span>
+                </p>
+
+                <div class="progress-container">
+                    <div class="progress-fill" th:style="'width:' + ${milestone.progress} + '%'"></div>
+                </div>
+
+                <p>
+                    <span th:text="${milestone.progress} + '%'"></span> of milestones completed
+                </p>
+            </section>
+
+        </div>
+
+
+        <div class="projectMilestones">
+            <h2>🔧 Milestone tasks</h2>
+
+            <div class="project-content">
+
+                <div class="project-item" th:each="task : ${ongoingTasks}">
+                    <p class="name" th:text="${task.taskName}"></p>
+                    <p>
+                        📍 <span th:text="${task.status.displayName}"></span>
+                    </p>
+
+                    <p>
+                        ⏰ Deadline: <span th:text="${#temporals.format(task.deadline, 'dd.MM.YYYY')}"></span>
+                    </p>
+
+                    <a th:href="@{/project/{id}(id=${project.id})}">
+                        <button class="update-button" type="button">➡️ View Task</button>
+                    </a>
+
+                </div>
+
+                <div class="project-content">
+
+                    <div class="project-item" th:each="task : ${completedTasks}">
+                        <p class="name" th:text="${task.taskName}"></p>
+                        <p>
+                            📍 <span th:text="${task.status.displayName}"></span>
+                        </p>
+
+                        <p>
+                            ⏰ Deadline: <span th:text="${#temporals.format(task.deadline, 'dd.MM.YYYY')}"></span>
+                        </p>
+
+                        <a th:href="@{/project/{id}(id=${project.id})}">
+                            <button class="update-button" type="button">➡️ View Task</button>
+                        </a>
+
+                    </div>
+
+
+                <div class="project-item" th:if="${#lists.isEmpty(milestoneTasks)}">
+                    <h3>This milestone has no tasks</h3>
+
+                    <a th:if="${isOwner}" th:href="@{/milestones/add/{projectId}(projectId=${project.id})}">
+                        <button class="add-button" type="button">✚ Add task</button>
+                    </a>
+                </div>
+
+                <div class="project-item" th:if="${!#lists.isEmpty(milestoneTasks) and isOwner}">
+                    <div class="button-wrapper" id="#add-milestone">
+                        <a th:href="@{/milestones/add/{projectId}(projectId=${project.id})}">
+                            <button class="add-button" type="button">✚ Add task</button>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+</div>
+</body>
+</html>
