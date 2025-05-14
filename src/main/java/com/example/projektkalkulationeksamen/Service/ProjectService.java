@@ -1,3 +1,4 @@
+
 package com.example.projektkalkulationeksamen.Service;
 
 
@@ -91,7 +92,8 @@ public class ProjectService {
 
         try {
 
-            ProjectDataValidator.validateAllFields(newProject.getProjectName(), newProject.getDescription(), newProject.getEstimatedHours(), newProject.getActualHoursUsed());
+            ProjectDataValidator.validateName(newProject.getProjectName());
+            ProjectDataValidator.validateDescription(newProject.getDescription());
             return projectRepository.addProject(newProject);
 
         } catch (DatabaseException e) {
@@ -119,9 +121,13 @@ public class ProjectService {
         logger.debug("Attempting to update project with ID: {}", updatedProject.getId());
 
         try {
-            Project currentProject = getProjectById(updatedProject.getId());
+            ProjectDataValidator.validateName(updatedProject.getProjectName());
+            ProjectDataValidator.validateDescription(updatedProject.getDescription());
 
-            if (!currentProject.getProjectName().equals(updatedProject.getProjectName()) && projectExistsByName(updatedProject.getProjectName())) {
+            Project currentProject = projectRepository.findProjectById(updatedProject.getId())
+                    .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + updatedProject.getId()));
+
+            if (!currentProject.getProjectName().equalsIgnoreCase(updatedProject.getProjectName()) && projectExistsByName(updatedProject.getProjectName())) {
                 throw new ProjectCreationException("Project name already taken");
             }
 

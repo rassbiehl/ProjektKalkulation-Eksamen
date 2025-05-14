@@ -1,5 +1,8 @@
 package com.example.projektkalkulationeksamen.Controller;
 
+import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
+import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
+import com.example.projektkalkulationeksamen.DTO.TaskDTO;
 import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
 import com.example.projektkalkulationeksamen.Exceptions.MilestoneCreationException;
 import com.example.projektkalkulationeksamen.Exceptions.MilestoneNotFoundException;
@@ -21,7 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
-@RequestMapping("milestones")
+@RequestMapping("/milestones")
 @Controller
 public class MilestoneController {
     private final static Logger logger = LoggerFactory.getLogger(MilestoneController.class);
@@ -38,9 +41,60 @@ public class MilestoneController {
         this.sessionValidator = sessionValidator;
         this.userService = userService;
     }
+
+
+    @GetMapping("/view/{id}")
+    public String getMilestonePage (
+            @PathVariable int id,
+            HttpSession session,
+            Model model
+    ) {
+        logger.info("Attempting to load milestone page with milestone ID: {}", id);
+
+        if (!sessionValidator.isSessionValid(session)) {
+            logger.warn("Invalid session. Redirecting to login.");
+            return "redirect:/loginform";
+        }
+
+        Integer userId = (Integer) session.getAttribute("userId");
+
+        MilestoneDTO milestoneDTO = milestoneService.getMilestoneWithDetails(id);
+
+        ProjectDTO projectDTO = projectService.getProjectWithDetails(milestoneDTO.getProjectId());
+
+        Role role = userService.getUserById(userId).getRole();
+        boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
+        logger.debug("User ID {} has role {}. Is owner: {}", userId, role, isOwner);
+
+        model.addAttribute("project", projectDTO);
+        model.addAttribute("milestone", milestoneDTO);
+        model.addAttribute("projectManager", userService.getUserById(projectDTO.getProjectManagerId()));
+        model.addAttribute("isOwner", isOwner);
+        model.addAttribute("milestoneTasks", milestoneDTO.getTasks());
+
+        List<TaskDTO> ongoingTasks = milestoneService.getOngoingTasksFromMilestone(id);
+
+        if (!ongoingTasks.isEmpty()) {
+            logger.debug("Found {} ongoing tasks.", ongoingTasks.size());
+            model.addAttribute("ongoingTasks", ongoingTasks);
+        }
+
+        List<TaskDTO> completedTasks = milestoneService.getCompletedTasksFromMilestone(id);
+
+        if (!completedTasks.isEmpty()) {
+            logger.debug("Found {} completed tasks.", ongoingTasks.size());
+            model.addAttribute("completedTasks", ongoingTasks);
+        }
+
+        logger.info("Returning milestonepgage.html");
+        return "milestonePage";
+    }
     
     @GetMapping("add/{projectId}")
-    public String showAddForm(HttpSession session, @PathVariable int projectId, Model model) {
+    public String showAddForm(HttpSession session,
+                              @PathVariable int projectId,
+                              Model model
+    ) {
 
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
@@ -61,7 +115,12 @@ public class MilestoneController {
     }
 
     @PostMapping("/save")
-    public String addMilestone(HttpSession session, RedirectAttributes redirectAttributes, @ModelAttribute Milestone milestone, @RequestParam int projectId) {
+    public String addMilestone(
+            HttpSession session,
+            RedirectAttributes redirectAttributes,
+            @ModelAttribute Milestone milestone,
+            @RequestParam int projectId
+    ) {
 
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
@@ -81,17 +140,39 @@ public class MilestoneController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteMilestone(@PathVariable int id, @RequestParam int projectId) {
+    public String deleteMilestone(
+            HttpSession session,
+            @PathVariable int id
+    ) {
+        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+            logger.warn("Access denied: User is not a project manager");
+            throw new AccessDeniedException("Only project managers can delete milestones");
+        }
 
-        milestoneService.deleteMilestone(id);
+        Integer userId = (Integer) session.getAttribute("userId");
+        MilestoneDTO milestoneDTO = milestoneService.getMilestoneWithDetails(id);
+        ProjectDTO projectDTO = projectService.getProjectWithDetails(milestoneDTO.getProjectId());
+        Role role = userService.getUserById(userId).getRole();
+        boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
 
+        if (isOwner) {
+            milestoneService.deleteMilestone(id);
+            logger.info("Succesfully deleted milesetone with ID: {}", id);
+        } else {
+            logger.warn("Failed to delete milestone with ID: {} because of missing owner id in session", id);
+            throw new AccessDeniedException("Access denied: User does not own the project");
+        }
 
-        return "redirect:/milestones/" + projectId;
+        return "redirect:/projects/view/" + projectDTO.getId();
 
     }
 
-    @GetMapping("/update/{milestoneId}")
-    public String showUpdateForm(Model model, @PathVariable int milestoneId, HttpSession session) {
+    @GetMapping("/update/{id}")
+    public String showUpdateForm(
+            Model model,
+            @PathVariable int id,
+            HttpSession session
+    ) {
 
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
@@ -99,14 +180,14 @@ public class MilestoneController {
         }
 
         try {
-            Milestone milestone = milestoneService.getMilestoneById(milestoneId);
+            Milestone milestone = milestoneService.getMilestoneById(id);
             model.addAttribute("milestone", milestone);
             model.addAttribute("status", Status.values());
         } catch (MilestoneNotFoundException e) {
             return "redirect:/loginform";
         }
 
-        return "projectmanager/updateMilestoneForm";
+        return "projectmanager/updateMilestone";
     }
 
     @PostMapping("/update")

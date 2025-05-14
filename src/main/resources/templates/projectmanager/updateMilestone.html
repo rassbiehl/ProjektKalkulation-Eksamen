@@ -9,10 +9,13 @@
 </head>
 <body>
 <div class="background">
-
-    <h1>Update' <span th:text="${milestone.milestoneName}"></span></h1>
-
+    <div class="headline">
+        <img src="/images/logonotext.svg" alt="Logo">
+        <h1>Update milestone: '<span th:text="${milestone.milestoneName}"></span>'</h1>
+    </div>
     <form th:action="@{/milestone/update}" method="post" th:object="${milestone}">
+
+        <a th:href="@{/projects/view/{id}(id=${milestone.projectId})}" class="back-button">← Back</a>
 
         <div>
             <label for="name">Name:</label>
@@ -21,27 +24,29 @@
 
         <div class="input">
             <p>Description:</p>
-            <textarea class="input-field-description" name="description" th:field="*{milestoneDescription}"></textarea>
+            <textarea class="input-field-description" th:field="*{milestoneDescription}"></textarea>
         </div>
 
         <div>
             <label for="status">Status:</label>
-            <select name="status" id="status">
-                <option th:each="status : ${status}" th:value="${status}" th:text="${status.displayName}"></option>
+            <select id="status" th:field="*{status}">
+                <option th:each="status : ${status}"
+                        th:value="${status}"
+                        th:text="${status.displayName}">
+                </option>
             </select>
         </div>
 
         <div>
             <label for="deadline">Deadline:</label>
-            <input id="deadline" type="date" name="deadline" th:field="*{deadline}" required>
+            <input id="deadline"
+                   type="datetime-local"
+                   name="deadline"
+                   th:value="${#temporals.format(milestone.deadline, 'yyyy-MM-dd''T''HH:mm')}"
+                   required>
         </div>
 
-        <div>
-            <label for="completedAt">Is milestone completed?</label>
-            <input id="completedAt" type="datetime-local" name="completedAt" th:field="*{completedAt}">
-        </div>
-
-        <input type="hidden" name="milestoneId" th:value="${milestone.id}">
+        <input type="hidden" th:field="*{id}">
 
         <div>
             <button type="submit">Update Milestone</button>

@@ -2,20 +2,18 @@ package com.example.projektkalkulationeksamen.Service;
 
 import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.TaskDTO;
-import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
-import com.example.projektkalkulationeksamen.Exceptions.MilestoneCreationException;
-import com.example.projektkalkulationeksamen.Exceptions.MilestoneNotFoundException;
-import com.example.projektkalkulationeksamen.Exceptions.ProjectNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.*;
 import com.example.projektkalkulationeksamen.Model.Milestone;
 import com.example.projektkalkulationeksamen.Model.Status;
 import com.example.projektkalkulationeksamen.Repository.MilestoneRepository;
 import com.example.projektkalkulationeksamen.Service.comparators.DeadlineComparator;
-import com.example.projektkalkulationeksamen.Validator.MilestoneDataValidator;
+import com.example.projektkalkulationeksamen.Validator.ProjectDataValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -74,12 +72,13 @@ public class MilestoneService {
     public Milestone addMilestone(Milestone milestone) {
         logger.debug("Adds milestone with id " + milestone.getId());
 
-        MilestoneDataValidator.validateAllFields(milestone.getMilestoneName(),
-                milestone.getMilestoneDescription(),
-                milestone.getEstimatedHours(),
-                milestone.getActualHoursUsed());
 
+        if (milestoneExistsByNameInProject(milestone.getMilestoneName(), milestone.getProjectId())) {
+            throw new MilestoneCreationException("Milestone name already taken in this project");
+        }
         try {
+            ProjectDataValidator.validateName(milestone.getMilestoneName());
+            ProjectDataValidator.validateDescription(milestone.getMilestoneDescription());
             return milestoneRepository.addMilestone(milestone);
         } catch (DatabaseException e) {
             logger.error("Failed to add milestone with ID " + milestone.getId(), e);
@@ -99,79 +98,134 @@ public class MilestoneService {
         logger.info("Succesfully deleted milestone with id " + id);
     }
 
-    public boolean updateMilestone(Milestone milestone) {
+    public void updateMilestone(Milestone milestone) {
+        logger.debug("Attempting to update milestone with ID: {}", milestone.getId());
 
-        MilestoneDataValidator.validateAllFields(milestone.getMilestoneName(),
-                milestone.getMilestoneDescription(),
-                milestone.getEstimatedHours(),
-                milestone.getActualHoursUsed());
+        try {
+            ProjectDataValidator.validateName(milestone.getMilestoneName());
+            ProjectDataValidator.validateDescription(milestone.getMilestoneDescription());
 
-        Optional<Milestone> toUpdate = milestoneRepository.getMilestoneById(milestone.getId());
+            Milestone currentMilestone = milestoneRepository.getMilestoneById(milestone.getId())
+                    .orElseThrow(() -> new MilestoneNotFoundException("Milestone not found with ID: {}" + milestone.getId()));
 
-
-        if (toUpdate.isEmpty()) {
-            logger.warn("Milestone with ID " + milestone.getId() + " Was not found");
-            throw new MilestoneNotFoundException("Could not find milestone with ID " + milestone.getId());
-        }
-        boolean succes = milestoneRepository.updateMilestone(milestone);
-
-        if (succes) {
-            logger.info("Milestone was succesfully updated");
-        } else {
-            logger.error("Failed to update milestone with ID " + milestone.getId());
-        }
-        return succes;
-    }
-
-    public int getMilestoneProgress(int milestoneId) {
-        List<TaskDTO> tasksWithDetails = taskService.getTasksByMilestoneIdWithDetails(milestoneId);
-
-
-        if (tasksWithDetails.isEmpty()) {
-            return 0;
-        }
-
-        int finishedTasks = 0;
-
-        for (TaskDTO taskDTO : tasksWithDetails) {
-            if (taskDTO.getStatus() == Status.COMPLETED) {
-                finishedTasks++;
+            if (!currentMilestone.getMilestoneName().equalsIgnoreCase(milestone.getMilestoneName()) && milestoneExistsByNameInProject(milestone.getMilestoneName(), milestone.getProjectId())) {
+                throw new MilestoneCreationException("Milestone name already exists for this project");
             }
+
+            if (milestone.getStatus().equals(Status.COMPLETED) && currentMilestone.getCompletedAt() == null) {
+                milestone.setCompletedAt(LocalDateTime.now());
+            } else if (milestone.getStatus() != Status.COMPLETED) {
+                milestone.setCompletedAt(null);
+            }
+            boolean updated = milestoneRepository.updateMilestone(milestone);
+
+            if (!updated) {
+                logger.warn("Cannot update. No milestone found with ID: {}", milestone.getId());
+                throw new MilestoneCreationException("Cannot update. No milestone found with ID: " + milestone.getId());
+            }
+            logger.info("Succesfully updated milestone with ID: {}", milestone.getId());
+        } catch (DatabaseException e) {
+            logger.error("Database error while trying to update milestone with ID: {}", milestone.getId(), e);
+            throw new ProjectCreationException("Database error while updating milestone with ID: " + milestone.getId(), e);
+        }
+    }
+
+        public boolean milestoneExistsByNameInProject (String name,int projectId){
+
+            List<Milestone> allMilestonesForProject = milestoneRepository.getMilestonesByProjectId(projectId);
+
+            for (Milestone milestone : allMilestonesForProject) {
+                if (milestone.getMilestoneName().equalsIgnoreCase(name)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
-        return (int) Math.round(finishedTasks * 100.0) / tasksWithDetails.size();
-    }
+        //DTO
 
-    // DTO Object methods
-    public MilestoneDTO getMilestoneWithDetails(int milestoneId) {
-        List<TaskDTO> milestoneTasksWithDetails = taskService.getTasksByMilestoneIdWithDetails(milestoneId);
-        Milestone milestone = getMilestoneById(milestoneId);
-        int progress = getMilestoneProgress(milestoneId);
-        return new MilestoneDTO(
-                milestone.getId(),
-                milestone.getMilestoneName(),
-                milestone.getMilestoneDescription(),
-                milestone.getProjectId(),
-                milestone.getEstimatedHours(),
-                milestone.getCalculatedCost(),
-                milestone.getActualHoursUsed(),
-                milestone.getStatus(),
-                milestone.getCreatedAt(),
-                milestone.getDeadline(),
-                milestone.getCompletedAt(),
-                milestoneTasksWithDetails,
-                progress
-        );
-    }
+        public List<TaskDTO> getOngoingTasksFromMilestone ( int milestoneId){
 
-    public List<MilestoneDTO> getMilestonesByProjectIdWithDetails(int projectId) {
-        List<MilestoneDTO> milestonesByProjectIdWithDetails = new ArrayList<>();
-        List<Milestone> milestonesByProjectId = milestoneRepository.getMilestonesByProjectId(projectId);
+            MilestoneDTO milestoneDTO = getMilestoneWithDetails(milestoneId);
+            List<TaskDTO> allTasksFromMileStone = milestoneDTO.getTasks();
 
-        for (Milestone milestone : milestonesByProjectId) {
-            milestonesByProjectIdWithDetails.add(getMilestoneWithDetails(milestone.getId()));
+            List<TaskDTO> ongoingTasks = new ArrayList<>();
+
+            for (TaskDTO taskDTO : allTasksFromMileStone) {
+                if (taskDTO.getStatus() != Status.COMPLETED) {
+                    ongoingTasks.add(taskDTO);
+                }
+            }
+
+            return ongoingTasks;
         }
-        return milestonesByProjectIdWithDetails;
-    }
 
-}
+        public List<TaskDTO> getCompletedTasksFromMilestone ( int milestoneId){
+
+            MilestoneDTO milestoneDTO = getMilestoneWithDetails(milestoneId);
+            List<TaskDTO> allTasksFromMileStone = milestoneDTO.getTasks();
+
+            List<TaskDTO> completedTasks = new ArrayList<>();
+
+            for (TaskDTO taskDTO : allTasksFromMileStone) {
+                if (taskDTO.getStatus() == Status.COMPLETED) {
+                    completedTasks.add(taskDTO);
+                }
+            }
+
+            return completedTasks;
+        }
+
+        public int getMilestoneProgress ( int milestoneId){
+            List<TaskDTO> tasksWithDetails = taskService.getTasksByMilestoneIdWithDetails(milestoneId);
+
+
+            if (tasksWithDetails.isEmpty()) {
+                return 0;
+            }
+
+            int finishedTasks = 0;
+
+            for (TaskDTO taskDTO : tasksWithDetails) {
+                if (taskDTO.getStatus() == Status.COMPLETED) {
+                    finishedTasks++;
+                }
+            }
+
+            return (int) Math.round(finishedTasks * 100.0) / tasksWithDetails.size();
+        }
+
+        // DTO Object methods
+        public MilestoneDTO getMilestoneWithDetails ( int milestoneId){
+            List<TaskDTO> milestoneTasksWithDetails = taskService.getTasksByMilestoneIdWithDetails(milestoneId);
+            Milestone milestone = getMilestoneById(milestoneId);
+            int progress = getMilestoneProgress(milestoneId);
+            return new MilestoneDTO(
+                    milestone.getId(),
+                    milestone.getMilestoneName(),
+                    milestone.getMilestoneDescription(),
+                    milestone.getProjectId(),
+                    milestone.getEstimatedHours(),
+                    milestone.getCalculatedCost(),
+                    milestone.getActualHoursUsed(),
+                    milestone.getStatus(),
+                    milestone.getCreatedAt(),
+                    milestone.getDeadline(),
+                    milestone.getCompletedAt(),
+                    milestoneTasksWithDetails,
+                    progress
+            );
+        }
+
+        public List<MilestoneDTO> getMilestonesByProjectIdWithDetails ( int projectId){
+            List<MilestoneDTO> milestonesByProjectIdWithDetails = new ArrayList<>();
+            List<Milestone> milestonesByProjectId = milestoneRepository.getMilestonesByProjectId(projectId);
+
+            for (Milestone milestone : milestonesByProjectId) {
+                milestonesByProjectIdWithDetails.add(getMilestoneWithDetails(milestone.getId()));
+            }
+            return milestonesByProjectIdWithDetails;
+        }
+
+    }
