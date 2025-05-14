@@ -158,7 +158,7 @@
                 <div class="project-item" th:if="${#lists.isEmpty(milestoneTasks)}">
                     <h3>This milestone has no tasks</h3>
 
-                    <a <a th:if="${isOwner}" th:href="@{/tasks/create/milestone/{milestoneId}(milestoneId=${milestone.id})}">
+                    <a th:if="${isOwner}" th:href="@{/tasks/create/milestone/{milestoneId}(milestoneId=${milestone.id})}">
                     <button class="add-button" type="button">✚ Add task</button>
                 </a>
                 </div>
