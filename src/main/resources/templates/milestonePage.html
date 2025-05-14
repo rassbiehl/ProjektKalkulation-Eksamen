@@ -95,7 +95,9 @@
                 <h2>📊 Progress & Status</h2>
 
                 <p>
-                    📍 <span th:text="${milestone.milestoneStatus.displayName}"></span>
+                    <span th:if="${milestone.milestoneStatus.displayName == 'Completed'}">✅</span>
+                    <span th:unless="${milestone.milestoneStatus.displayName == 'Completed'}">📍</span>
+                    <span th:text="${milestone.milestoneStatus.displayName}"></span>
                 </p>
 
                 <div class="progress-container">
@@ -103,7 +105,7 @@
                 </div>
 
                 <p>
-                    <span th:text="${milestone.progress} + '%'"></span> of milestones completed
+                    <span th:text="${milestone.progress} + '%'"></span> of tasks completed
                 </p>
             </section>
 
@@ -118,7 +120,9 @@
                 <div class="project-item" th:each="task : ${ongoingTasks}">
                     <p class="name" th:text="${task.taskName}"></p>
                     <p>
-                        📍 <span th:text="${task.status.displayName}"></span>
+                        <span th:if="${task.status.displayName == 'Completed'}">✅</span>
+                        <span th:unless="${task.status.displayName == 'Completed'}">📍</span>
+                        <span th:text="${task.status.displayName}"></span>
                     </p>
 
                     <p>
@@ -136,9 +140,10 @@
                     <div class="project-item" th:each="task : ${completedTasks}">
                         <p class="name" th:text="${task.taskName}"></p>
                         <p>
-                            📍 <span th:text="${task.status.displayName}"></span>
+                            <span th:if="${task.status.displayName == 'Completed'}">✅</span>
+                            <span th:unless="${task.status.displayName == 'Completed'}">📍</span>
+                            <span th:text="${task.status.displayName}"></span>
                         </p>
-
                         <p>
                             ⏰ Deadline: <span th:text="${#temporals.format(task.deadline, 'dd.MM.YYYY')}"></span>
                         </p>
