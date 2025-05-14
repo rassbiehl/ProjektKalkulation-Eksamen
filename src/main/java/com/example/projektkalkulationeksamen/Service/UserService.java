@@ -4,11 +4,14 @@ import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
 import com.example.projektkalkulationeksamen.Exceptions.UserCreationException;
 import com.example.projektkalkulationeksamen.Exceptions.UserNotFoundException;
 import com.example.projektkalkulationeksamen.Exceptions.UserUpdateException;
+import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -109,6 +112,19 @@ public class UserService {
         return userRepository.getUserById(id).isPresent();
     }
 
+    @PostConstruct
+    public void initAdminUser() {
+        if (userRepository.getUserByUsername("admin").isEmpty()) {
+            User admin = new User();
+            admin.setUsername("admin");
+            admin.setPasswordHash(BCrypt.hashpw("admin123", BCrypt.gensalt())); // or use your password encoder
+            admin.setRole(Role.ADMIN);
 
+            userRepository.addUser(admin); // Or whatever method inserts user
+            System.out.println("✅ Admin user created.");
+
+
+        }
+    }
 }
 
