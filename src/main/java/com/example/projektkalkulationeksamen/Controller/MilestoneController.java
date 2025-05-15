@@ -136,7 +136,6 @@ public class MilestoneController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/add/" + projectId;
         }
-
         return "redirect:/projects/view/" + projectId;
     }
 
