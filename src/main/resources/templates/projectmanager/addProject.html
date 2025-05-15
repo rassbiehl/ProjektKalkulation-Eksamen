@@ -18,8 +18,6 @@
 
         <a th:href="@{/projects/{role}Startpage(role=${userRole})}" class="back-button">← Back</a>
 
-        <input type="hidden" name="projectId" th:value="${projectId}"/>
-
         <div>
             <label for="projectName">Project name:</label>
             <input id="projectName" class="input-field" type="text" th:field="*{projectName}" required>

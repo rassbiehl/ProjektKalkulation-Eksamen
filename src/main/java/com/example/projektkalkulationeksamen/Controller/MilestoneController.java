@@ -83,7 +83,7 @@ public class MilestoneController {
 
         if (!completedTasks.isEmpty()) {
             logger.debug("Found {} completed tasks.", ongoingTasks.size());
-            model.addAttribute("completedTasks", ongoingTasks);
+            model.addAttribute("completedTasks", completedTasks);
         }
 
         logger.info("Returning milestonepgage.html");
@@ -136,7 +136,6 @@ public class MilestoneController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/add/" + projectId;
         }
-
         return "redirect:/projects/view/" + projectId;
     }
 

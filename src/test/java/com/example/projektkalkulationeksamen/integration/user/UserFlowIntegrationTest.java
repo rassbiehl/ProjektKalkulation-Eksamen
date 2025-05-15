@@ -1,8 +1,4 @@
 package com.example.projektkalkulationeksamen.integration.user;
-
-
-import com.example.projektkalkulationeksamen.Controller.AuthController;
-import com.example.projektkalkulationeksamen.Controller.UserController;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Repository.UserRepository;

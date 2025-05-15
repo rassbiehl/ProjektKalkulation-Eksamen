@@ -100,8 +100,17 @@ public class RowMapperUtil {
             int actualHoursUsed = rs.getInt("actual_hours_used");
             Status status = Status.valueOf(rs.getString("task_status"));
             LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
-            LocalDateTime startedAt = rs.getTimestamp("start_date").toLocalDateTime();
-            LocalDateTime deadline = rs.getTimestamp("deadline").toLocalDateTime();
+            LocalDateTime startedAt = null;
+            Timestamp startedAtTs = rs.getTimestamp("start_date");
+            if (startedAtTs != null) {
+                startedAt = startedAtTs.toLocalDateTime();
+            }
+
+            LocalDateTime deadline = null;
+            Timestamp deadlineTs = rs.getTimestamp("deadline");
+            if (deadlineTs != null) {
+                deadline = deadlineTs.toLocalDateTime();
+            }
 
             Timestamp completedAtTimestamp = rs.getTimestamp("completed_at");
             LocalDateTime completedAt = null;

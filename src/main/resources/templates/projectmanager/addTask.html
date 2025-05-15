@@ -9,12 +9,10 @@
 </head>
 <body>
 <div class="background">
-    <h1 th:text="${task.id} != null ? 'Edit Task' : 'Create Task'"></h1>
+    <h1 th:text="${task.taskName}"></h1>
 
-    <form th:action="@{${task.id} != null and ${task.id} > 0 ? '/tasks/update' : '/tasks/create'}"
-          th:object="${task}" method="post">
+    <form method="post" th:action="@{/tasks/create}" th:object="${task}" >
 
-        <input type="hidden" th:field="*{id}"/>
         <input type="hidden" th:field="*{milestoneId}"/>
         <div>
             <label for="taskName">Name:</label>

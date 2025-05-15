@@ -116,7 +116,7 @@
             <h2>🔧 Milestone tasks</h2>
 
             <div class="project-content">
-
+                <!-- Ongoing tasks -->
                 <div class="project-item" th:each="task : ${ongoingTasks}">
                     <p class="name" th:text="${task.taskName}"></p>
                     <p>
@@ -124,60 +124,48 @@
                         <span th:unless="${task.status.displayName == 'Completed'}">📍</span>
                         <span th:text="${task.status.displayName}"></span>
                     </p>
-
                     <p>
-                        ⏰ Deadline: <span th:text="${#temporals.format(task.deadline, 'dd.MM.YYYY')}"></span>
+                        ⏰ Deadline: <span th:text="${#temporals.format(task.deadline, 'dd.MM.yyyy')}"></span>
                     </p>
-
                     <a th:href="@{/tasks/view/{id}(id=${task.id})}">
                         <button class="update-button" type="button">➡️ View Task</button>
                     </a>
-
                 </div>
 
-                <div class="project-content">
+                <!-- Completed tasks -->
+                <div class="project-item" th:each="task : ${completedTasks}">
+                    <p class="name" th:text="${task.taskName}"></p>
+                    <p>
+                        <span th:if="${task.status.displayName == 'Completed'}">✅</span>
+                        <span th:unless="${task.status.displayName == 'Completed'}">📍</span>
+                        <span th:text="${task.status.displayName}"></span>
+                    </p>
+                    <p>
+                        ⏰ Deadline: <span th:text="${#temporals.format(task.deadline, 'dd.MM.yyyy')}"></span>
+                    </p>
+                    <a th:href="@{/tasks/view/{id}(id=${task.id})}">
+                        <button class="update-button" type="button">➡️ View Task</button>
+                    </a>
+                </div>
 
-                    <div class="project-item" th:each="task : ${completedTasks}">
-                        <p class="name" th:text="${task.taskName}"></p>
-                        <p>
-                            <span th:if="${task.status.displayName == 'Completed'}">✅</span>
-                            <span th:unless="${task.status.displayName == 'Completed'}">📍</span>
-                            <span th:text="${task.status.displayName}"></span>
-                        </p>
-                        <p>
-                            ⏰ Deadline: <span th:text="${#temporals.format(task.deadline, 'dd.MM.YYYY')}"></span>
-                        </p>
-
-                        <a th:href="@{/project/{id}(id=${project.id})}">
-                            <button class="update-button" type="button">➡️ View Task</button>
-                        </a>
-
-                    </div>
-
-
-                <div class="project-item" th:if="${#lists.isEmpty(milestoneTasks)}">
+                <!-- No tasks -->
+                <div class="project-item" th:if="${#lists.isEmpty(ongoingTasks) and #lists.isEmpty(completedTasks)}">
                     <h3>This milestone has no tasks</h3>
-
-                    <a th:if="${isOwner}" th:href="@{/tasks/create/milestone/{milestoneId}(milestoneId=${milestone.id})}">
-                    <button class="add-button" type="button">✚ Add task</button>
-                </a>
                 </div>
 
-                <div class="project-item" th:if="${!#lists.isEmpty(milestoneTasks) and isOwner}">
-                    <div class="button-wrapper" id="#add-milestone">
-                        <a th:if="${isOwner}" th:href="@{/tasks/create/milestone/{milestoneId}(milestoneId=${milestone.id})}">
+                <!-- Add task button -->
+                <div class="project-item" th:if="${isOwner}">
+                    <div class="button-wrapper">
+                        <a th:href="@{/tasks/create/{milestoneId}(milestoneId=${milestone.id})}">
                             <button class="add-button" type="button">✚ Add task</button>
                         </a>
-
                     </div>
                 </div>
-
             </div>
 
+
+
         </div>
-
-
-    </div>
 </div>
 </div>
 
