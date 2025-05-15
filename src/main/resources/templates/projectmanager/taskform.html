@@ -11,9 +11,11 @@
 <div class="background">
     <h1 th:text="${task.id} != null ? 'Edit Task' : 'Create Task'"></h1>
 
-    <form th:action="@{${task.id} != null ? '/tasks/update' : '/tasks/create'}" th:object="${task}" method="post">
-        <input type="hidden" th:field="*{id}"/>
+    <form th:action="@{${task.id} != null and ${task.id} > 0 ? '/tasks/update' : '/tasks/create'}"
+          th:object="${task}" method="post">
 
+        <input type="hidden" th:field="*{id}"/>
+        <input type="hidden" th:field="*{milestoneId}"/>
         <div>
             <label for="taskName">Name:</label>
             <input id="taskName" class="input-field" type="text" th:field="*{taskName}" required>
@@ -22,21 +24,6 @@
         <div class="input">
             <p>Description:</p>
             <textarea class="input-field-description" th:field="*{taskDescription}" required></textarea>
-        </div>
-
-        <div class="input">
-            <p>Milestone ID:</p>
-            <input type="number" class="input-field" th:field="*{milestoneId}" required>
-        </div>
-
-        <div class="input">
-            <p>Estimated Hours:</p>
-            <input type="number" class="input-field" min="0" th:field="*{estimatedHours}" required>
-        </div>
-
-        <div class="input">
-            <p>Actual Hours Used:</p>
-            <input type="number" class="input-field" min="0" th:field="*{actualHoursUsed}">
         </div>
 
         <div class="input">
@@ -58,14 +45,9 @@
             <input type="datetime-local" class="input-field" th:field="*{deadline}">
         </div>
 
-        <div class="input">
-            <p>Completed At:</p>
-            <input type="datetime-local" class="input-field" th:field="*{completedAt}">
-        </div>
-
         <div>
             <button type="submit">Save</button>
-            <a th:href="@{/tasks}">Cancel</a>
+
         </div>
     </form>
 </div>

@@ -21,6 +21,9 @@ public class ProjectDTO {
     private List<MilestoneDTO> milestones;
     private int progress;
 
+    public ProjectDTO() {
+    }
+
     public ProjectDTO(int id, String projectName, String description, LocalDateTime createdAt, int projectManagerId, int actualHoursUsed, int estimatedHours, int calculatedCost, Status status, LocalDateTime deadline, LocalDateTime startDate, LocalDateTime completedAt, List<MilestoneDTO> milestones, int progress) {
         this.id = id;
         this.projectName = projectName;

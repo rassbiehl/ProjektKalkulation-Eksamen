@@ -43,6 +43,7 @@
                 <th>Estimated Hours</th>
                 <th>Delete</th>
                 <th>Update</th>
+                <th> Add Task</th>
             </tr>
             </thead>
             <tbody>
@@ -64,11 +65,19 @@
                 </td>
                 <td>
                     <div class="action-buttons">
-                        <form th:action="@{/updateMilestoneForm/{id}(id=${milestone.id})}">
+                        <form th:action="@{/updateMilestoneForm/{milestoneId}(milestoneId=${milestone.id})}" method="get">
                             <button class="update-button" type="submit">Update</button>
                         </form>
                     </div>
                 </td>
+                <td>
+                    <div class="action-buttons">
+                        <a th:href="@{/tasks/create/milestone/{milestoneId}(milestoneId=${milestone.id})}">
+                            <button class="add-button" type="button">Add Task</button>
+                        </a>
+                    </div>
+                </td>
+
             </tr>
             </tbody>
         </table>

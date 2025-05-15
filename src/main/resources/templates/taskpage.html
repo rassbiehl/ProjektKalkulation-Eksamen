@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Page</title>
+
+    <link rel="stylesheet" href="/css/background.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    <link rel="stylesheet" href="/css/usertable.css">
+    <link rel="stylesheet" href="/css/projectpage.css">
+</head>
+<body>
+
+<div class="background">
+    <div class="shadow">
+
+        <a th:href="@{/milestones/view/{id}(id=${task.milestoneId})}" class="back-button">← Back to Milestone</a>
+
+        <div class="headline">
+            <img src="/images/logonotext.svg" alt="Logo">
+            <h1 th:text="${task.taskName}"></h1>
+        </div>
+
+        <section th:if="${isOwner}" class="owner-actions">
+            <h2>Task Actions:</h2>
+            <div class="action-buttons">
+                <a th:href="@{/tasks/update/{id}(id=${task.id})}">
+                    <button class="update-button" type="button">🔄 Update Task</button>
+                </a>
+                <form th:action="@{/tasks/delete/{id}(id=${task.id})}" method="post"
+                      onsubmit="return confirm('Are you sure you want to delete this task?')">
+                    <button class="delete-button" type="submit">❌ Delete Task</button>
+                </form>
+            </div>
+        </section>
+
+        <div class="projectinfo">
+
+            <section class="project-overview">
+                <h2>Task Overview</h2>
+
+                <p th:if="${task.taskDescription}">
+                    📝 <span th:text="${task.taskDescription}"></span>
+                </p>
+
+                <p>
+                    <span th:if="${task.status.name() == 'COMPLETED'}">✅</span>
+                    <span th:unless="${task.status.name() == 'COMPLETED'}">📍</span>
+                    <span th:text="${task.status}"></span>
+                </p>
+            </section>
+
+            <section class="project-metrics">
+                <h2>⛏️ Work Metrics</h2>
+
+                <p>
+                    🕒 Hours estimated: <span th:text="${task.estimatedHours}"></span>
+                </p>
+
+                <p>
+                    📊 Hours used: <span th:text="${task.actualHoursUsed}"></span>
+                </p>
+            </section>
+
+            <section class="project-timeline">
+                <h2>🗓️ Timeline</h2>
+
+                <p th:if="${task.startedDate}">
+                    🟢 Started: <span th:text="${#temporals.format(task.startedDate, 'dd.MM.yyyy HH:mm')}"></span>
+                </p>
+
+                <p th:if="${task.deadline}">
+                    ⏰ Deadline: <span th:text="${#temporals.format(task.deadline, 'dd.MM.yyyy HH:mm')}"></span>
+                </p>
+
+                <p th:if="${task.completedAt}">
+                    ✅ Completed at: <span th:text="${#temporals.format(task.completedAt, 'dd.MM.yyyy HH:mm')}"></span>
+                </p>
+            </section>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
