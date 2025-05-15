@@ -144,4 +144,19 @@ public class MilestoneRepository {
             throw new DatabaseException("Failed to update milestone with ID " + updatedMilestone.getId());
         }
     }
+
+    public int estimatedHours (int milestoneId){
+
+        String sql = "SELECT SUM(estimated_hours) FROM tasks WHERE milestone_id = ?";
+
+       Integer estimatedHours = jdbcTemplate.queryForObject(sql,Integer.class,milestoneId);
+
+       if (estimatedHours == null){
+           return 0;
+       }
+
+       return estimatedHours;
+
+
+    }
 }

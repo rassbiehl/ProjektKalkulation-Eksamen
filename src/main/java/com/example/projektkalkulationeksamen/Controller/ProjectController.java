@@ -123,6 +123,7 @@ public class ProjectController {
         model.addAttribute("projectManager", userService.getUserById(project.getProjectManagerId()));
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("projectMilestones", project.getMilestones());
+        model.addAttribute("estimatedHours",projectService.estimatedHours(project.getId()));
 
         List<MilestoneDTO> ongoing = projectService.getOngoingMileStonesFromProject(id);
         if (!ongoing.isEmpty()) {

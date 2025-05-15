@@ -306,4 +306,13 @@ public class ProjectService {
         return foundProjects;
     }
 
+    public int estimatedHours (int projectId){
+        int estimatedHours = 0;
+        ProjectDTO projectDTO = getProjectWithDetails(projectId);
+        for (MilestoneDTO milestoneDTO : projectDTO.getMilestones()){
+           estimatedHours += milestoneDTO.getEstimatedHours();
+        }
+        return estimatedHours;
+    }
+
 }

@@ -65,12 +65,16 @@ public class MilestoneController {
         Role role = userService.getUserById(userId).getRole();
         boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
         logger.debug("User ID {} has role {}. Is owner: {}", userId, role, isOwner);
-
+        milestoneDTO.setEstimatedHours(milestoneService.estimatedHours(id));
         model.addAttribute("project", projectDTO);
         model.addAttribute("milestone", milestoneDTO);
         model.addAttribute("projectManager", userService.getUserById(projectDTO.getProjectManagerId()));
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("milestoneTasks", milestoneDTO.getTasks());
+
+        model.addAttribute("estimatedHours", milestoneService.estimatedHours(id));
+
+
 
         List<TaskDTO> ongoingTasks = milestoneService.getOngoingTasksFromMilestone(id);
 

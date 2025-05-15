@@ -3,6 +3,7 @@ package com.example.projektkalkulationeksamen.Repository;
 import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
 import com.example.projektkalkulationeksamen.Exceptions.TaskNotFoundException;
 import com.example.projektkalkulationeksamen.Mapper.RowMapperUtil;
+import com.example.projektkalkulationeksamen.Model.Milestone;
 import com.example.projektkalkulationeksamen.Model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -148,7 +149,6 @@ public class TaskRepository {
             throw new DatabaseException("Failed to update task with ID: " + updatedTask.getId(), e);
         }
     }
-
 }
 
 

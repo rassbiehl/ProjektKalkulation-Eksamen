@@ -102,13 +102,13 @@ public class RowMapperUtil {
             LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
             LocalDateTime startedAt = null;
             Timestamp startedAtTs = rs.getTimestamp("start_date");
-            if (startedAtTs != null) {
+            if (startedAtTs != null){
                 startedAt = startedAtTs.toLocalDateTime();
             }
 
-            LocalDateTime deadline = null;
             Timestamp deadlineTs = rs.getTimestamp("deadline");
-            if (deadlineTs != null) {
+            LocalDateTime deadline = null;
+            if (deadlineTs != null){
                 deadline = deadlineTs.toLocalDateTime();
             }
 
@@ -122,6 +122,10 @@ public class RowMapperUtil {
             return new Task(id, name, description, milestoneId, estimatedHours, actualHoursUsed, status, createdAt,
                     startedAt, deadline, completedAt);
         };
+    }
+
+    public static RowMapper<Integer> estimatedHours() {
+        return (rs, rowNum) -> rs.getInt("estimated_hours");
     }
 
 
