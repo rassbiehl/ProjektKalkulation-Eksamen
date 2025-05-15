@@ -6,10 +6,7 @@ import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
 import com.example.projektkalkulationeksamen.Model.Milestone;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.Status;
-import com.example.projektkalkulationeksamen.Service.MilestoneService;
-import com.example.projektkalkulationeksamen.Service.ProjectService;
-import com.example.projektkalkulationeksamen.Service.TaskService;
-import com.example.projektkalkulationeksamen.Service.UserService;
+import com.example.projektkalkulationeksamen.Service.*;
 import com.example.projektkalkulationeksamen.Validator.SessionValidator;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -20,6 +17,8 @@ import org.springframework.ui.Model;
 import com.example.projektkalkulationeksamen.Model.Task;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/tasks")
 public class TaskController {
@@ -29,14 +28,16 @@ private static final Logger logger = LoggerFactory.getLogger(TaskController.clas
     private final UserService userService;
     private final ProjectService projectService;
     private final MilestoneService milestoneService;
+    private final TaskCoworkerService taskCoworkerService;
 
     @Autowired
-    public TaskController(TaskService taskService, SessionValidator sessionValidator, UserService userService, ProjectService projectService, MilestoneService milestoneService) {
+    public TaskController(TaskService taskService, SessionValidator sessionValidator, UserService userService, ProjectService projectService, MilestoneService milestoneService, TaskCoworkerService taskCoworkerService) {
         this.taskService = taskService;
         this.sessionValidator = sessionValidator;
         this.userService = userService;
         this.projectService = projectService;
         this.milestoneService = milestoneService;
+        this.taskCoworkerService = taskCoworkerService;
     }
 
     @GetMapping("")
@@ -99,6 +100,7 @@ private static final Logger logger = LoggerFactory.getLogger(TaskController.clas
             task.setMilestoneId(milestoneId);
             model.addAttribute("task", task);
             model.addAttribute("milestoneId", milestoneId);
+            model.addAttribute("employees", userService.getAllEmployees());
             logger.info("Returning add task form");
             return "projectmanager/addTask";
         } else {
@@ -108,11 +110,16 @@ private static final Logger logger = LoggerFactory.getLogger(TaskController.clas
     }
 
     @PostMapping("/create")
-    public String createTask (HttpSession session, @ModelAttribute Task task){
+    public String createTask (
+            HttpSession session,
+            @ModelAttribute Task task,
+            @RequestParam (required = false) List<Integer> userIds
+    ) {
         if(!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             throw new AccessDeniedException("Only project managers can create tasks");
         }
-        taskService.addTask(task);
+        Task newTask = taskService.addTask(task);
+        taskCoworkerService.addCoworkersToTask(newTask.getId(), userIds);
         return "redirect:/milestones/view/" + task.getMilestoneId();
     }
 

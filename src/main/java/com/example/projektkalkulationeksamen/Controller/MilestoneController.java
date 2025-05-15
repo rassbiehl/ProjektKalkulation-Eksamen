@@ -134,7 +134,7 @@ public class MilestoneController {
             milestoneService.addMilestone(milestone);
         } catch (MilestoneCreationException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/add/" + projectId;
+            return "redirect:/milestones/add/" + projectId;
         }
         return "redirect:/projects/view/" + projectId;
     }
@@ -193,34 +193,44 @@ public class MilestoneController {
     @PostMapping("/update")
     public String updateMileStone(
             HttpSession session,
-            @ModelAttribute Milestone milestone, RedirectAttributes redirectAttributes) {
+            @ModelAttribute Milestone milestone,
+            RedirectAttributes redirectAttributes) {
+
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can update projects");
         }
 
-        Integer userId = (Integer) session.getAttribute("userId");
-        MilestoneDTO milestoneDTO = milestoneService.getMilestoneWithDetails(milestone.getId());
-        ProjectDTO projectDTO = projectService.getProjectWithDetails(milestoneDTO.getProjectId());
-        Role role = userService.getUserById(userId).getRole();
-        boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
+        try {
+            Integer userId = (Integer) session.getAttribute("userId");
+            MilestoneDTO milestoneDTO = milestoneService.getMilestoneWithDetails(milestone.getId());
+            ProjectDTO projectDTO = projectService.getProjectWithDetails(milestoneDTO.getProjectId());
 
-        if (isOwner) {
-            try {
-                milestoneService.updateMilestone(milestone);
-                logger.info("Milestone with ID {} was successfully updated by user {}", milestone.getId(), userId);
-            } catch(MilestoneCreationException e) {
-                logger.error("Could not update milestone with ID {}. Reason: {}", milestone.getId(), e.getMessage());
-                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-                return "redirect:/milestones/update/" + milestone.getId();
+            Role role = userService.getUserById(userId).getRole();
+            boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
+
+            if (isOwner) {
+                milestone.setProjectId(milestoneDTO.getProjectId());
+
+                try {
+                    milestoneService.updateMilestone(milestone);
+                    logger.info("Milestone with ID {} was successfully updated by user {}", milestone.getId(), userId);
+                } catch (MilestoneCreationException e) {
+                    logger.error("Could not update milestone with ID {}. Reason: {}", milestone.getId(), e.getMessage());
+                    redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                    return "redirect:/milestones/update/" + milestone.getId();
+                }
+            } else {
+                logger.warn("User with ID {} is not the owner of project ID {}. Access denied.", userId, milestone.getId());
+                throw new AccessDeniedException("Access denied: User does not own the project");
             }
 
-        } else {
-            logger.warn("User with ID {} is not the owner of project ID {}. Access denied.", userId, milestone.getId());
-            throw new AccessDeniedException("Access denied: User does not own the project");
+        } catch (MilestoneCreationException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/milestones/update/" + milestone.getId();
         }
 
         return "redirect:/milestones/view/" + milestone.getId();
     }
 
-}
+    }

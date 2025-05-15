@@ -58,6 +58,16 @@
     color: white !important;
     text-decoration: none;
 }
+
+.name span {
+    font-size: 1.5vw;
+    display: inline-block;
+    border-bottom: 1px solid white;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+    color: white !important;
+    text-decoration: none;
+}
 .name a:hover {
     color: white !important;
     text-decoration: none;

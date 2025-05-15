@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +31,18 @@ public class UserService {
     public List<User> getAllUsers() {
         logger.debug("Sends list of all users");
         return userRepository.getAllUsers();
+    }
+
+    public List<User> getAllEmployees () {
+        logger.debug("Sends list of all employees");
+        List<User> employees = new ArrayList<>();
+
+        for (User user : getAllUsers()) {
+            if (user.getRole() == Role.EMPLOYEE) {
+                employees.add(user);
+            }
+        }
+        return employees;
     }
 
     public User getUserById(int id) {

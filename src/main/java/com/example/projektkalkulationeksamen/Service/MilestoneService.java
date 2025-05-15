@@ -106,9 +106,14 @@ public class MilestoneService {
             ProjectDataValidator.validateDescription(milestone.getMilestoneDescription());
 
             Milestone currentMilestone = milestoneRepository.getMilestoneById(milestone.getId())
-                    .orElseThrow(() -> new MilestoneNotFoundException("Milestone not found with ID: {}" + milestone.getId()));
+                    .orElseThrow(() -> new MilestoneNotFoundException("Milestone not found with ID: " + milestone.getId()));
 
-            if (!currentMilestone.getMilestoneName().equalsIgnoreCase(milestone.getMilestoneName()) && milestoneExistsByNameInProject(milestone.getMilestoneName(), milestone.getProjectId())) {
+
+            String newName = milestone.getMilestoneName().trim().toLowerCase();
+            String currentName = currentMilestone.getMilestoneName().trim().toLowerCase();
+
+            if (!newName.equals(currentName) &&
+                    milestoneExistsByNameInProjectExcludeId(milestone.getMilestoneName(), milestone.getProjectId(), milestone.getId())) {
                 throw new MilestoneCreationException("Milestone name already exists for this project");
             }
 
@@ -117,13 +122,15 @@ public class MilestoneService {
             } else if (milestone.getStatus() != Status.COMPLETED) {
                 milestone.setCompletedAt(null);
             }
+
             boolean updated = milestoneRepository.updateMilestone(milestone);
 
             if (!updated) {
                 logger.warn("Cannot update. No milestone found with ID: {}", milestone.getId());
                 throw new MilestoneCreationException("Cannot update. No milestone found with ID: " + milestone.getId());
             }
-            logger.info("Succesfully updated milestone with ID: {}", milestone.getId());
+
+            logger.info("Successfully updated milestone with ID: {}", milestone.getId());
         } catch (DatabaseException e) {
             logger.error("Database error while trying to update milestone with ID: {}", milestone.getId(), e);
             throw new ProjectCreationException("Database error while updating milestone with ID: " + milestone.getId(), e);
@@ -142,6 +149,23 @@ public class MilestoneService {
 
             return false;
         }
+
+    public boolean milestoneExistsByNameInProjectExcludeId(String name, int projectId, int excludeId) {
+        String target = name.trim();
+
+        List<Milestone> milestones = getMilestonesByProjectId(projectId);
+
+        for (Milestone m : milestones) {
+            if (m.getId() != excludeId) {
+                String current = m.getMilestoneName().trim();
+                if (current.equalsIgnoreCase(target)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
         //DTO
 

@@ -9,12 +9,18 @@
 </head>
 <body>
 <div class="background">
-    <h1 th:text="${task.taskName}"></h1>
+    <div class="headline">
+        <img src="/images/logonotext.svg" alt="Logo">
+        <h1>Add new task to milestone</h1>
+    </div>
 
-    <form method="post" th:action="@{/tasks/create}" th:object="${task}" >
+    <form method="post" th:action="@{/tasks/create}" th:object="${task}">
 
-        <input type="hidden" th:field="*{milestoneId}"/>
-        <div>
+        <a th:href="@{/milestones/view/{id}(id=${milestoneId})}" class="back-button" >← Back</a>
+
+        <input type="hidden" th:field="*{milestoneId}" />
+
+        <div style="margin-top: 30px;">
             <label for="taskName">Name:</label>
             <input id="taskName" class="input-field" type="text" th:field="*{taskName}" required>
         </div>
@@ -22,15 +28,6 @@
         <div class="input">
             <p>Description:</p>
             <textarea class="input-field-description" th:field="*{taskDescription}" required></textarea>
-        </div>
-
-        <div class="input">
-            <label for="status">Status:</label>
-            <select id="status" th:field="*{status}">
-                <option value="NOT_STARTED">Not Started</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="COMPLETED">Completed</option>
-            </select>
         </div>
 
         <div class="input">
@@ -43,9 +40,25 @@
             <input type="datetime-local" class="input-field" th:field="*{deadline}">
         </div>
 
+        <div class="input">
+            <p>Estimated hours:</p>
+            <input type="number" class="input-field" th:field="*{estimatedHours}">
+        </div>
+
+        <h3>Assign employees to task</h3>
+        <div class="checkbox-grid" style="margin-top: 20px;">
+            <label th:each="user : ${employees}">
+                <input type="checkbox" name="userIds" th:value="${user.id}" />
+                <span th:text="${user.username}">Employee Name</span>
+            </label>
+        </div>
+
+        <div th:if="${#lists.isEmpty(employees)}">
+            <h3>No employees registered.</h3>
+        </div>
+
         <div>
             <button type="submit">Save</button>
-
         </div>
     </form>
 </div>
