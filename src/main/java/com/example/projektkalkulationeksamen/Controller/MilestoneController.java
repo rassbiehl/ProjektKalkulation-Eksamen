@@ -83,7 +83,7 @@ public class MilestoneController {
 
         if (!completedTasks.isEmpty()) {
             logger.debug("Found {} completed tasks.", ongoingTasks.size());
-            model.addAttribute("completedTasks", ongoingTasks);
+            model.addAttribute("completedTasks", completedTasks);
         }
 
         logger.info("Returning milestonepgage.html");

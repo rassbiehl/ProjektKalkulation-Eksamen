@@ -3,6 +3,7 @@ package com.example.projektkalkulationeksamen.Controller;
 import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
 import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
+import com.example.projektkalkulationeksamen.Model.Milestone;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.Status;
 import com.example.projektkalkulationeksamen.Service.MilestoneService;
@@ -11,6 +12,8 @@ import com.example.projektkalkulationeksamen.Service.TaskService;
 import com.example.projektkalkulationeksamen.Service.UserService;
 import com.example.projektkalkulationeksamen.Validator.SessionValidator;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/tasks")
 public class TaskController {
-
+private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
     private final TaskService taskService;
     private final SessionValidator sessionValidator;
     private final UserService userService;
@@ -28,11 +31,11 @@ public class TaskController {
     private final MilestoneService milestoneService;
 
     @Autowired
-    public TaskController (TaskService taskService, SessionValidator sessionValidator, ProjectService projectService, UserService userService, MilestoneService milestoneService) {
+    public TaskController(TaskService taskService, SessionValidator sessionValidator, UserService userService, ProjectService projectService, MilestoneService milestoneService) {
         this.taskService = taskService;
         this.sessionValidator = sessionValidator;
-        this.projectService = projectService;
         this.userService = userService;
+        this.projectService = projectService;
         this.milestoneService = milestoneService;
     }
 
@@ -45,24 +48,7 @@ public class TaskController {
         return "task/tasklist";
     }
 
-    @GetMapping("/create")
-    public String showCreateForm (HttpSession session, Model model) {
-        if(!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
-            throw new AccessDeniedException("Only project managers can create tasks");
-        }
-        model.addAttribute("task", new Task());
-        return "task/taskform";
 
-    }
-
-    @PostMapping("/create")
-    public String createTask (HttpSession session, @ModelAttribute Task task){
-        if(!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
-            throw new AccessDeniedException("Only project managers can create tasks");
-        }
-        taskService.addTask(task);
-        return "redirect:/milestones/view/" + task.getMilestoneId();
-    }
 
     @GetMapping("/update/{id}")
     public String showUpateForm (HttpSession session, @PathVariable int id, Model model) {
@@ -96,16 +82,38 @@ public class TaskController {
         return "redirect:/milestones/view/" + milestoneId;
     }
 
-    @GetMapping("/create/milestone/{milestoneId}")
-    public String showCreateTaskForMilestone(@PathVariable int milestoneId, HttpSession session, Model model) {
+     @GetMapping("/create/{milestoneId}")
+    public String showCreateTaskForm(@PathVariable int milestoneId, HttpSession session, Model model) {
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             throw new AccessDeniedException("Only project managers can create tasks");
         }
-        Task task = new Task();
-        task.setMilestoneId(milestoneId);
 
-        model.addAttribute("task", task);
-        return "projectmanager/taskform";
+        Milestone milestone = milestoneService.getMilestoneById(milestoneId);
+        Integer userId = (Integer) session.getAttribute("userId");
+        ProjectDTO project = projectService.getProjectWithDetails(milestone.getProjectId());
+        Role role = userService.getUserById(userId).getRole();
+        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+
+        if (isOwner) {
+            Task task = new Task();
+            task.setMilestoneId(milestoneId);
+            model.addAttribute("task", task);
+            model.addAttribute("milestoneId", milestoneId);
+            logger.info("Returning add task form");
+            return "projectmanager/addTask";
+        } else {
+            logger.warn("Failed to get add Task page because of missing owner id in session");
+            throw new AccessDeniedException("Access denied: User does not own the project");
+        }
+    }
+
+    @PostMapping("/create")
+    public String createTask (HttpSession session, @ModelAttribute Task task){
+        if(!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+            throw new AccessDeniedException("Only project managers can create tasks");
+        }
+        taskService.addTask(task);
+        return "redirect:/milestones/view/" + task.getMilestoneId();
     }
 
     @GetMapping("/view/{id}")
