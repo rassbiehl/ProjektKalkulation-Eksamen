@@ -9,12 +9,19 @@
 </head>
 <body>
 <div class="background">
-    <h1 th:text="${task.taskName}"></h1>
+    <div class="headline">
+        <img src="/images/logonotext.svg" alt="Logo">
+        <h1>Update task: '<span th:text="${task.taskName}"></span>'</h1>
+    </div>
 
-    <form method="post" th:action="@{/tasks/create}" th:object="${task}" >
+    <form method="post" th:action="@{/tasks/update}" th:object="${task}">
+        <input type="hidden" th:field="*{id}" />
+        <input type="hidden" th:field="*{milestoneId}" />
+        <a th:href="@{/tasks/view/{id}(id=${task.id})}" class="back-button">← Back</a>
 
-        <input type="hidden" th:field="*{milestoneId}"/>
-        <div>
+
+
+        <div style="margin-top: 30px;">
             <label for="taskName">Name:</label>
             <input id="taskName" class="input-field" type="text" th:field="*{taskName}" required>
         </div>
@@ -24,31 +31,64 @@
             <textarea class="input-field-description" th:field="*{taskDescription}" required></textarea>
         </div>
 
-
-
-        <div class="input">
-            <p>Start Date:</p>
-            <input type="datetime-local" class="input-field" th:field="*{startedDate}">
-        </div>
-
-        <div class="input">
-            <p>Deadline:</p>
-            <input type="datetime-local" class="input-field" th:field="*{deadline}">
+        <div>
+            <label for="starteddate">New Startdate:</label>
+            <input id="starteddate"
+                   name="startedDate"
+                   type="datetime-local"
+                   th:value="${#temporals.format(task.startedDate, 'yyyy-MM-dd''T''HH:mm')}" />
         </div>
 
         <div>
-            <button type="submit">Save</button>
+            <label for="deadline">Deadline:</label>
+            <input id="deadline"
+                   type="datetime-local"
+                   name="deadline"
+                   th:value="${#temporals.format(task.deadline, 'yyyy-MM-dd''T''HH:mm')}"
+                   >
+        </div>
 
+        <div class="input">
+            <p>Estimated hours:</p>
+            <input type="number" class="input-field" th:field="*{estimatedHours}">
+        </div>
+
+        <div class="input">
+            <label for="status">Status:</label>
+            <select id="status" th:field="*{status}">
+                <option value="NOT_STARTED">Not Started</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="COMPLETED">Completed</option>
+            </select>
+
+            <h3 style="margin-top: 20px;">Assign employees to task</h3>
+            <div class="checkbox-grid">
+                <label th:each="user : ${employees}">
+                    <input type="checkbox"
+                           name="userIds"
+                           th:value="${user.id}"
+                           th:checked="${assignedEmployees.contains(user.id)}"/>
+                    <span th:text="${user.username}">Employee Name</span>
+                </label>
+            </div>
+
+
+            <div th:if="${#lists.isEmpty(employees)}">
+                <h3>No employees registered.</h3>
+            </div>
+
+            <div>
+                <button type="submit">Save</button>
+            </div>
+
+            <div th:if="${errorMessage}" class="error-message">
+                <p th:text="${errorMessage}" style="text-align: center; color: #7e1010 "></p>
+            </div>
         </div>
     </form>
 </div>
+
 </body>
 </html>
 
-<div class="input">
-    <label for="status">Status:</label>
-    <select id="status" th:field="*{status}">
-        <option value="NOT_STARTED">Not Started</option>
-        <option value="IN_PROGRESS">In Progress</option>
-        <option value="COMPLETED">Completed</option>
-    </select>
+

@@ -2,6 +2,7 @@ package com.example.projektkalkulationeksamen.Service;
 
 import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
 import com.example.projektkalkulationeksamen.Exceptions.taskcoworker.TaskCoworkerException;
+import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Repository.TaskCoworkerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,10 +18,12 @@ public class TaskCoworkerService {
     private static final Logger logger = LoggerFactory.getLogger(TaskCoworkerService.class);
 
     private final TaskCoworkerRepository taskCoworkerRepository;
+    private final UserService userService;
 
     @Autowired
-    public TaskCoworkerService(TaskCoworkerRepository taskCoworkerRepository) {
+    public TaskCoworkerService(TaskCoworkerRepository taskCoworkerRepository, UserService userService) {
         this.taskCoworkerRepository = taskCoworkerRepository;
+        this.userService = userService;
     }
 
 
@@ -80,6 +84,16 @@ public class TaskCoworkerService {
 
     public List<Integer> getAllCoworkersIdsForTask (int taskId) {
         return taskCoworkerRepository.getAllCoworkersIdsForTask(taskId);
+    }
+
+    public List<User> getAllCoworkersForTask(int taskId) {
+        List<Integer> allTaskCoworkersIds = getAllCoworkersIdsForTask(taskId);
+        List<User> allTaskCoworkers = new ArrayList<>();
+
+        for (Integer userId : allTaskCoworkersIds) {
+            allTaskCoworkers.add(userService.getUserById(userId));
+        }
+        return allTaskCoworkers;
     }
 
     public List<Integer> getAllTaskIdsForCoworker (int userId) {
