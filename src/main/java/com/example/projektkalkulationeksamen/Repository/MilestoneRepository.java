@@ -33,7 +33,7 @@ public class MilestoneRepository {
         return jdbcTemplate.query(sql, RowMapperUtil.milestoneRowMapper());
     }
 
-    public List<Milestone> getMilestonesByProjectId (int projectId) {
+    public List<Milestone> getMilestonesByProjectId(int projectId) {
         String sql = "SELECT * FROM milestones " +
                 "WHERE project_id = ?";
 
@@ -72,9 +72,9 @@ public class MilestoneRepository {
     public Milestone addMilestone(Milestone milestone) {
         try {
             String sql = """
-            INSERT INTO milestones (milestone_name, milestone_description, project_id, deadline)
-            VALUES (?, ?, ?, ?)
-        """;
+                        INSERT INTO milestones (milestone_name, milestone_description, project_id, deadline)
+                        VALUES (?, ?, ?, ?)
+                    """;
 
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -144,5 +144,28 @@ public class MilestoneRepository {
         } catch (DataAccessException e) {
             throw new DatabaseException("Failed to update milestone with ID " + updatedMilestone.getId(), e);
         }
+    }
+
+    public int estimatedHours(int milestoneId) {
+
+        String sql = "SELECT SUM(estimated_hours) FROM tasks WHERE milestone_id = ?";
+
+        Integer estimatedHours = jdbcTemplate.queryForObject(sql, Integer.class, milestoneId);
+
+        if (estimatedHours == null) {
+            return 0;
+        }
+        return estimatedHours;
+    }
+
+    public int actualHoursUsed(int milestoneId){
+        String sql = "SELECT SUM(actual_hours_used) FROM tasks WHERE milestone_id = ?";
+
+        Integer actualHoursUsed = jdbcTemplate.queryForObject(sql,Integer.class, milestoneId);
+
+        if (actualHoursUsed == null){
+            return 0;
+        }
+        return actualHoursUsed;
     }
 }

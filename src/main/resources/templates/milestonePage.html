@@ -64,11 +64,11 @@
                 <h2>⛏️ Work Metrics </h2>
 
                 <p>
-                    📊 Hours spent: <span th:text="${milestone.actualHoursUsed}"></span> hours
+                    📊 Hours spent: <span th:text="${actualHoursUsed}"></span> hours
                 </p>
 
-                <p th:if="${project.estimatedHours}">
-                    ⏳ Estimated remaining: <span th:text="${milestone.estimatedHours}"></span> hours
+                <p>
+                    ⏳ Estimated remaining: <span th:text="${estimatedHours}"></span> hours
                 </p>
 
                 <p>
