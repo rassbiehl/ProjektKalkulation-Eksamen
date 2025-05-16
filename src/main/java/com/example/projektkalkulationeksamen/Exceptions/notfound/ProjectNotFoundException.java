@@ -1,8 +1,6 @@
-package com.example.projektkalkulationeksamen.Exceptions;
+package com.example.projektkalkulationeksamen.Exceptions.notfound;
 
-import com.example.projektkalkulationeksamen.Model.Project;
-
-public class ProjectNotFoundException extends RuntimeException {
+public class ProjectNotFoundException extends NotFoundException {
     public ProjectNotFoundException(String message) {
         super(message);
     }

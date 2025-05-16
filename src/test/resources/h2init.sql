@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS milestones;
 DROP TABLE IF EXISTS projects;
 DROP TABLE IF EXISTS users;
 
--- creating database
+-- Brugere
 CREATE TABLE users (
                        id INT NOT NULL AUTO_INCREMENT,
                        username VARCHAR(30) NOT NULL UNIQUE,
@@ -15,6 +15,7 @@ CREATE TABLE users (
                        PRIMARY KEY (id)
 );
 
+-- Projekter
 CREATE TABLE projects (
                           id INT NOT NULL AUTO_INCREMENT,
                           project_name VARCHAR(30) NOT NULL,
@@ -32,6 +33,7 @@ CREATE TABLE projects (
                           FOREIGN KEY (project_manager_id) REFERENCES users(id)
 );
 
+-- Milepæle
 CREATE TABLE milestones (
                             id INT NOT NULL AUTO_INCREMENT,
                             milestone_name VARCHAR(30) NOT NULL,
@@ -45,9 +47,10 @@ CREATE TABLE milestones (
                             deadline DATETIME,
                             completed_at DATETIME,
                             PRIMARY KEY (id),
-                            FOREIGN KEY (project_id) REFERENCES projects(id)
+                            FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 
+-- Opgaver
 CREATE TABLE tasks (
                        id INT NOT NULL AUTO_INCREMENT,
                        task_name VARCHAR(30) NOT NULL,
@@ -61,9 +64,10 @@ CREATE TABLE tasks (
                        deadline DATETIME,
                        completed_at DATETIME,
                        PRIMARY KEY (id),
-                       FOREIGN KEY (milestone_id) REFERENCES milestones(id)
+                       FOREIGN KEY (milestone_id) REFERENCES milestones(id) ON DELETE CASCADE
 );
 
+-- Medarbejdere til opgaver
 CREATE TABLE task_coworkers (
                                 id INT NOT NULL AUTO_INCREMENT,
                                 user_id INT NOT NULL,

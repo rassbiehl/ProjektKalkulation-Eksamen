@@ -2,14 +2,14 @@ package com.example.projektkalkulationeksamen.Controller;
 
 import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
-import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
-import com.example.projektkalkulationeksamen.Exceptions.ProjectCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.project.ProjectUpdateException;
+import com.example.projektkalkulationeksamen.Exceptions.security.AccessDeniedException;
+import com.example.projektkalkulationeksamen.Exceptions.project.ProjectCreationException;
 import com.example.projektkalkulationeksamen.Model.Project;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.Status;
 import com.example.projektkalkulationeksamen.Service.ProjectService;
 import com.example.projektkalkulationeksamen.Service.UserService;
-import com.example.projektkalkulationeksamen.Validator.ProjectDataValidator;
 import com.example.projektkalkulationeksamen.Validator.SessionValidator;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -46,12 +46,12 @@ public class ProjectController {
             Model model
     ) {
 
-        Integer userId = (Integer) session.getAttribute("userId");
-
         if (!sessionValidator.isSessionValid(session)) {
             logger.info("User is not logged in for current session. Redirecting to loginform.html");
             return "redirect:/loginform";
         }
+
+        Integer userId = (Integer) session.getAttribute("userId");
 
         Role requiredRole;
         try {
@@ -168,24 +168,30 @@ public class ProjectController {
     @PostMapping("/save")
     public String saveProject(
             HttpSession session,
-            @ModelAttribute Project project
+            @ModelAttribute Project project,
+            RedirectAttributes redirectAttributes
     ) {
-        logger.debug("Attempting to add new project to database with ID: {}", project.getId());
+        logger.debug("Attempting to add new project");
+
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can add projects");
         }
+
         Integer userId = (Integer) session.getAttribute("userId");
-
-
         project.setProjectManagerId(userId);
 
-        projectService.addProject(project);
-        logger.info("Successfully added new project to database with ID: {} and projectmanager ID: {}", project.getId(), userId);
+        try {
+            projectService.addProject(project);
+            logger.info("Successfully added project with name: {}", project.getProjectName());
+            Role role = userService.getUserById(userId).getRole();
+            return "redirect:/projects/" + role.toString().toLowerCase() + "Startpage";
 
-        Role role = userService.getUserById(userId).getRole();
-
-        return "redirect:/projects/" + role.toString().toLowerCase() + "Startpage";
+        } catch (ProjectCreationException e) {
+            logger.warn("Project creation failed: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/projects/add";
+        }
     }
 
     @PostMapping("/delete/{id}")
@@ -206,12 +212,11 @@ public class ProjectController {
 
         if (isOwner) {
             projectService.deleteProject(id);
-            logger.info("Succesfully deleted project with ID: {}", id);
+            logger.info("Successfully deleted project with ID: {}", id);
         } else {
             logger.warn("Failed to delete project with ID: {} because of missing owner id in session", id);
             throw new AccessDeniedException("Access denied: User does not own the project");
         }
-
 
         return "redirect:/projects/" + role.toString().toLowerCase() + "Startpage";
     }
@@ -281,10 +286,10 @@ public class ProjectController {
             try {
                 projectService.updateProject(projectToUpdate);
                 logger.info("Project with ID {} was successfully updated by user {}", id, userId);
-            } catch (ProjectCreationException e) {
+            } catch (ProjectUpdateException e) {
                 logger.error("Could not update project with ID {}. Reason: {}", id, e.getMessage());
                 redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-                return "redirect:/projects/updateproject/" + id;
+                return "redirect:/projects/update/" + id;
             }
         } else {
             logger.warn("User with ID {} is not the owner of project ID {}. Access denied.", userId, id);

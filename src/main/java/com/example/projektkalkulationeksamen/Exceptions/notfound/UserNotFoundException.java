@@ -1,6 +1,6 @@
-package com.example.projektkalkulationeksamen.Exceptions;
+package com.example.projektkalkulationeksamen.Exceptions.notfound;
 
-public class UserNotFoundException extends RuntimeException {
+public class UserNotFoundException extends NotFoundException {
     public UserNotFoundException (String message){
         super (message);
     }

@@ -1,7 +1,9 @@
 package com.example.projektkalkulationeksamen.unit.service;
 
 
-import com.example.projektkalkulationeksamen.Exceptions.*;
+import com.example.projektkalkulationeksamen.Exceptions.notfound.UserNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.security.AuthenticationFailedException;
+import com.example.projektkalkulationeksamen.Exceptions.user.*;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Repository.UserRepository;
@@ -20,7 +22,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;

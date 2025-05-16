@@ -1,6 +1,6 @@
 package com.example.projektkalkulationeksamen.unit.validator;
 
-import com.example.projektkalkulationeksamen.Exceptions.UserCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.user.UserCreationException;
 import com.example.projektkalkulationeksamen.Validator.UserValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

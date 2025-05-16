@@ -19,7 +19,7 @@
 
         <div class="headline">
             <img src="/images/logonotext.svg" alt="Logo">
-            <h1 th:text="${milestone.milestoneName}"></h1>
+            <h1>Milestone: '<span th:text="${milestone.milestoneName}"></span>'</h1>
         </div>
 
         <div class="projectinfo">
@@ -81,11 +81,11 @@
                 <h2>🕒 Timestamps</h2>
 
                 <p>
-                    Created at: <span th:text="${#temporals.format(milestone.createdAt, 'dd.MM.yyyy')}"></span>
+                    ✏️ Created at: <span th:text="${#temporals.format(milestone.createdAt, 'dd.MM.yyyy')}"></span>
                 </p>
 
                 <p>
-                    Deadline: <span th:text="${#temporals.format(milestone.deadline, 'dd.MM.yyyy')}"></span>
+                    ⏰ Deadline: <span th:text="${#temporals.format(milestone.deadline, 'dd.MM.yyyy')}"></span>
                 </p>
 
             </section>

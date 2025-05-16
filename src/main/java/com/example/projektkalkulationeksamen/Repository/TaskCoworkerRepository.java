@@ -1,14 +1,11 @@
 package com.example.projektkalkulationeksamen.Repository;
 
-import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
 import java.util.List;
 
 @Repository

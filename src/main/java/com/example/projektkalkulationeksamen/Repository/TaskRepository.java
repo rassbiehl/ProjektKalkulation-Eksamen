@@ -1,7 +1,6 @@
 package com.example.projektkalkulationeksamen.Repository;
 
-import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
-import com.example.projektkalkulationeksamen.Exceptions.TaskNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
 import com.example.projektkalkulationeksamen.Mapper.RowMapperUtil;
 import com.example.projektkalkulationeksamen.Model.Milestone;
 import com.example.projektkalkulationeksamen.Model.Task;
@@ -30,31 +29,27 @@ public class TaskRepository {
 
     public Task addTask(Task task) {
         try {
-            String sql = "INSERT INTO tasks (task_name, task_description, milestone_id, estimated_hours, actual_hours_used," +
-                    " task_status, start_date, deadline, completed_at) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO tasks (task_name, task_description, milestone_id, estimated_hours, " +
+                    " start_date, deadline) " +
+                    "VALUES (?, ?, ?, ?, ?, ?   )";
 
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-
                 ps.setString(1, task.getTaskName());
                 ps.setString(2, task.getTaskDescription());
                 ps.setInt(3, task.getMilestoneId());
                 ps.setInt(4, task.getEstimatedHours());
-                ps.setInt(5, task.getActualHoursUsed());
-                ps.setString(6, task.getStatus().name());
-                ps.setObject(7, task.getStartedDate());
-                ps.setObject(8, task.getDeadline());
-                ps.setObject(9, task.getCompletedAt());
+                ps.setObject(5, task.getStartedDate());
+                ps.setObject(6, task.getDeadline());
                 return ps;
             }, keyHolder);
 
             Number key = keyHolder.getKey();
 
             if (key == null) {
-                throw new DatabaseException("Failed to retrieve generated ID for new user");
+                throw new DatabaseException("Failed to retrieve generated ID for new task");
             }
 
             int generatedId = key.intValue();

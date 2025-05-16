@@ -1,4 +1,4 @@
-package com.example.projektkalkulationeksamen.Exceptions;
+package com.example.projektkalkulationeksamen.Exceptions.database;
 
 
 public class DatabaseException extends RuntimeException {

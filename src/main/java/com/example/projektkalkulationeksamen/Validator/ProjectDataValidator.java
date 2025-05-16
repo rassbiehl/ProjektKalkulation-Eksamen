@@ -1,7 +1,6 @@
 package com.example.projektkalkulationeksamen.Validator;
 
-import com.example.projektkalkulationeksamen.Exceptions.MilestoneCreationException;
-import com.example.projektkalkulationeksamen.Exceptions.ProjectCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.project.ProjectCreationException;
 
 public class ProjectDataValidator {
     public static void validateName(String name){

@@ -18,7 +18,7 @@
 
         <div class="headline">
             <img src="/images/logonotext.svg" alt="Logo">
-            <h1 th:text="${task.taskName}"></h1>
+            <h1>Task: '<span th:text="${task.taskName}"></span>'</h1>
         </div>
 
         <section th:if="${isOwner}" class="owner-actions">
@@ -44,9 +44,9 @@
                 </p>
 
                 <p>
-                    <span th:if="${task.status.name() == 'COMPLETED'}">✅</span>
-                    <span th:unless="${task.status.name() == 'COMPLETED'}">📍</span>
-                    <span th:text="${task.status}"></span>
+                    <span th:if="${task.status.name() == 'COMPLETED'}">✅ </span>
+                    <span th:if="${task.status.name() != 'COMPLETED'}">📍</span>
+                    <span th:text="${task.status.displayName}"></span>
                 </p>
             </section>
 
@@ -66,7 +66,7 @@
                 <h2>🗓️ Timeline</h2>
 
                 <p th:if="${task.startedDate}">
-                    🟢 Started: <span th:text="${#temporals.format(task.startedDate, 'dd.MM.yyyy HH:mm')}"></span>
+                    🚀 Startdate: <span th:text="${#temporals.format(task.startedDate, 'dd.MM.yyyy HH:mm')}"></span>
                 </p>
 
                 <p th:if="${task.deadline}">

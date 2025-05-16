@@ -1,6 +1,11 @@
 package com.example.projektkalkulationeksamen.Validator;
 
-import com.example.projektkalkulationeksamen.Exceptions.UserCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.user.UserCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.user.UserUpdateException;
+import com.example.projektkalkulationeksamen.Model.Role;
+import com.example.projektkalkulationeksamen.Model.User;
+import com.example.projektkalkulationeksamen.Service.UserService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class UserValidator {
 
@@ -19,4 +24,31 @@ if (password == null || password.length() < 6){
         validateUsername(username);
         validatePassword(password);
     }
+
+    public static User validateAndPrepareUpdate(User currentUser, String newUsername, String rawPassword, Role newRole, UserService userService) {
+        String finalUsername = currentUser.getUsername();
+        String finalPassword = currentUser.getPasswordHash();
+
+        if (!currentUser.getUsername().equals(newUsername)) {
+            if (userService.userExistsByUsername(newUsername)) {
+                throw new UserUpdateException("Username already taken");
+            }
+            validateUsername(newUsername);
+            finalUsername = newUsername;
+        }
+
+        if (rawPassword != null && !rawPassword.trim().isEmpty()) {
+            validatePassword(rawPassword);
+            finalPassword = new BCryptPasswordEncoder().encode(rawPassword);
+        }
+
+        if (finalUsername.equals(currentUser.getUsername())
+                && finalPassword.equals(currentUser.getPasswordHash())
+                && currentUser.getRole().equals(newRole)) {
+            throw new UserUpdateException("No changes made. Nothing to update.");
+        }
+
+        return new User(currentUser.getId(), finalUsername, finalPassword, newRole);
+    }
+
 }

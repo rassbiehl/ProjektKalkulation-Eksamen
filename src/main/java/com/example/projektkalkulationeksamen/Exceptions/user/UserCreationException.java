@@ -1,4 +1,4 @@
-package com.example.projektkalkulationeksamen.Exceptions;
+package com.example.projektkalkulationeksamen.Exceptions.user;
 
 public class UserCreationException extends RuntimeException {
     public UserCreationException(String message) {

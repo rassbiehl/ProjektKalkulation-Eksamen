@@ -1,4 +1,4 @@
-package com.example.projektkalkulationeksamen.Exceptions;
+package com.example.projektkalkulationeksamen.Exceptions.security;
 
 public class AccessDeniedException extends RuntimeException{
     public AccessDeniedException(String message) {
