@@ -232,4 +232,8 @@ public class MilestoneService {
         return milestoneRepository.estimatedHours(milestoneId);
         }
 
+        public int actualHoursUsed(int milestoneId){
+        return milestoneRepository.actualHoursUsed(milestoneId);
+        }
+
     }

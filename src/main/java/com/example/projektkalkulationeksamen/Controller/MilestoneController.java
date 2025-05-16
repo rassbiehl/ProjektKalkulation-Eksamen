@@ -71,10 +71,8 @@ public class MilestoneController {
         model.addAttribute("projectManager", userService.getUserById(projectDTO.getProjectManagerId()));
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("milestoneTasks", milestoneDTO.getTasks());
-
         model.addAttribute("estimatedHours", milestoneService.estimatedHours(id));
-
-
+        model.addAttribute("actualHoursUsed", milestoneService.actualHoursUsed(id));
 
         List<TaskDTO> ongoingTasks = milestoneService.getOngoingTasksFromMilestone(id);
 
@@ -213,7 +211,7 @@ public class MilestoneController {
             try {
                 milestoneService.updateMilestone(milestone);
                 logger.info("Milestone with ID {} was successfully updated by user {}", milestone.getId(), userId);
-            } catch(MilestoneCreationException e) {
+            } catch (MilestoneCreationException e) {
                 logger.error("Could not update milestone with ID {}. Reason: {}", milestone.getId(), e.getMessage());
                 redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
                 return "redirect:/milestones/update/" + milestone.getId();
