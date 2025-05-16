@@ -1,17 +1,16 @@
 package com.example.projektkalkulationeksamen.Service;
 
-import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
-import com.example.projektkalkulationeksamen.Exceptions.UserCreationException;
-import com.example.projektkalkulationeksamen.Exceptions.UserNotFoundException;
-import com.example.projektkalkulationeksamen.Exceptions.UserUpdateException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DeletionException;
+import com.example.projektkalkulationeksamen.Exceptions.user.UserCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.notfound.UserNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.user.UserUpdateException;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Repository.UserRepository;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public class UserService {
         return userRepository.getAllUsers();
     }
 
-    public List<User> getAllEmployees () {
+    public List<User> getAllEmployees() {
         logger.debug("Sends list of all employees");
         List<User> employees = new ArrayList<>();
 
@@ -46,36 +45,42 @@ public class UserService {
     }
 
     public User getUserById(int id) {
-        try {
             logger.debug("Sends user with ID: {}", id);
 
             Optional<User> foundUser = userRepository.getUserById(id);
 
-            return foundUser.orElseThrow(() -> new UserNotFoundException("Failed to find user with ID: " + id));
-        } catch (DatabaseException e) {
-            throw new UserNotFoundException("Failed to find user with ID: " + id, e);
-        }
+            return foundUser.orElseThrow(() -> {
+                logger.warn("User not found with ID: {}", id);
+                return new UserNotFoundException("Failed to find user with ID: " + id);
+            });
     }
 
     public User getUserByUsername(String username) {
+        logger.debug("Attempting to send user with username: {}", username);
+
         try {
-            logger.debug("Sends user with username: {}", username);
             Optional<User> foundUser = userRepository.getUserByUsername(username);
 
-            return foundUser.orElseThrow(() -> new UserNotFoundException("Failed to find user by username: " + username));
+            return foundUser.orElseThrow(() -> {
+                logger.warn("User not found with username: {}", username);
+                return new UserNotFoundException("Failed to find user by username: " + username);
+            });
 
         } catch (DatabaseException e) {
-            logger.error("Failed to retrieve user from Database with username " + username, e);
-            throw new UserNotFoundException("Failed to find user with username: " + username);
+            logger.error("Failed to retrieve user from Database with username {}", username, e);
+            throw new DatabaseException("Database error while fetching project with ID: " + username, e);
         }
     }
 
     public User addUser(User user) {
+        logger.debug("Attempting to add user with username: {}", user.getUsername());
         try {
-            return userRepository.addUser(user);
+            User createdUser = userRepository.addUser(user);
+            logger.info("Succesfully added user with username: {}", user.getUsername());
+            return createdUser;
         } catch (DatabaseException e) {
-            logger.error("Failed to add user to database with username: {}", user.getUsername());
-            throw new UserCreationException("Failed to create user", e);
+            logger.error("Failed to add user to database with username: {}", user.getUsername(), e);
+            throw new UserCreationException("Failed to create user with username: " + user.getUsername(), e);
         }
     }
 
@@ -86,15 +91,14 @@ public class UserService {
             boolean deleted = userRepository.deleteUser(id);
 
             if (!deleted) {
-                logger.warn("Failed to delete user with ID {}", id);
+                logger.warn("Failed to delete user with ID: {}", id);
                 throw new UserNotFoundException("Failed to delete user with ID " + id);
             }
-            logger.info("Successfully deleted user with ID {}", id);
+            logger.info("Successfully deleted user with ID: {}", id);
         } catch (DatabaseException e) {
-            logger.error("Failed to delete user with ID: {}", id);
-            throw new UserNotFoundException("Failed to delete user with ID " + id, e);
+            logger.error("Failed to delete user with ID: {}", id, e);
+            throw new DeletionException("Failed to delete user with ID " + id, e);
         }
-
     }
 
     public void updateUser(User user) {
@@ -112,10 +116,9 @@ public class UserService {
 
         } catch (DatabaseException e) {
             logger.error("Database error while updating user with ID {}", user.getId(), e);
-            throw new UserUpdateException("Database error while updating user with ID: " + user.getId(), user.getId());
+            throw new UserUpdateException("Database error while updating user with ID: " + user.getId(), e);
         }
     }
-
 
     public boolean userExistsByUsername(String username) {
         return userRepository.getUserByUsername(username).isPresent();
@@ -125,19 +128,5 @@ public class UserService {
         return userRepository.getUserById(id).isPresent();
     }
 
-    @PostConstruct
-    public void initAdminUser() {
-        if (userRepository.getUserByUsername("admin").isEmpty()) {
-            User admin = new User();
-            admin.setUsername("admin");
-            admin.setPasswordHash(BCrypt.hashpw("admin123", BCrypt.gensalt())); // or use your password encoder
-            admin.setRole(Role.ADMIN);
-
-            userRepository.addUser(admin); // Or whatever method inserts user
-            System.out.println("✅ Admin user created.");
-
-
-        }
-    }
 }
 

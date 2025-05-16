@@ -1,4 +1,4 @@
-package com.example.projektkalkulationeksamen.Exceptions;
+package com.example.projektkalkulationeksamen.Exceptions.security;
 
 public class AuthenticationFailedException extends RuntimeException{
     public AuthenticationFailedException(String message) {

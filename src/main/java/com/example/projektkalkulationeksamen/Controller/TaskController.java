@@ -2,10 +2,9 @@ package com.example.projektkalkulationeksamen.Controller;
 
 import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
-import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
+import com.example.projektkalkulationeksamen.Exceptions.security.AccessDeniedException;
 import com.example.projektkalkulationeksamen.Model.Milestone;
 import com.example.projektkalkulationeksamen.Model.Role;
-import com.example.projektkalkulationeksamen.Model.Status;
 import com.example.projektkalkulationeksamen.Service.*;
 import com.example.projektkalkulationeksamen.Validator.SessionValidator;
 import jakarta.servlet.http.HttpSession;

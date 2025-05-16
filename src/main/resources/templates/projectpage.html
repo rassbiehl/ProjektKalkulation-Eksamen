@@ -16,11 +16,12 @@
 
     <div class="shadow">
 
+
         <a th:href="@{/projects/{role}Startpage(role=${userRole})}" class="back-button">← Back</a>
 
         <div class="headline">
             <img src="/images/logonotext.svg" alt="Logo">
-            <h1 th:text="${project.projectName}"></h1>
+            <h1>Project: '<span th:text="${project.projectName}"></span>'</h1>
         </div>
 
         <div class="projectinfo">
@@ -31,7 +32,8 @@
                     <a th:href="@{/projects/update/{id}(id=${project.id})}">
                         <button class="update-button" type="button">🔄 Update project</button>
                     </a>
-                    <form th:action="@{/projects/delete/{id}(id=${project.id})}" method="post" onsubmit="return confirm('Are you sure?')">
+                    <form th:action="@{/projects/delete/{id}(id=${project.id})}" method="post"
+                          onsubmit="return confirm('Are you sure?')">
                         <button class="delete-button" type="submit">❌ Delete project</button>
                     </form>
                 </div>
@@ -81,15 +83,15 @@
                 <h2>🕒 Timestamps</h2>
 
                 <p>
-                    Created at: <span th:text="${#temporals.format(project.createdAt, 'dd.MM.yyyy')}"></span>
+                    ✏️ Created at: <span th:text="${#temporals.format(project.createdAt, 'dd.MM.yyyy')}"></span>
                 </p>
 
                 <p>
-                    Startdate: <span th:text="${#temporals.format(project.startDate, 'dd.MM.yyyy')}"></span>
+                    🚀 Startdate: <span th:text="${#temporals.format(project.startDate, 'dd.MM.yyyy')}"></span>
                 </p>
 
                 <p>
-                    Deadline: <span th:text="${#temporals.format(project.deadline, 'dd.MM.yyyy')}"></span>
+                    ⏰ Deadline: <span th:text="${#temporals.format(project.deadline, 'dd.MM.yyyy')}"></span>
                 </p>
 
             </section>
@@ -99,7 +101,9 @@
                 <h2>📊 Progress & Status</h2>
 
                 <p>
-                    📍 <span th:text="${project.status.displayName}"></span>
+                    <span th:if="${project.status.name() == 'COMPLETED'}">✅ </span>
+                    <span th:if="${project.status.name() != 'COMPLETED'}">📍</span>
+                    <span th:text="${project.status.displayName}"></span>
                 </p>
 
                 <div class="progress-container">

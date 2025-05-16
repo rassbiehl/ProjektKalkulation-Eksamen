@@ -1,7 +1,7 @@
 package com.example.projektkalkulationeksamen.Service;
 
-import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
-import com.example.projektkalkulationeksamen.Exceptions.TaskCoworkerException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
+import com.example.projektkalkulationeksamen.Exceptions.taskcoworker.TaskCoworkerException;
 import com.example.projektkalkulationeksamen.Repository.TaskCoworkerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

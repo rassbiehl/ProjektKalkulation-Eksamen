@@ -1,6 +1,9 @@
 package com.example.projektkalkulationeksamen.Controller;
 
+import com.example.projektkalkulationeksamen.Exceptions.notfound.UserNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.security.AccessDeniedException;
 import com.example.projektkalkulationeksamen.Model.Role;
+import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Service.AuthService;
 import com.example.projektkalkulationeksamen.Service.UserService;
 import com.example.projektkalkulationeksamen.Validator.SessionValidator;
@@ -30,7 +33,10 @@ public class UserController {
     }
 
     @GetMapping
-    public String getUserPage(Model model, HttpSession session) {
+    public String getUserPage(
+            Model model,
+            HttpSession session
+    ) {
         if (!sessionValidator.isSessionValid(session)) {
             logger.info("User is not logged in for current session. Redirecting to loginform.html");
             return "redirect:/loginform";
@@ -38,26 +44,29 @@ public class UserController {
 
         Integer userId = (Integer) session.getAttribute("userId");
 
-        if (!userService.userExistsById(userId)) {
-            logger.warn("User ID {} not found in DB. Invalidating session.", userId);
-            authService.logout(session);
-            return "redirect:/loginform";
-        }
-
-        Role role = userService.getUserById(userId).getRole();
+        User user = userService.getUserById(userId); // NotfoundException bliver fanget globalt.
+        Role role = user.getRole();
 
         model.addAttribute("allUsers", userService.getAllUsers());
 
         String viewName = role.toString().toLowerCase() + "/userpage";
         logger.info("User with ID {} and role {} accessing {}", userId, role, viewName);
-
         return viewName;
+
     }
 
 
     @GetMapping("/delete/{id}")
-    public String deleteUser(@PathVariable int id) {
-        userService.deleteUser(id);
+    public String deleteUser(
+            HttpSession session,
+            @PathVariable int id
+    ) {
+        if (!sessionValidator.isSessionValid(session, Role.ADMIN)) {
+            throw new AccessDeniedException("Only admins can delete users");
+        }
+
+        userService.deleteUser(id); // DeletionException bliver fanget globalt.
+
         logger.info("User was successfully deleted with ID: {}", id);
         return "redirect:/users";
     }

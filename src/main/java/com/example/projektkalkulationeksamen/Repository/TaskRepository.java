@@ -1,7 +1,6 @@
 package com.example.projektkalkulationeksamen.Repository;
 
-import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
-import com.example.projektkalkulationeksamen.Exceptions.TaskNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
 import com.example.projektkalkulationeksamen.Mapper.RowMapperUtil;
 import com.example.projektkalkulationeksamen.Model.Task;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,7 @@ public class TaskRepository {
             Number key = keyHolder.getKey();
 
             if (key == null) {
-                throw new DatabaseException("Failed to retrieve generated ID for new user");
+                throw new DatabaseException("Failed to retrieve generated ID for new task");
             }
 
             int generatedId = key.intValue();

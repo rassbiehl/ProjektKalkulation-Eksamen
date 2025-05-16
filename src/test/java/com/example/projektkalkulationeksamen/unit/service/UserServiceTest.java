@@ -1,8 +1,9 @@
 package com.example.projektkalkulationeksamen.unit.service;
 
-import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
-import com.example.projektkalkulationeksamen.Exceptions.UserCreationException;
-import com.example.projektkalkulationeksamen.Exceptions.UserNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DeletionException;
+import com.example.projektkalkulationeksamen.Exceptions.user.UserCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.notfound.UserNotFoundException;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Repository.UserRepository;
@@ -159,13 +160,13 @@ public class UserServiceTest {
         User messi = new User();
 
         // Mock Behavior
-        Mockito.when(userRepository.addUser(messi)).thenThrow(new DatabaseException("Failed to add user"));
+        Mockito.when(userRepository.addUser(messi)).thenThrow(new DatabaseException("Failed to create user"));
 
         // Act and assert
         Exception exception = assertThrows(UserCreationException.class, () -> userService.addUser(messi));
 
         // Assert
-        assertEquals("Failed to create user", exception.getMessage());
+        assertEquals("Failed to create user with username: null", exception.getMessage());
 
     }
 
@@ -190,16 +191,16 @@ public class UserServiceTest {
     }
 
     @Test
-    void deleteUser_throwsUserNotFoundException_whenUserIsNotFound() {
+    void deleteUser_throwsDeletionException_whenUserIsNotFound() {
 
         // Mock behavior
         Mockito.when(userRepository.deleteUser(999)).thenThrow(new DatabaseException("Failed to delete user"));
 
         // Act and assert
-        UserNotFoundException userNotFoundException = assertThrows(UserNotFoundException.class, () -> userService.deleteUser(999));
+        DeletionException deletionException = assertThrows(DeletionException.class, () -> userService.deleteUser(999));
 
         // assert
-        assertEquals("Failed to delete user with ID " + 999, userNotFoundException.getMessage());
+        assertEquals("Failed to delete user with ID " + 999, deletionException.getMessage());
     }
 
     @Test

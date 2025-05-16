@@ -5,13 +5,13 @@ package com.example.projektkalkulationeksamen.Service;
 import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
 import com.example.projektkalkulationeksamen.DTO.TaskDTO;
-import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
-import com.example.projektkalkulationeksamen.Exceptions.ProjectCreationException;
-import com.example.projektkalkulationeksamen.Exceptions.ProjectNotFoundException;
-import com.example.projektkalkulationeksamen.Model.Milestone;
+import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DeletionException;
+import com.example.projektkalkulationeksamen.Exceptions.project.ProjectCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.notfound.ProjectNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.project.ProjectUpdateException;
 import com.example.projektkalkulationeksamen.Model.Project;
 import com.example.projektkalkulationeksamen.Model.Status;
-import com.example.projektkalkulationeksamen.Repository.MilestoneRepository;
 import com.example.projektkalkulationeksamen.Repository.ProjectRepository;
 import com.example.projektkalkulationeksamen.Validator.ProjectDataValidator;
 import org.slf4j.Logger;
@@ -27,16 +27,12 @@ public class ProjectService {
     private static final Logger logger = LoggerFactory.getLogger(ProjectService.class);
 
     private final ProjectRepository projectRepository;
-    private final UserService userService;
     private final MilestoneService milestoneService;
-    private final TaskService taskService;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository, UserService userService, MilestoneService milestoneService, TaskService taskService) {
+    public ProjectService(ProjectRepository projectRepository, MilestoneService milestoneService) {
         this.projectRepository = projectRepository;
-        this.userService = userService;
         this.milestoneService = milestoneService;
-        this.taskService = taskService;
     }
 
 
@@ -45,57 +41,28 @@ public class ProjectService {
         return projectRepository.getAllProjects();
     }
 
-    public List<Project> getAllProjectsByProjectManager(int projectManagerId) {
-        logger.debug("Retrieving all projects made by project manager with ID: {}", projectManagerId);
-        return projectRepository.getAllProjectsByProjectManager(projectManagerId);
-    }
-
-
     public Project getProjectById(int id) {
         logger.debug("Sends project with ID: {}", id);
 
-        try {
-            Optional<Project> optionalProject = projectRepository.findProjectById(id);
-
-            return optionalProject
-                    .orElseThrow(() ->
-                            new ProjectNotFoundException("Failed to get project by ID: " + id)
-                    );
-        } catch (DatabaseException e) {
-            logger.error("Failed to retrieve project from Database with ID: {}", id, e);
-            throw new ProjectNotFoundException("Failed to get project with ID: " + id, e);
-        }
-    }
-
-    public Project getProjectByName(String projectName) {
-        logger.debug("Sends project with project name: {}", projectName);
-
-        try {
-            Optional<Project> optionalProject = projectRepository.findProjectByName(projectName);
-
-            return optionalProject
-                    .orElseThrow(() ->
-                            new ProjectNotFoundException("Failed to get project by project name: " + projectName)
-                    );
-        } catch (DatabaseException e) {
-            logger.error("Failed to retrieve project from Database with project name: {}", projectName, e);
-            throw new ProjectNotFoundException("Failed to get project with project name: " + projectName, e);
-        }
+        return projectRepository.findProjectById(id)
+                .orElseThrow(() -> {
+                    logger.warn("Project not found with ID: {}", id);
+                    return new ProjectNotFoundException("Failed to get project by ID: " + id);
+                });
     }
 
     public Project addProject(Project newProject) {
         logger.debug("Attempting to create new project with project name: {}", newProject.getProjectName());
 
-        if (projectExistsByName(newProject.getProjectName())) {
-            throw new ProjectCreationException("Project name already taken");
-        }
-
-        try {
+            if (projectExistsByName(newProject.getProjectName())) {
+                throw new ProjectCreationException("Project name already taken");
+            }
 
             ProjectDataValidator.validateName(newProject.getProjectName());
             ProjectDataValidator.validateDescription(newProject.getDescription());
-            return projectRepository.addProject(newProject);
 
+        try {
+            return projectRepository.addProject(newProject);
         } catch (DatabaseException e) {
             logger.error("Failed to create project with project name: {}", newProject.getProjectName(), e);
             throw new ProjectCreationException("Failed to create project with project name: " + newProject.getProjectName(), e);
@@ -109,11 +76,12 @@ public class ProjectService {
             boolean deleted = projectRepository.deleteProject(id);
 
             if (!deleted) {
+                logger.warn("Failed to delete project with ID: {}", id);
                 throw new ProjectNotFoundException("Failed to delete project with ID:" + id);
             }
         } catch (DatabaseException e) {
             logger.error("Failed to delete project with ID: {}", id, e);
-            throw new ProjectNotFoundException("Failed to delete project with ID: " + id, e);
+            throw new DeletionException("Failed to delete project with ID: " + id, e);
         }
     }
 
@@ -121,14 +89,14 @@ public class ProjectService {
         logger.debug("Attempting to update project with ID: {}", updatedProject.getId());
 
         try {
-            ProjectDataValidator.validateName(updatedProject.getProjectName());
-            ProjectDataValidator.validateDescription(updatedProject.getDescription());
-
             Project currentProject = projectRepository.findProjectById(updatedProject.getId())
                     .orElseThrow(() -> new ProjectNotFoundException("Project not found with id: " + updatedProject.getId()));
 
-            if (!currentProject.getProjectName().equalsIgnoreCase(updatedProject.getProjectName()) && projectExistsByName(updatedProject.getProjectName())) {
-                throw new ProjectCreationException("Project name already taken");
+            ProjectDataValidator.validateName(updatedProject.getProjectName());
+            ProjectDataValidator.validateDescription(updatedProject.getDescription());
+
+            if (!currentProject.getProjectName().equalsIgnoreCase(updatedProject.getProjectName()) && otherProjectExistsWithName(currentProject.getId(), updatedProject.getProjectName())) {
+                throw new ProjectUpdateException("Project name already taken");
             }
 
             if (updatedProject.getStatus().equals(Status.COMPLETED) && currentProject.getCompletedAt() == null) {
@@ -140,13 +108,13 @@ public class ProjectService {
 
             if (!updated) {
                 logger.warn("Cannot update. No project found with ID: {}", updatedProject.getId());
-                throw new ProjectCreationException("Cannot update. No project found with ID: " + updatedProject.getId());
+                throw new ProjectUpdateException("Cannot update. No project found with ID: " + updatedProject.getId());
             }
 
             logger.info("Succesfully updated project with ID: {}", updatedProject.getId());
         } catch (DatabaseException e) {
             logger.error("Database error while trying to update project with ID: {}", updatedProject.getId(), e);
-            throw new ProjectCreationException("Database error while updating project with ID: " + updatedProject.getId(), e);
+            throw new ProjectUpdateException("Database error while updating project with ID: " + updatedProject.getId(), e);
         }
     }
 
@@ -169,14 +137,20 @@ public class ProjectService {
 
     }
 
-
+    // til add
     public boolean projectExistsByName(String name) {
         return projectRepository.findProjectByName(name).isPresent();
     }
 
+    // til update
+    public boolean otherProjectExistsWithName(int currentProjectId, String name) {
+        Optional<Project> existing = projectRepository.findProjectByName(name);
+        return existing.isPresent() && existing.get().getId() != currentProjectId;
+    }
+
 
     // DTO Object methods
-    public List<MilestoneDTO> getFinishedMileStonesFromProject (int projectId) {
+    public List<MilestoneDTO> getFinishedMileStonesFromProject(int projectId) {
 
         ProjectDTO projectDTO = getProjectWithDetails(projectId);
 
@@ -192,7 +166,7 @@ public class ProjectService {
         return finishedMileStones;
     }
 
-    public List<MilestoneDTO> getOngoingMileStonesFromProject (int projectId) {
+    public List<MilestoneDTO> getOngoingMileStonesFromProject(int projectId) {
 
         ProjectDTO projectDTO = getProjectWithDetails(projectId);
 
@@ -232,7 +206,7 @@ public class ProjectService {
 
     public List<ProjectDTO> getAllProjectsWithDetails() {
         List<ProjectDTO> allProjectsWithDetails = new ArrayList<>();
-        List<Project> allProjects = projectRepository.getAllProjects();
+        List<Project> allProjects = getAllProjects();
 
         for (Project project : allProjects) {
             allProjectsWithDetails.add(getProjectWithDetails(project.getId()));
@@ -280,7 +254,7 @@ public class ProjectService {
 
     public List<ProjectDTO> getAllProjectsByEmployeeId(int employeeId) {
         List<ProjectDTO> allProjects = getAllProjectsWithDetails();
-        Set<Integer> foundProjectIds= new HashSet<>();
+        Set<Integer> foundProjectIds = new HashSet<>();
 
         for (ProjectDTO projectDTO : allProjects) {
             for (MilestoneDTO milestoneDTO : projectDTO.getMilestones()) {
@@ -301,7 +275,7 @@ public class ProjectService {
         List<ProjectDTO> foundProjects = new ArrayList<>();
 
         for (Integer integer : foundProjectIds) {
-           foundProjects.add(getProjectWithDetails(integer));
+            foundProjects.add(getProjectWithDetails(integer));
         }
         return foundProjects;
     }

@@ -1,6 +1,6 @@
 package com.example.projektkalkulationeksamen.Repository;
 
-import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
 import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Mapper.RowMapperUtil;
 import org.springframework.beans.factory.annotation.Autowired;

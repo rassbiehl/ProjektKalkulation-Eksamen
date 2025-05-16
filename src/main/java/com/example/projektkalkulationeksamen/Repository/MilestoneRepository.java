@@ -1,6 +1,6 @@
 package com.example.projektkalkulationeksamen.Repository;
 
-import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
 import com.example.projektkalkulationeksamen.Mapper.RowMapperUtil;
 import com.example.projektkalkulationeksamen.Model.Milestone;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,7 +114,7 @@ public class MilestoneRepository {
             return affectedRows > 0;
 
         } catch (DataAccessException e) {
-            throw new DatabaseException("Failed to delete milestone with ID " + id);
+            throw new DatabaseException("Failed to delete milestone with ID " + id, e);
         }
     }
 
@@ -127,13 +127,14 @@ public class MilestoneRepository {
 
             if (updatedMilestone.getCompletedAt() != null) {
                 ifCompleted = Timestamp.valueOf(updatedMilestone.getCompletedAt());
+
             }
 
             int affectedRows = jdbcTemplate.update(sql,
                     updatedMilestone.getMilestoneName(),
                     updatedMilestone.getMilestoneDescription(),
                     updatedMilestone.getStatus().toString(),
-                    updatedMilestone.getDeadline(),
+                    Timestamp.valueOf(updatedMilestone.getDeadline()),
                     ifCompleted,
 
                     updatedMilestone.getId()
@@ -141,7 +142,7 @@ public class MilestoneRepository {
 
             return affectedRows > 0;
         } catch (DataAccessException e) {
-            throw new DatabaseException("Failed to update milestone with ID " + updatedMilestone.getId());
+            throw new DatabaseException("Failed to update milestone with ID " + updatedMilestone.getId(), e);
         }
     }
 }

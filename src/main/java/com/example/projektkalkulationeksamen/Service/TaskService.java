@@ -1,10 +1,11 @@
 package com.example.projektkalkulationeksamen.Service;
 
 import com.example.projektkalkulationeksamen.DTO.TaskDTO;
-import com.example.projektkalkulationeksamen.Exceptions.DatabaseException;
-import com.example.projektkalkulationeksamen.Exceptions.TaskCreationException;
-import com.example.projektkalkulationeksamen.Exceptions.TaskNotFoundException;
-import com.example.projektkalkulationeksamen.Exceptions.UserNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
+import com.example.projektkalkulationeksamen.Exceptions.database.DeletionException;
+import com.example.projektkalkulationeksamen.Exceptions.task.TaskCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.notfound.TaskNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.task.TaskUpdateException;
 import com.example.projektkalkulationeksamen.Model.Task;
 import com.example.projektkalkulationeksamen.Repository.TaskRepository;
 import org.slf4j.Logger;
@@ -35,28 +36,13 @@ public class TaskService {
     }
 
     public Task getTaskById(int id) {
-        try {
             logger.debug("Sends task with ID: " + id);
-
             Optional<Task> foundTask = taskRepository.getTaskById(id);
 
-            return foundTask.orElseThrow(() -> new TaskNotFoundException("Failed to find task with ID: " + id));
-        } catch (DatabaseException e) {
-            throw new TaskNotFoundException("Failed to find task with ID: " + id);
-        }
-    }
-
-    public Task getTaskByName(String taskName) {
-        try {
-            logger.debug("Sends task with name: " + taskName);
-            Optional<Task> foundTask = taskRepository.getTaskByName(taskName);
-
-            return foundTask.orElseThrow(() -> new TaskNotFoundException("Failed to find task by name: " + taskName));
-
-        } catch (DatabaseException e) {
-            logger.error("Failed to retrieve task from Database with name " + taskName, e);
-            throw new TaskNotFoundException("Failed to find task with name: " + taskName);
-        }
+            return foundTask.orElseThrow(() -> {
+                logger.warn("Task not found with ID: {}", id);
+                    return new TaskNotFoundException("Failed to find task with ID: " + id);
+            });
     }
 
     public Task addTask(Task task) {
@@ -80,7 +66,7 @@ public class TaskService {
             }
             logger.info("Successfully deleted task with ID: " + id);
         } catch (TaskNotFoundException e) {
-            throw new TaskNotFoundException("Failed to delete task with ID: " + id, e);
+            throw new DeletionException("Failed to delete task with ID: " + id, e);
         }
     }
 
@@ -93,7 +79,7 @@ public class TaskService {
 
         if (!updated) {
             logger.warn("Failed to update task with ID: {}", task.getId());
-            throw new TaskNotFoundException("Failed to update task with ID: " + task.getId());
+            throw new TaskUpdateException("Failed to update task with ID: " + task.getId());
         }
 
         logger.info("Successfully updated task with ID: {}", task.getId());

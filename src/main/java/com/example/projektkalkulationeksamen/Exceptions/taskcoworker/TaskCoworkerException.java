@@ -1,6 +1,4 @@
-package com.example.projektkalkulationeksamen.Exceptions;
-
-import com.example.projektkalkulationeksamen.Repository.TaskCoworkerRepository;
+package com.example.projektkalkulationeksamen.Exceptions.taskcoworker;
 
 public class TaskCoworkerException extends RuntimeException {
     public TaskCoworkerException (String message) {

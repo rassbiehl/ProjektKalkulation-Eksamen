@@ -1,6 +1,9 @@
 package com.example.projektkalkulationeksamen.Controller;
 
-import com.example.projektkalkulationeksamen.Exceptions.*;
+import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
+import com.example.projektkalkulationeksamen.Exceptions.notfound.NotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.security.AccessDeniedException;
+import com.example.projektkalkulationeksamen.Exceptions.security.AuthenticationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
@@ -26,32 +29,20 @@ public class GlobalExceptionHandler {
         return "error/403";
     }
 
-    @ExceptionHandler(AuthRegisterException.class)
-    public String handleRegisterFailed(AuthRegisterException e, RedirectAttributes redirectAttributes) {
-        logger.warn("Register failed: {}", e.getMessage());
-        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        return "redirect:/registerform";
+    @ExceptionHandler(DatabaseException.class)
+    public String handleDatabaseException(DatabaseException e, Model model) {
+        logger.warn("Internal server error during database operation: {}", e.getMessage());
+        model.addAttribute("errorMessage", e.getMessage());
+        return "error/500";
     }
 
-    @ExceptionHandler(UserUpdateException.class)
-    public String handleUpdateFailed(UserUpdateException e, RedirectAttributes redirectAttributes) {
-        logger.warn("User update failed for user ID {}: {}", e.getUserId(), e.getMessage());
-        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        return "redirect:/updateform/" + e.getUserId();
-    }
-
-    @ExceptionHandler(ProjectCreationException.class)
-    public String handleProjectCreationFailed(ProjectCreationException e, RedirectAttributes redirectAttributes) {
-        logger.warn("Project creation failed: {}", e.getMessage());
-        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        return "redirect:/addproject";
+    // covers tasks, milestone, projects and users.
+    @ExceptionHandler(NotFoundException.class)
+    public String handleNotFoundException(NotFoundException e, Model model) {
+        logger.warn("Resource not found: {}", e.getMessage());
+        model.addAttribute("errorMessage", e.getMessage());
+        return "error/404";
     }
 
 
-    @ExceptionHandler(MilestoneCreationException.class)
-    public String handleMilestoneCreationFailed(MilestoneCreationException e, RedirectAttributes redirectAttributes) {
-        logger.warn("Milestone creation failed: {}", e.getMessage());
-        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        return "redirect:/addproject";
-    }
 }

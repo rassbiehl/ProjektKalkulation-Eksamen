@@ -1,8 +1,8 @@
 /*
 package com.example.projektkalkulationeksamen.Validator;
 
-import com.example.projektkalkulationeksamen.Exceptions.MilestoneCreationException;
-import com.example.projektkalkulationeksamen.Exceptions.ProjectCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.milestone.MilestoneCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.project.ProjectCreationException;
 
 public class MilestoneDataValidator {
 

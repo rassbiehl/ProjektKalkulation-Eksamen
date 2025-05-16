@@ -1,6 +1,6 @@
-package com.example.projektkalkulationeksamen.Exceptions;
+package com.example.projektkalkulationeksamen.Exceptions.notfound;
 
-public class TaskNotFoundException extends RuntimeException {
+public class TaskNotFoundException extends NotFoundException {
 
     public TaskNotFoundException(String message) {
         super(message);

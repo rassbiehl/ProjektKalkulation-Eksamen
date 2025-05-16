@@ -1,6 +1,6 @@
-package com.example.projektkalkulationeksamen.Exceptions;
+package com.example.projektkalkulationeksamen.Exceptions.notfound;
 
-public class MilestoneNotFoundException extends RuntimeException {
+public class MilestoneNotFoundException extends NotFoundException {
     public MilestoneNotFoundException(String message) {
         super(message);
     }

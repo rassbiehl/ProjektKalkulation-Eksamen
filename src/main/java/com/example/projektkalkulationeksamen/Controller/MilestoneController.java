@@ -3,9 +3,10 @@ package com.example.projektkalkulationeksamen.Controller;
 import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
 import com.example.projektkalkulationeksamen.DTO.TaskDTO;
-import com.example.projektkalkulationeksamen.Exceptions.AccessDeniedException;
-import com.example.projektkalkulationeksamen.Exceptions.MilestoneCreationException;
-import com.example.projektkalkulationeksamen.Exceptions.MilestoneNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.milestone.MilestoneUpdateException;
+import com.example.projektkalkulationeksamen.Exceptions.security.AccessDeniedException;
+import com.example.projektkalkulationeksamen.Exceptions.milestone.MilestoneCreationException;
+import com.example.projektkalkulationeksamen.Exceptions.notfound.MilestoneNotFoundException;
 import com.example.projektkalkulationeksamen.Model.Milestone;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.Status;
@@ -86,11 +87,11 @@ public class MilestoneController {
             model.addAttribute("completedTasks", completedTasks);
         }
 
-        logger.info("Returning milestonepgage.html");
+        logger.info("Returning milestone page");
         return "milestonePage";
     }
 
-    @GetMapping("add/{projectId}")
+    @GetMapping("/add/{projectId}")
     public String showAddForm(
             HttpSession session,
             @PathVariable int projectId,
@@ -201,31 +202,25 @@ public class MilestoneController {
             throw new AccessDeniedException("Only project managers can update projects");
         }
 
+        Integer userId = (Integer) session.getAttribute("userId");
+        MilestoneDTO milestoneDTO = milestoneService.getMilestoneWithDetails(milestone.getId());
+        ProjectDTO projectDTO = projectService.getProjectWithDetails(milestoneDTO.getProjectId());
+
+        Role role = userService.getUserById(userId).getRole();
+        boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
+
+        if (!isOwner) {
+            logger.warn("User with ID {} is not the owner of project ID {}. Access denied.", userId, milestone.getId());
+            throw new AccessDeniedException("Access denied: User does not own the project");
+        }
+
+        milestone.setProjectId(milestoneDTO.getProjectId());
+
         try {
-            Integer userId = (Integer) session.getAttribute("userId");
-            MilestoneDTO milestoneDTO = milestoneService.getMilestoneWithDetails(milestone.getId());
-            ProjectDTO projectDTO = projectService.getProjectWithDetails(milestoneDTO.getProjectId());
-
-            Role role = userService.getUserById(userId).getRole();
-            boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
-
-            if (isOwner) {
-                milestone.setProjectId(milestoneDTO.getProjectId());
-
-                try {
-                    milestoneService.updateMilestone(milestone);
-                    logger.info("Milestone with ID {} was successfully updated by user {}", milestone.getId(), userId);
-                } catch (MilestoneCreationException e) {
-                    logger.error("Could not update milestone with ID {}. Reason: {}", milestone.getId(), e.getMessage());
-                    redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-                    return "redirect:/milestones/update/" + milestone.getId();
-                }
-            } else {
-                logger.warn("User with ID {} is not the owner of project ID {}. Access denied.", userId, milestone.getId());
-                throw new AccessDeniedException("Access denied: User does not own the project");
-            }
-
-        } catch (MilestoneCreationException e) {
+            milestoneService.updateMilestone(milestone);
+            logger.info("Milestone with ID {} was successfully updated by user {}", milestone.getId(), userId);
+        } catch (MilestoneUpdateException e) {
+            logger.error("Could not update milestone with ID {}. Reason: {}", milestone.getId(), e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/milestones/update/" + milestone.getId();
         }

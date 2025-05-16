@@ -1,6 +1,8 @@
 package com.example.projektkalkulationeksamen.Service;
 
-import com.example.projektkalkulationeksamen.Exceptions.*;
+import com.example.projektkalkulationeksamen.Exceptions.notfound.UserNotFoundException;
+import com.example.projektkalkulationeksamen.Exceptions.security.AuthenticationFailedException;
+import com.example.projektkalkulationeksamen.Exceptions.user.*;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.User;
 import com.example.projektkalkulationeksamen.Validator.UserValidator;
@@ -10,8 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import javax.naming.AuthenticationException;
 
 @Service
 public class AuthService {
@@ -25,21 +25,21 @@ public class AuthService {
         this.userService = userService;
     }
 
-    public void login(String username, String rawPassword) {
+    public User login(String username, String rawPassword) {
         logger.debug("Attempting to sign user in with username: {} ", username);
         try {
 
             User user = userService.getUserByUsername(username);
 
-
             if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
-                logger.error("Failed to login attempt for username: {}", username);
+                logger.warn("Login failed for username '{}': invalid password", username);
                 throw new AuthenticationFailedException("Invalid username or password");
             }
 
+            return user;
 
         } catch (UserNotFoundException e) {
-logger.error("Failed login attempt: no user found with username: {}", username, e);
+            logger.error("Failed login attempt: no user found with username: {}", username, e);
             throw new AuthenticationFailedException("Invalid username or password", e);
         }
     }
@@ -47,15 +47,19 @@ logger.error("Failed login attempt: no user found with username: {}", username, 
     public void adminRegister(String username, String rawPassword, Role role) {
         logger.debug("Attempting to register new user with username: {}", username);
 
-        if (userService.userExistsByUsername(username)) {
-            throw new AuthRegisterException("Username already taken");
-        }
         try {
-        UserValidator.registrationValidate(username, rawPassword);
+            if (userService.userExistsByUsername(username)) {
+                logger.warn("Username already taken: {}", username);
+                throw new UserCreationException("Username already taken");
+            }
 
-        String hashedPassword = passwordEncoder.encode(rawPassword);
+            UserValidator.registrationValidate(username, rawPassword);
 
-            userService.addUser(new User(username, hashedPassword,role));
+            String hashedPassword = passwordEncoder.encode(rawPassword);
+
+            userService.addUser(new User(username, hashedPassword, role));
+
+            logger.info("Successfully registered new user with username: {}", username);
 
         } catch (UserCreationException e) {
             logger.error("Failed to register user with username: {}", username, e);
@@ -69,44 +73,20 @@ logger.error("Failed login attempt: no user found with username: {}", username, 
         try {
             User currentUser = userService.getUserById(id);
 
-            // Username
-            String newUsername;
-            if (!currentUser.getUsername().equals(username) &&
-                    userService.userExistsByUsername(username)) {
-                throw new AuthRegisterException("Username already taken");
-            } else if (username != null && !username.trim().isEmpty()) {
-                UserValidator.validateUsername(username);
-                newUsername = username;
-            } else {
-                newUsername = currentUser.getUsername();
-            }
+            User updatedUser = UserValidator.validateAndPrepareUpdate(currentUser, username, rawPassword, role, userService);
 
-            // Password
-            String hashedPassword;
-            if (rawPassword != null && !rawPassword.trim().isEmpty()) {
-                UserValidator.validatePassword(rawPassword);
-                hashedPassword = passwordEncoder.encode(rawPassword);
-            } else {
-                hashedPassword = currentUser.getPasswordHash();
-            }
-
-            // i tilfælde af at både password og username er uændret.
-            if (newUsername.equals(currentUser.getUsername())
-                    && hashedPassword.equals(currentUser.getPasswordHash())
-                    && role == currentUser.getRole()) {
-                logger.info("No changes detected for user ID {}. Skipping update.", id);
-                throw new UserUpdateException("No changes made. Nothing to update.", id);
-            }
-
-            userService.updateUser(new User(id, newUsername, hashedPassword, role));
+            userService.updateUser(updatedUser);
+            logger.info("Successfully updated user with ID: {}", id);
 
         } catch (UserNotFoundException | UserCreationException e) {
-            throw new UserUpdateException(e.getMessage(), id);
+            logger.error("Failed to update user with ID: {}", id, e);
+            throw new UserUpdateException(e.getMessage(), e);
         }
     }
 
 
     public void logout(HttpSession session) {
+        logger.info("Invalidating session with id: {}", session.getAttribute("userId"));
         session.invalidate();
     }
 

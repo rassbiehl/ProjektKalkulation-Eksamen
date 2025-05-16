@@ -1,4 +1,4 @@
-package com.example.projektkalkulationeksamen.Exceptions;
+package com.example.projektkalkulationeksamen.Exceptions.task;
 
 public class TaskCreationException extends RuntimeException {
     public TaskCreationException(String message) {
