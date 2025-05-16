@@ -55,6 +55,7 @@ public class ProjectService {
         logger.debug("Attempting to create new project with project name: {}", newProject.getProjectName());
 
             if (projectExistsByName(newProject.getProjectName())) {
+                logger.warn("Project name: {} already taken", newProject.getProjectName());
                 throw new ProjectCreationException("Project name already taken");
             }
 

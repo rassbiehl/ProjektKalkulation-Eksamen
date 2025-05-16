@@ -104,16 +104,23 @@ public class MilestoneController {
         }
 
         Integer userId = (Integer) session.getAttribute("userId");
-
         Role role = userService.getUserById(userId).getRole();
+        ProjectDTO projectDTO = projectService.getProjectWithDetails(projectId);
 
-        model.addAttribute("userRole", role.toString().toLowerCase());
+        boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
 
-        model.addAttribute("milestone", new Milestone());
-        model.addAttribute("projectId", projectId);
-        model.addAttribute("status", Status.values());
+        if (isOwner) {
+            model.addAttribute("userRole", role.toString().toLowerCase());
 
-        return "/projectmanager/addMilestone";
+            model.addAttribute("milestone", new Milestone());
+            model.addAttribute("projectId", projectId);
+            model.addAttribute("status", Status.values());
+
+            return "/projectmanager/addMilestone";
+        } else {
+            logger.warn("Failed retrieve add milestone form because of missing owner ID: {}", userId);
+            throw new AccessDeniedException("Access denied: User with ID: {} " + projectId + " does not own the project");
+        }
     }
 
     @PostMapping("/save")
@@ -129,15 +136,28 @@ public class MilestoneController {
             throw new AccessDeniedException("Only project managers can add projects");
         }
 
-        milestone.setProjectId(projectId);
+        Integer userId = (Integer) session.getAttribute("userId");
+        Role role = userService.getUserById(userId).getRole();
+        ProjectDTO projectDTO = projectService.getProjectWithDetails(projectId);
 
-        try {
-            milestoneService.addMilestone(milestone);
-        } catch (MilestoneCreationException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/milestones/add/" + projectId;
+        boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
+
+        if (isOwner) {
+            milestone.setProjectId(projectId);
+
+            try {
+                milestoneService.addMilestone(milestone);
+                logger.info("Successfully created new milestone with name: {}", milestone.getMilestoneName());
+                return "redirect:/projects/view/" + projectId;
+            } catch (MilestoneCreationException e) {
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+                return "redirect:/milestones/add/" + projectId;
+            }
+
+        } else {
+            logger.warn("Access denied: User is not a project manager");
+            throw new AccessDeniedException("Only project managers can add projects");
         }
-        return "redirect:/projects/view/" + projectId;
     }
 
     @PostMapping("/delete/{id}")
@@ -228,4 +248,4 @@ public class MilestoneController {
         return "redirect:/milestones/view/" + milestone.getId();
     }
 
-    }
+}

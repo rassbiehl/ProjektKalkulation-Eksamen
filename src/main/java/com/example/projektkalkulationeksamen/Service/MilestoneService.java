@@ -110,17 +110,17 @@ public class MilestoneService {
             Milestone currentMilestone = milestoneRepository.getMilestoneById(milestone.getId())
                     .orElseThrow(() -> new MilestoneNotFoundException("Milestone not found with ID: " + milestone.getId()));
 
+            String newName = milestone.getMilestoneName().trim();
+            String currentName = currentMilestone.getMilestoneName().trim();
 
-            String newName = milestone.getMilestoneName().trim().toLowerCase();
-            String currentName = currentMilestone.getMilestoneName().trim().toLowerCase();
-
-            if (!newName.equals(currentName) &&
-                    milestoneExistsByNameInProjectExcludeId(milestone.getMilestoneName(), milestone.getProjectId(), milestone.getId())) {
+            if (!newName.equalsIgnoreCase(currentName) &&
+                    milestoneExistsByNameInProjectExcludeId(newName, milestone.getProjectId(), milestone.getId())) {
+                logger.warn("Duplicate milestonename: {}", newName);
                 throw new MilestoneUpdateException("Milestone name already exists for this project");
             }
 
             if (milestone.getDeadline() == null) {
-                throw new MilestoneUpdateException("Deadline cannot be null");
+                throw new MilestoneUpdateException("Deadline cannot be empty");
             }
 
             if (milestone.getStatus().equals(Status.COMPLETED) && currentMilestone.getCompletedAt() == null) {
