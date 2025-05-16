@@ -12,6 +12,7 @@ import com.example.projektkalkulationeksamen.Exceptions.notfound.ProjectNotFound
 import com.example.projektkalkulationeksamen.Exceptions.project.ProjectUpdateException;
 import com.example.projektkalkulationeksamen.Model.Project;
 import com.example.projektkalkulationeksamen.Model.Status;
+import com.example.projektkalkulationeksamen.Model.Task;
 import com.example.projektkalkulationeksamen.Repository.ProjectRepository;
 import com.example.projektkalkulationeksamen.Validator.ProjectDataValidator;
 import org.slf4j.Logger;
@@ -285,7 +286,9 @@ public class ProjectService {
         int estimatedHours = 0;
         ProjectDTO projectDTO = getProjectWithDetails(projectId);
         for (MilestoneDTO milestoneDTO : projectDTO.getMilestones()) {
-            estimatedHours += milestoneDTO.getEstimatedHours();
+            for (TaskDTO taskDTO : milestoneDTO.getTasks()){
+                estimatedHours += taskDTO.getEstimatedHours();
+            }
         }
         return estimatedHours;
     }
@@ -294,7 +297,9 @@ public class ProjectService {
         int actualHoursUsed = 0;
         ProjectDTO projectDTO = getProjectWithDetails(projectId);
         for (MilestoneDTO milestoneDTO : projectDTO.getMilestones()) {
-            actualHoursUsed += milestoneDTO.getActualHoursUsed();
+            for (TaskDTO taskDTO : milestoneDTO.getTasks()){
+                actualHoursUsed += taskDTO.getActualHoursUsed();
+            }
         }
         return actualHoursUsed;
     }

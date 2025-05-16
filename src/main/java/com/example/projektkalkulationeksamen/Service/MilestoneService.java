@@ -257,5 +257,10 @@ public class MilestoneService {
         }
         return milestonesByProjectIdWithDetails;
     }
-
+    public int getEstimatedHours(int milestoneId){
+        return milestoneRepository.estimatedHours(milestoneId);
+    }
+    public int getActualHoursUsed(int milestoneId){
+        return milestoneRepository.actualHoursUsed(milestoneId);
+    }
 }

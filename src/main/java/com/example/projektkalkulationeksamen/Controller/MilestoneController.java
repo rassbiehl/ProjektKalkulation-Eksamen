@@ -10,6 +10,7 @@ import com.example.projektkalkulationeksamen.Exceptions.notfound.MilestoneNotFou
 import com.example.projektkalkulationeksamen.Model.Milestone;
 import com.example.projektkalkulationeksamen.Model.Role;
 import com.example.projektkalkulationeksamen.Model.Status;
+import com.example.projektkalkulationeksamen.Repository.MilestoneRepository;
 import com.example.projektkalkulationeksamen.Service.MilestoneService;
 import com.example.projektkalkulationeksamen.Service.ProjectService;
 import com.example.projektkalkulationeksamen.Service.UserService;
@@ -29,18 +30,21 @@ import java.util.List;
 @Controller
 public class MilestoneController {
     private final static Logger logger = LoggerFactory.getLogger(MilestoneController.class);
+
     private final MilestoneService milestoneService;
     private final ProjectService projectService;
     private final SessionValidator sessionValidator;
     private final UserService userService;
+    private final MilestoneRepository milestoneRepository;
 
 
     @Autowired
-    public MilestoneController(MilestoneService milestoneService, ProjectService projectService, SessionValidator sessionValidator, UserService userService) {
+    public MilestoneController(MilestoneService milestoneService, ProjectService projectService, SessionValidator sessionValidator, UserService userService, MilestoneRepository milestoneRepository) {
         this.milestoneService = milestoneService;
         this.projectService = projectService;
         this.sessionValidator = sessionValidator;
         this.userService = userService;
+        this.milestoneRepository = milestoneRepository;
     }
 
 
@@ -72,6 +76,8 @@ public class MilestoneController {
         model.addAttribute("projectManager", userService.getUserById(projectDTO.getProjectManagerId()));
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("milestoneTasks", milestoneDTO.getTasks());
+        model.addAttribute("estimatedHours", milestoneRepository.estimatedHours(id));
+        model.addAttribute("actualHoursUsed", milestoneService.getActualHoursUsed(id));
 
         List<TaskDTO> ongoingTasks = milestoneService.getOngoingTasksFromMilestone(id);
 

@@ -218,6 +218,9 @@ public class TaskService {
 
         return selectedTasks;
     }
+    public boolean setHours(int hours, int taskId){
+        return taskRepository.setHours(hours, taskId);
+    }
 
 }
 

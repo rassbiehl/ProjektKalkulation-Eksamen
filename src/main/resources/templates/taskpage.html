@@ -34,6 +34,15 @@
             </div>
         </section>
 
+        <section th:if="${isEmployee}" class="owner-actions">
+            <h2>Task Actions:</h2>
+            <div class="action-buttons">
+                <a th:href="@{/tasks/setHours/{id}(id=${task.id})}">
+                    <button class="update-button" type="button"> Set Hours</button>
+                </a>
+            </div>
+        </section>
+
         <div class="projectinfo">
 
             <section class="project-overview">

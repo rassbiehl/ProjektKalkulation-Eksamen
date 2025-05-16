@@ -99,4 +99,14 @@ public class TaskCoworkerService {
     public List<Integer> getAllTaskIdsForCoworker (int userId) {
         return taskCoworkerRepository.getAllTaskIdsForCoworker(userId);
     }
+
+    public boolean isEmployee(int userId, int taskId){
+        List<Integer> allCoworkers = getAllCoworkersIdsForTask(taskId);
+        for (Integer id : allCoworkers){
+            if (id.equals(userId)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

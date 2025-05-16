@@ -152,6 +152,15 @@ public class TaskRepository {
             throw new DatabaseException("Failed to update task with ID: " + updatedTask.getId(), e);
         }
     }
+    public boolean setHours(int hours, int taskId){
+        String sql ="UPDATE tasks SET actual_hours_used = ? WHERE id = ?";
+
+
+
+        int affectedRows =jdbcTemplate.update(sql,hours,taskId);
+
+        return affectedRows > 0;
+    }
 }
 
 

@@ -2,6 +2,7 @@ package com.example.projektkalkulationeksamen.Controller;
 
 import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
+import com.example.projektkalkulationeksamen.DTO.TaskDTO;
 import com.example.projektkalkulationeksamen.Exceptions.security.AccessDeniedException;
 import com.example.projektkalkulationeksamen.Exceptions.task.TaskCreationException;
 import com.example.projektkalkulationeksamen.Exceptions.task.TaskUpdateException;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import com.example.projektkalkulationeksamen.Model.Task;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -213,6 +215,7 @@ public class TaskController {
     }
 
 
+
     @GetMapping("/view/{id}")
     public String viewTask(@PathVariable int id, Model model, HttpSession session) {
         if (!sessionValidator.isSessionValid(session)) {
@@ -228,12 +231,38 @@ public class TaskController {
 
         Role role = userService.getUserById(userId).getRole();
         boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+        boolean isEmployee = role == Role.EMPLOYEE && taskCoworkerService.isEmployee(userId,task.getId());
 
 
         model.addAttribute("task", task);
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("employees", taskCoworkerService.getAllCoworkersForTask(id));
+        model.addAttribute("isEmployee", isEmployee);
 
         return "taskpage";
+    }
+
+    @GetMapping("/setHours/{id}")
+    public String showSetHours(@PathVariable int id, Model model){
+        System.out.println("showSetHours called with id = " + id);
+        Task task = taskService.getTaskById(id);
+        model.addAttribute("task", task);
+        model.addAttribute("taskId", id);
+        model.addAttribute("HoursInput", 0);
+        return "setHours";
+    }
+
+    @PostMapping("/set-hours")
+    public String submitHours (@RequestParam int taskId, @RequestParam int hours){
+
+        Task task = taskService.getTaskById(taskId);
+        int updatedHours = task.getActualHoursUsed() + hours;
+        task.setActualHoursUsed(updatedHours);
+
+        int milestoneId = task.getMilestoneId();
+
+        taskService.setHours(updatedHours,taskId);
+
+        return "redirect:/milestones/view/" + milestoneId;
     }
 }

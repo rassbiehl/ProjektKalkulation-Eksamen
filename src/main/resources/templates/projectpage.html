@@ -59,10 +59,6 @@
                     🎯 Number of milestones: <span th:text="${#lists.size(project.milestones)}"></span>
                 </p>
 
-                <p>
-                    ⏳ Estimated remaining: <span th:text="${estimatedHours}"></span> hours
-                </p>
-
             </section>
 
             <!-- Progress % Status -->
@@ -73,8 +69,8 @@
                     📊 Hours spent: <span th:text="${actualHoursUsed}"></span> hours
                 </p>
 
-                <p th:if="${project.estimatedHours}">
-                    ⏳ Estimated remaining: <span th:text="${project.estimatedHours}"></span> hours
+                <p >
+                    ⏳ Estimated remaining: <span th:text="${estimatedHours}"></span> hours
                 </p>
 
                 <p>
