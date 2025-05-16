@@ -240,7 +240,7 @@ public class MilestoneController {
             milestoneService.updateMilestone(milestone);
             logger.info("Milestone with ID {} was successfully updated by user {}", milestone.getId(), userId);
         } catch (MilestoneUpdateException e) {
-            logger.error("Could not update milestone with ID {}. Reason: {}", milestone.getId(), e.getMessage());
+            logger.error("Could not update milestone with ID: {}. Reason: {}", milestone.getId(), e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/milestones/update/" + milestone.getId();
         }

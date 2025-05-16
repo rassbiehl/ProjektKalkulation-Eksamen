@@ -4,9 +4,8 @@ import com.example.projektkalkulationeksamen.DTO.MilestoneDTO;
 import com.example.projektkalkulationeksamen.DTO.ProjectDTO;
 import com.example.projektkalkulationeksamen.Exceptions.security.AccessDeniedException;
 import com.example.projektkalkulationeksamen.Exceptions.task.TaskCreationException;
-import com.example.projektkalkulationeksamen.Model.Milestone;
-import com.example.projektkalkulationeksamen.Model.Project;
-import com.example.projektkalkulationeksamen.Model.Role;
+import com.example.projektkalkulationeksamen.Exceptions.task.TaskUpdateException;
+import com.example.projektkalkulationeksamen.Model.*;
 import com.example.projektkalkulationeksamen.Service.*;
 import com.example.projektkalkulationeksamen.Validator.SessionValidator;
 import jakarta.servlet.http.HttpSession;
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import com.example.projektkalkulationeksamen.Model.Task;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -24,7 +22,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/tasks")
 public class TaskController {
-private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
+    private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
     private final TaskService taskService;
     private final SessionValidator sessionValidator;
     private final UserService userService;
@@ -43,7 +41,7 @@ private static final Logger logger = LoggerFactory.getLogger(TaskController.clas
     }
 
     @GetMapping("")
-    public String showAllTasks (HttpSession session, Model model) {
+    public String showAllTasks(HttpSession session, Model model) {
         if (!sessionValidator.isSessionValid(session)) {
             return "redirect:/loginform";
         }
@@ -52,24 +50,70 @@ private static final Logger logger = LoggerFactory.getLogger(TaskController.clas
     }
 
 
-
     @GetMapping("/update/{id}")
-    public String showUpateForm (HttpSession session, @PathVariable int id, Model model) {
-        if(!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+    public String showUpdateForm(HttpSession session, @PathVariable int id, Model model) {
+        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             throw new AccessDeniedException("Only project managers can edit tasks");
         }
+
         Task task = taskService.getTaskById(id);
+        MilestoneDTO milestone = milestoneService.getMilestoneWithDetails(task.getMilestoneId());
+        Project project = projectService.getProjectById(milestone.getProjectId());
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        Role role = userService.getUserById(userId).getRole();
+
+        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+        if (!isOwner) {
+            throw new AccessDeniedException("You must be the project owner to edit tasks.");
+        }
+
         model.addAttribute("task", task);
-        return "projectmanager/taskform";
+        model.addAttribute("status", Status.values());
+        model.addAttribute("employees", userService.getAllEmployees());
+        model.addAttribute("assignedEmployees", taskCoworkerService.getAllCoworkersIdsForTask(id));
+
+        return "projectmanager/updateTask";
     }
 
+
     @PostMapping("/update")
-    public String updateTask (HttpSession session, @ModelAttribute Task task) {
-        if(!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+    public String updateTask(
+            HttpSession session,
+            @ModelAttribute Task task,
+            @RequestParam (required = false) List<Integer> userIds,
+            RedirectAttributes redirectAttributes
+
+    ) {
+        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             throw new AccessDeniedException("Only project managers can update tasks");
         }
 
-        taskService.updateTask(task);
+        Task currentTask = taskService.getTaskById(task.getId());
+        MilestoneDTO milestone = milestoneService.getMilestoneWithDetails(task.getMilestoneId());
+        Project project = projectService.getProjectById(milestone.getProjectId());
+
+        Integer userId = (Integer) session.getAttribute("userId");
+        Role role = userService.getUserById(userId).getRole();
+
+        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+        if (!isOwner) {
+            throw new AccessDeniedException("You must be the project owner to update tasks.");
+        }
+        task.setId(currentTask.getId());
+
+        try {
+            taskService.updateTask(task);
+            taskCoworkerService.removeCoworkersFromTask(task.getId(), taskCoworkerService.getAllCoworkersIdsForTask(task.getId()));
+            taskCoworkerService.addCoworkersToTask(task.getId(), userIds);
+
+            logger.info("Task with ID: {} was successfully updated by user {}", task.getId(), userId);
+        } catch (TaskUpdateException e) {
+            logger.error("Could not update task with ID: {}. Reason: {}", task.getId(), e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/tasks/update/" + task.getId();
+        }
+
         return "redirect:/tasks/view/" + task.getId();
     }
 
@@ -98,12 +142,12 @@ private static final Logger logger = LoggerFactory.getLogger(TaskController.clas
         return "redirect:/milestones/view/" + milestoneId;
     }
 
-     @GetMapping("/create/{milestoneId}")
+    @GetMapping("/create/{milestoneId}")
     public String showCreateTaskForm(
             @PathVariable int milestoneId,
             HttpSession session,
             Model model
-     ) {
+    ) {
         if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
             throw new AccessDeniedException("Only project managers can create tasks");
         }
@@ -169,7 +213,6 @@ private static final Logger logger = LoggerFactory.getLogger(TaskController.clas
     }
 
 
-
     @GetMapping("/view/{id}")
     public String viewTask(@PathVariable int id, Model model, HttpSession session) {
         if (!sessionValidator.isSessionValid(session)) {
@@ -186,8 +229,10 @@ private static final Logger logger = LoggerFactory.getLogger(TaskController.clas
         Role role = userService.getUserById(userId).getRole();
         boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
 
+
         model.addAttribute("task", task);
         model.addAttribute("isOwner", isOwner);
+        model.addAttribute("employees", taskCoworkerService.getAllCoworkersForTask(id));
 
         return "taskpage";
     }

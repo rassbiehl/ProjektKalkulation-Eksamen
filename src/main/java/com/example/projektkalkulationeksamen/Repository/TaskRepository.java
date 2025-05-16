@@ -96,7 +96,7 @@ public class TaskRepository {
         return jdbcTemplate.query(sql, RowMapperUtil.taskRowMapper());
     }
 
-    public List<Task> getTasksByMilestoneId (int milestoneId) {
+    public List<Task> getTasksByMilestoneId(int milestoneId) {
         String sql = "SELECT * FROM tasks " +
                 "WHERE milestone_id = ?";
 
@@ -124,7 +124,15 @@ public class TaskRepository {
             if (updatedTask.getCompletedAt() != null) {
                 ifCompleted = Timestamp.valueOf(updatedTask.getCompletedAt());
             }
+            Timestamp ifStartDate = null;
+            if (updatedTask.getStartedDate() != null) {
+                ifStartDate = Timestamp.valueOf(updatedTask.getStartedDate());
+            }
 
+            Timestamp ifDeadline = null;
+            if (updatedTask.getDeadline() != null) {
+                ifDeadline = Timestamp.valueOf(updatedTask.getDeadline());
+            }
             int affectedRows = jdbcTemplate.update(sql,
                     updatedTask.getTaskName(),
                     updatedTask.getTaskDescription(),
@@ -132,8 +140,8 @@ public class TaskRepository {
                     updatedTask.getEstimatedHours(),
                     updatedTask.getActualHoursUsed(),
                     updatedTask.getStatus().toString(),
-                    Timestamp.valueOf(updatedTask.getStartedDate()),
-                    Timestamp.valueOf(updatedTask.getDeadline()),
+                    ifStartDate,
+                    ifDeadline,
                     ifCompleted,
 
                     updatedTask.getId()

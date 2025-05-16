@@ -79,8 +79,44 @@
             </section>
 
         </div>
+
+        <div class="projectMilestones">
+            <h2>Collaborators</h2>
+
+            <div class="project-content">
+
+
+                <div class="project-item" th:each="employee : ${employees}">
+
+                    <p>🙋‍♂️</p>
+                    <p class="name" th:text="${employee.username}"></p>
+
+                    <p>
+                        🔑 Employee ID: <span th:text="${employee.id}"></span>
+                    </p>
+
+                    <p>
+                        ⏰ Created at: <span th:text="${#temporals.format(employee.createdAt, 'dd.MM.yyyy')}"></span>
+                    </p>
+
+                </div>
+
+                <!-- No tasks -->
+                <div class="project-item" th:if="${#lists.isEmpty(employees)}">
+                    <h3>This task has no assigned users</h3>
+                </div>
+
+
+                <div class="project-item" th:if="${isOwner}">
+                    <div class="button-wrapper">
+                        <a th:href="@{/tasks/update/{id}(id=${task.id})}">
+                            <button class="add-button" type="button">✚ Assign Employee</button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
 </body>
 </html>
