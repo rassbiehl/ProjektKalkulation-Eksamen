@@ -176,7 +176,7 @@ public class ProjectService {
 
 
     // DTO Object methods
-    public List<MilestoneDTO> getFinishedMileStonesFromProject (int projectId) {
+    public List<MilestoneDTO> getFinishedMileStonesFromProject(int projectId) {
 
         ProjectDTO projectDTO = getProjectWithDetails(projectId);
 
@@ -192,7 +192,7 @@ public class ProjectService {
         return finishedMileStones;
     }
 
-    public List<MilestoneDTO> getOngoingMileStonesFromProject (int projectId) {
+    public List<MilestoneDTO> getOngoingMileStonesFromProject(int projectId) {
 
         ProjectDTO projectDTO = getProjectWithDetails(projectId);
 
@@ -280,7 +280,7 @@ public class ProjectService {
 
     public List<ProjectDTO> getAllProjectsByEmployeeId(int employeeId) {
         List<ProjectDTO> allProjects = getAllProjectsWithDetails();
-        Set<Integer> foundProjectIds= new HashSet<>();
+        Set<Integer> foundProjectIds = new HashSet<>();
 
         for (ProjectDTO projectDTO : allProjects) {
             for (MilestoneDTO milestoneDTO : projectDTO.getMilestones()) {
@@ -301,18 +301,27 @@ public class ProjectService {
         List<ProjectDTO> foundProjects = new ArrayList<>();
 
         for (Integer integer : foundProjectIds) {
-           foundProjects.add(getProjectWithDetails(integer));
+            foundProjects.add(getProjectWithDetails(integer));
         }
         return foundProjects;
     }
 
-    public int estimatedHours (int projectId){
+    public int estimatedHours(int projectId) {
         int estimatedHours = 0;
         ProjectDTO projectDTO = getProjectWithDetails(projectId);
-        for (MilestoneDTO milestoneDTO : projectDTO.getMilestones()){
-           estimatedHours += milestoneDTO.getEstimatedHours();
+        for (MilestoneDTO milestoneDTO : projectDTO.getMilestones()) {
+            estimatedHours += milestoneDTO.getEstimatedHours();
         }
         return estimatedHours;
+    }
+
+    public int actualHoursUsed(int projectId) {
+        int actualHoursUsed = 0;
+        ProjectDTO projectDTO = getProjectWithDetails(projectId);
+        for (MilestoneDTO milestoneDTO : projectDTO.getMilestones()) {
+            actualHoursUsed += milestoneDTO.getActualHoursUsed();
+        }
+        return actualHoursUsed;
     }
 
 }
