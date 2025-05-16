@@ -12,11 +12,6 @@ public class ProjektKalkulationEksamenApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ProjektKalkulationEksamenApplication.class, args);
-        String rawPassword = "123456";
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String hashedPassword = passwordEncoder.encode(rawPassword);
-        System.out.println(rawPassword);
-        System.out.println(hashedPassword);
     }
 
 }
