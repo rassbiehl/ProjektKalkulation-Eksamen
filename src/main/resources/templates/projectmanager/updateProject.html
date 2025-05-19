@@ -25,9 +25,9 @@
             <input id="projectName" class="input-field" type="text" name="projectName" th:value="${project.projectName}">
         </div>
 
-        <div>
-            <label for="description">New project description:</label>
-            <input id="description" class="input-field" type="text" name="description" th:value="${project.description}">
+        <div class="input">
+            <p>New project description:</p>
+            <textarea class="input-field-description" th:field="*{project.description}" required></textarea>
         </div>
 
         <div>

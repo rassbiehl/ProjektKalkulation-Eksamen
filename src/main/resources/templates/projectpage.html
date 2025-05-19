@@ -17,7 +17,7 @@
     <div class="shadow">
 
 
-        <a th:href="@{/projects/{role}Startpage(role=${userRole})}" class="back-button">← Back</a>
+        <a th:href="@{/projects/{role}Startpage(role=${userRole})}" class="back-button">← Back to Dashboard</a>
 
         <div class="headline">
             <img src="/images/logonotext.svg" alt="Logo">
@@ -70,12 +70,9 @@
                 </p>
 
                 <p >
-                    ⏳ Estimated remaining: <span th:text="${estimatedHours}"></span> hours
+                    ⏳ Estimated hours: <span th:text="${estimatedHours}"></span> hours
                 </p>
 
-                <p>
-                    💰 Calculated cost: <span th:text="${project.calculatedCost}"></span> kr
-                </p>
             </section>
 
             <!-- Timeline -->

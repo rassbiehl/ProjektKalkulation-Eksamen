@@ -1,13 +1,13 @@
 package com.example.projektkalkulationeksamen.unit.service;
 
-import com.example.projektkalkulationeksamen.Exceptions.database.DatabaseException;
-import com.example.projektkalkulationeksamen.Exceptions.database.DeletionException;
-import com.example.projektkalkulationeksamen.Exceptions.user.UserCreationException;
-import com.example.projektkalkulationeksamen.Exceptions.notfound.UserNotFoundException;
-import com.example.projektkalkulationeksamen.Model.Role;
-import com.example.projektkalkulationeksamen.Model.User;
-import com.example.projektkalkulationeksamen.Repository.UserRepository;
-import com.example.projektkalkulationeksamen.Service.UserService;
+import com.example.projektkalkulationeksamen.exceptions.database.DatabaseException;
+import com.example.projektkalkulationeksamen.exceptions.database.DeletionException;
+import com.example.projektkalkulationeksamen.exceptions.user.UserCreationException;
+import com.example.projektkalkulationeksamen.exceptions.notfound.UserNotFoundException;
+import com.example.projektkalkulationeksamen.model.Role;
+import com.example.projektkalkulationeksamen.model.User;
+import com.example.projektkalkulationeksamen.repository.UserRepository;
+import com.example.projektkalkulationeksamen.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

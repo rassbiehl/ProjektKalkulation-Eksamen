@@ -1,7 +1,7 @@
 package com.example.projektkalkulationeksamen.unit.validator;
 
-import com.example.projektkalkulationeksamen.Exceptions.user.UserCreationException;
-import com.example.projektkalkulationeksamen.Validator.UserValidator;
+import com.example.projektkalkulationeksamen.exceptions.user.UserCreationException;
+import com.example.projektkalkulationeksamen.validator.UserValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
