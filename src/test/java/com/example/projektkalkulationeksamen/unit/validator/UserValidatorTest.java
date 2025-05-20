@@ -15,10 +15,10 @@ public class UserValidatorTest {
     @Test
     void validateUsername_shouldThrowUserCreationException_whenInvalidUsername () {
         // Arrange
-        String invalidUsername = "";
+        String invalidUsername = " ";
 
         // Act and assert
-        UserCreationException userCreationException = assertThrows(UserCreationException.class, () -> UserValidator.validateUsername(invalidUsername));
+        assertThrows(UserCreationException.class, () -> UserValidator.validateUsername(invalidUsername));
 
     }
 
@@ -29,7 +29,7 @@ public class UserValidatorTest {
         String invalidPassword = "123";
 
         // act and assert
-        UserCreationException userCreationException = assertThrows(UserCreationException.class, () -> UserValidator.validatePassword(invalidPassword));
+        assertThrows(UserCreationException.class, () -> UserValidator.validatePassword(invalidPassword));
     }
 
 }

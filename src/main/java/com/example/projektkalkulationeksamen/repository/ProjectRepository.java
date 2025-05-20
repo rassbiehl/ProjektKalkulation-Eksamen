@@ -47,13 +47,6 @@ public class ProjectRepository {
         }
     }
 
-    public List<Project> getAllProjectsByProjectManager(int projectManagerId) {
-        String sql = "SELECT * FROM projects " +
-                "WHERE project_manager_id = ?";
-        return jdbcTemplate.query(sql, RowMapperUtil.projectRowMapper(), projectManagerId);
-    }
-
-
     public Optional<Project> findProjectByName(String projectName) {
         try {
             String sql = "SELECT * FROM projects " +

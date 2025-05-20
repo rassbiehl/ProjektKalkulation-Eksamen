@@ -1,4 +1,4 @@
-package com.example.projektkalkulationeksamen.integration.user;
+package com.example.projektkalkulationeksamen.integration;
 import com.example.projektkalkulationeksamen.model.Role;
 import com.example.projektkalkulationeksamen.model.User;
 import com.example.projektkalkulationeksamen.repository.UserRepository;
@@ -32,11 +32,10 @@ public class UserFlowIntegrationTest {
     private AuthService authService;
 
 
-//slet bruger,
 
 
     @Test
-    void testRegisterUser() throws SQLException {
+    void shouldRegisterUserSuccessfully() throws SQLException {
 
         // arrange
         String newUsername = "test";
@@ -57,7 +56,7 @@ public class UserFlowIntegrationTest {
 
 
     @Test
-    void testGetUserById() throws SQLException {
+    void shouldFetchUserById() throws SQLException {
         // arrange
         List<User> allUsers = userService.getAllUsers();
         User selectedUser = allUsers.get(1);
@@ -71,7 +70,7 @@ public class UserFlowIntegrationTest {
     }
 
     @Test
-    void testGetUserByUsername() throws SQLException {
+    void shouldFetchUserByUsername() throws SQLException {
         //arrange
         List<User> allUsers = userService.getAllUsers();
         User selectedUser = userService.getUserByUsername("projectmanager");
@@ -86,7 +85,7 @@ public class UserFlowIntegrationTest {
 
 
     @Test
-    void testUpdateUser() throws SQLException {
+    void shouldUpdateUserDetails() throws SQLException {
         // arrange
         List<User> allUsers = userService.getAllUsers();
         User originalUser = userService.getUserByUsername("projectmanager");
@@ -103,7 +102,8 @@ public class UserFlowIntegrationTest {
 
 
     @Test
-    void testDeleteUser() throws SQLException {
+    void shouldDeleteUserCorrectly() throws SQLException {
+        // arrange
         List<User> allUsers = userService.getAllUsers();
         User userToBeDeleted = userService.getUserByUsername("projectmanager");
 

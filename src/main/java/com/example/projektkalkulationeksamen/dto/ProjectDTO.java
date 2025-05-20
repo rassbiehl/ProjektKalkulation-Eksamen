@@ -71,6 +71,7 @@ public class ProjectDTO {
         return projectManagerId;
     }
 
+    public void setProjectManagerId(int projectManagerId) {this.projectManagerId = projectManagerId;}
     public Status getStatus() {
         return status;
     }
