@@ -33,8 +33,7 @@ public class UserRepository {
 
     public Optional<User> getUserById(int id) {
         try {
-            String sql = "SELECT * FROM users" +
-                    " WHERE id = ?";
+            String sql = "SELECT * FROM users WHERE id = ?";
             User user = jdbcTemplate.queryForObject(sql, RowMapperUtil.userRowMapper(), id);
 
             return Optional.of(user);

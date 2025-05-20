@@ -13,7 +13,7 @@ import com.example.projektkalkulationeksamen.exceptions.project.ProjectUpdateExc
 import com.example.projektkalkulationeksamen.model.Project;
 import com.example.projektkalkulationeksamen.model.Status;
 import com.example.projektkalkulationeksamen.repository.ProjectRepository;
-import com.example.projektkalkulationeksamen.validator.ProjectDataValidator;
+import com.example.projektkalkulationeksamen.validation.ProjectDataValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,13 +54,13 @@ public class ProjectService {
     public Project addProject(Project newProject) {
         logger.debug("Attempting to create new project with project name: {}", newProject.getProjectName());
 
-            if (projectExistsByName(newProject.getProjectName())) {
-                logger.warn("Project name: {} already taken", newProject.getProjectName());
-                throw new ProjectCreationException("Project name already taken");
-            }
+        if (projectExistsByName(newProject.getProjectName())) {
+            logger.warn("Project name: {} already taken", newProject.getProjectName());
+            throw new ProjectCreationException("Project name already taken");
+        }
 
-            ProjectDataValidator.validateName(newProject.getProjectName());
-            ProjectDataValidator.validateDescription(newProject.getDescription());
+        ProjectDataValidator.validateName(newProject.getProjectName());
+        ProjectDataValidator.validateDescription(newProject.getDescription());
 
         try {
             return projectRepository.addProject(newProject);
@@ -100,8 +100,11 @@ public class ProjectService {
                 throw new ProjectUpdateException("Project name already taken");
             }
 
+            // When changing the project status to "COMPLETED", update completed_at to the current LocalDateTime.
             if (updatedProject.getStatus().equals(Status.COMPLETED) && currentProject.getCompletedAt() == null) {
                 updatedProject.setCompletedAt(LocalDateTime.now());
+
+                // If changed back from "COMPLETED" to "In progress" or "Not started" remove the completed_at value.
             } else if (updatedProject.getStatus() != Status.COMPLETED) {
                 updatedProject.setCompletedAt(null);
             }
@@ -138,19 +141,18 @@ public class ProjectService {
 
     }
 
-    // til add
+    // returns true if a project name already exists
     public boolean projectExistsByName(String name) {
         return projectRepository.findProjectByName(name).isPresent();
     }
 
-    // til update
+    // Ensures no duplicate names (ignoring its own name when updating)
     public boolean otherProjectExistsWithName(int currentProjectId, String name) {
         Optional<Project> existing = projectRepository.findProjectByName(name);
         return existing.isPresent() && existing.get().getId() != currentProjectId;
     }
 
 
-    // DTO Object methods
     public List<MilestoneDTO> getFinishedMileStonesFromProject(int projectId) {
 
         ProjectDTO projectDTO = getProjectWithDetails(projectId);
@@ -193,9 +195,6 @@ public class ProjectService {
                 project.getDescription(),
                 project.getCreatedAt(),
                 project.getProjectManagerId(),
-                project.getActualHoursUsed(),
-                project.getEstimatedHours(),
-                project.getCalculatedCost(),
                 project.getStatus(),
                 project.getDeadline(),
                 project.getStartDate(),
@@ -215,7 +214,7 @@ public class ProjectService {
 
         return allProjectsWithDetails;
     }
-
+// returns all projects that has the status of "COMPLETED"
     public List<ProjectDTO> getAllFinishedProjectsWithDetails() {
         List<ProjectDTO> allProjects = getAllProjectsWithDetails();
         List<ProjectDTO> finishedProjects = new ArrayList<>();
@@ -227,7 +226,7 @@ public class ProjectService {
         }
         return finishedProjects;
     }
-
+// returns all projects that has the status of "IN PROGRESS" or "NOT STARTED"
     public List<ProjectDTO> getAllOngoingProjects() {
         List<ProjectDTO> allProjects = getAllProjectsWithDetails();
         List<ProjectDTO> ongoingProjects = new ArrayList<>();
@@ -285,7 +284,7 @@ public class ProjectService {
         int estimatedHours = 0;
         ProjectDTO projectDTO = getProjectWithDetails(projectId);
         for (MilestoneDTO milestoneDTO : projectDTO.getMilestones()) {
-            for (TaskDTO taskDTO : milestoneDTO.getTasks()){
+            for (TaskDTO taskDTO : milestoneDTO.getTasks()) {
                 estimatedHours += taskDTO.getEstimatedHours();
             }
         }
@@ -296,7 +295,7 @@ public class ProjectService {
         int actualHoursUsed = 0;
         ProjectDTO projectDTO = getProjectWithDetails(projectId);
         for (MilestoneDTO milestoneDTO : projectDTO.getMilestones()) {
-            for (TaskDTO taskDTO : milestoneDTO.getTasks()){
+            for (TaskDTO taskDTO : milestoneDTO.getTasks()) {
                 actualHoursUsed += taskDTO.getActualHoursUsed();
             }
         }

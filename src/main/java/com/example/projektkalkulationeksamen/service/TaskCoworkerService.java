@@ -82,12 +82,14 @@ public class TaskCoworkerService {
         }
     }
 
-    public List<Integer> getAllCoworkersIdsForTask (int taskId) {
+    public List<Integer> getAllCoworkersIdsFromTask(int taskId) {
+        logger.debug("Retrieving all coworkers ID's from task with ID: {}", taskId);
         return taskCoworkerRepository.getAllCoworkersIdsForTask(taskId);
     }
 
     public List<User> getAllCoworkersForTask(int taskId) {
-        List<Integer> allTaskCoworkersIds = getAllCoworkersIdsForTask(taskId);
+        logger.debug("Retrieving all coworkers from task with ID: {}", taskId);
+        List<Integer> allTaskCoworkersIds = getAllCoworkersIdsFromTask(taskId);
         List<User> allTaskCoworkers = new ArrayList<>();
 
         for (Integer userId : allTaskCoworkersIds) {
@@ -96,17 +98,16 @@ public class TaskCoworkerService {
         return allTaskCoworkers;
     }
 
-    public List<Integer> getAllTaskIdsForCoworker (int userId) {
-        return taskCoworkerRepository.getAllTaskIdsForCoworker(userId);
-    }
-
     public boolean isEmployee(int userId, int taskId){
-        List<Integer> allCoworkers = getAllCoworkersIdsForTask(taskId);
+        logger.debug("Checking if user ID {} is assigned to task ID {}", userId, taskId);
+        List<Integer> allCoworkers = getAllCoworkersIdsFromTask(taskId);
         for (Integer id : allCoworkers){
             if (id.equals(userId)){
+                logger.debug("User ID {} is assigned to task ID {}", userId, taskId);
                 return true;
             }
         }
+        logger.debug("User ID {} is NOT assigned to task ID {}", userId, taskId);
         return false;
     }
 }

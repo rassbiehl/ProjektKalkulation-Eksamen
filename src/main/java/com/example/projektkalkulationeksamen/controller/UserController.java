@@ -3,9 +3,8 @@ package com.example.projektkalkulationeksamen.controller;
 import com.example.projektkalkulationeksamen.exceptions.security.AccessDeniedException;
 import com.example.projektkalkulationeksamen.model.Role;
 import com.example.projektkalkulationeksamen.model.User;
-import com.example.projektkalkulationeksamen.service.AuthService;
 import com.example.projektkalkulationeksamen.service.UserService;
-import com.example.projektkalkulationeksamen.validator.SessionValidator;
+import com.example.projektkalkulationeksamen.validation.SessionValidation;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,14 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
-    private final SessionValidator sessionValidator;
-    private final AuthService authService;
+    private final SessionValidation sessionValidation;
 
     @Autowired
-    public UserController(UserService userService, SessionValidator sessionValidator, AuthService authService) {
+    public UserController(UserService userService, SessionValidation sessionValidation) {
         this.userService = userService;
-        this.sessionValidator = sessionValidator;
-        this.authService = authService;
+        this.sessionValidation = sessionValidation;
     }
 
     @GetMapping
@@ -36,15 +33,14 @@ public class UserController {
             Model model,
             HttpSession session
     ) {
-        if (!sessionValidator.isSessionValid(session)) {
+        if (!sessionValidation.isSessionValid(session)) {
             logger.info("User is not logged in for current session. Redirecting to loginform.html");
             return "redirect:/loginform";
         }
 
         Integer userId = (Integer) session.getAttribute("userId");
 
-        User user = userService.getUserById(userId); // NotfoundException bliver fanget globalt.
-        Role role = user.getRole();
+        Role role = userService.getUserById(userId).getRole();
 
         model.addAttribute("allUsers", userService.getAllUsers());
 
@@ -60,13 +56,17 @@ public class UserController {
             HttpSession session,
             @PathVariable int id
     ) {
-        if (!sessionValidator.isSessionValid(session, Role.ADMIN)) {
+        if (!sessionValidation.isSessionValid(session, Role.ADMIN)) {
             throw new AccessDeniedException("Only admins can delete users");
         }
+        // prevents the admin of deleting itself.
+        if (id == (int) session.getAttribute("userId")) {
+            throw new AccessDeniedException("You cannot delete your own account");
+        }
+        userService.deleteUser(id);
 
-        userService.deleteUser(id); // DeletionException bliver fanget globalt.
-
-        logger.info("User was successfully deleted with ID: {}", id);
+        Integer adminId = (Integer) session.getAttribute("userId");
+        logger.info("Admin with ID {} deleted user with ID {}", adminId, id);
         return "redirect:/users";
     }
 

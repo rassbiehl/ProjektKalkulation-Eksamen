@@ -7,7 +7,7 @@ import com.example.projektkalkulationeksamen.model.Role;
 import com.example.projektkalkulationeksamen.model.User;
 import com.example.projektkalkulationeksamen.service.AuthService;
 import com.example.projektkalkulationeksamen.service.UserService;
-import com.example.projektkalkulationeksamen.validator.SessionValidator;
+import com.example.projektkalkulationeksamen.validation.SessionValidation;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,18 +25,18 @@ public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     private final UserService userService;
     private final AuthService authService;
-    private final SessionValidator sessionValidator;
+    private final SessionValidation sessionValidation;
 
     @Autowired
-    public AuthController(UserService userService, AuthService authService, SessionValidator sessionValidator) {
+    public AuthController(UserService userService, AuthService authService, SessionValidation sessionValidation) {
         this.userService = userService;
         this.authService = authService;
-        this.sessionValidator = sessionValidator;
+        this.sessionValidation = sessionValidation;
     }
 
     @GetMapping("/")
     public String redirectToLogin(HttpSession session) {
-        if (!sessionValidator.isSessionValid(session)) {
+        if (!sessionValidation.isSessionValid(session)) {
             logger.info("User is not logged in for current session. Redirecting to loginform.html");
             return "redirect:/loginform";
         }
@@ -76,7 +76,7 @@ public class AuthController {
     @GetMapping("/registerform")
     public String showRegisterForm(HttpSession session, Model model) {
 
-        if (!sessionValidator.isSessionValid(session, Role.ADMIN)) {
+        if (!sessionValidation.isSessionValid(session, Role.ADMIN)) {
 
             logger.info("Access denied: user lacks admin privileges");
             throw new AccessDeniedException("User lacks admin privileges");
@@ -98,7 +98,7 @@ public class AuthController {
 
     ) {
 
-        if (!sessionValidator.isSessionValid(session, Role.ADMIN)) {
+        if (!sessionValidation.isSessionValid(session, Role.ADMIN)) {
             logger.info("Access denied: user lacks admin privileges");
             throw new AccessDeniedException("User lacks admin privileges");
         }
@@ -108,12 +108,12 @@ public class AuthController {
 
             authService.adminRegister(username, rawPassword, role);
 
-            User createdUser = userService.getUserByUsername(username); //
+            User createdUser = userService.getUserByUsername(username);
             logger.info("Successfully created new user with userID: {} and role: {}",
                     createdUser.getId(), createdUser.getRole());
             return "redirect:/registerform";
         } catch (AuthRegisterException e) {
-            logger.info("Failed to register user with username: {}", username, e);
+            logger.warn("Failed to register user due to validation or DB error");
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/registerform";
         }
@@ -126,20 +126,20 @@ public class AuthController {
             @PathVariable int id
     ) {
 
-        if (!sessionValidator.isSessionValid(session, Role.ADMIN)) {
+        if (!sessionValidation.isSessionValid(session, Role.ADMIN)) {
             Integer userId = (Integer) session.getAttribute("userId");
             logger.info("Access denied: user with ID {} lacks admin privileges", userId);
             throw new AccessDeniedException("User lacks admin privileges");
         }
 
-            User user = userService.getUserById(id); // kan smide notfoundexception
+        User user = userService.getUserById(id);
 
-            model.addAttribute("userId", user.getId());
-            model.addAttribute("roles", Role.values());
-            model.addAttribute("username", user.getUsername());
-            model.addAttribute("selectedRole", user.getRole());
+        model.addAttribute("userId", user.getId());
+        model.addAttribute("roles", Role.values());
+        model.addAttribute("username", user.getUsername());
+        model.addAttribute("selectedRole", user.getRole());
 
-            logger.info("loading registerform.html");
+        logger.info("loading registerform.html");
 
         return "admin/updateform";
     }
@@ -152,11 +152,17 @@ public class AuthController {
                               @RequestParam int id,
                               RedirectAttributes redirectAttributes) {
 
-        if (!sessionValidator.isSessionValid(session, Role.ADMIN)) {
+        if (!sessionValidation.isSessionValid(session, Role.ADMIN)) {
             Integer userId = (Integer) session.getAttribute("userId");
             logger.info("Access denied: user with ID {} lacks admin privileges", userId);
             throw new AccessDeniedException("User lacks admin privileges");
         }
+         // prevents admit from updating itself
+        if (session.getAttribute("userId").equals(id)) {
+            logger.warn("Admin user with ID {} attempted to edit own account", id);
+            throw new AccessDeniedException("You cannot edit your own admin account");
+        }
+
 
         try {
             logger.debug("attempting to update existing user with username: {} and role: {}", username, role.toString());

@@ -7,7 +7,8 @@ import com.example.projektkalkulationeksamen.exceptions.task.TaskCreationExcepti
 import com.example.projektkalkulationeksamen.exceptions.task.TaskUpdateException;
 import com.example.projektkalkulationeksamen.model.*;
 import com.example.projektkalkulationeksamen.service.*;
-import com.example.projektkalkulationeksamen.validator.SessionValidator;
+import com.example.projektkalkulationeksamen.validation.AccessValidation;
+import com.example.projektkalkulationeksamen.validation.SessionValidation;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,16 +25,16 @@ import java.util.List;
 public class TaskController {
     private static final Logger logger = LoggerFactory.getLogger(TaskController.class);
     private final TaskService taskService;
-    private final SessionValidator sessionValidator;
+    private final SessionValidation sessionValidation;
     private final UserService userService;
     private final ProjectService projectService;
     private final MilestoneService milestoneService;
     private final TaskCoworkerService taskCoworkerService;
 
     @Autowired
-    public TaskController(TaskService taskService, SessionValidator sessionValidator, UserService userService, ProjectService projectService, MilestoneService milestoneService, TaskCoworkerService taskCoworkerService) {
+    public TaskController(TaskService taskService, SessionValidation sessionValidation, UserService userService, ProjectService projectService, MilestoneService milestoneService, TaskCoworkerService taskCoworkerService) {
         this.taskService = taskService;
-        this.sessionValidator = sessionValidator;
+        this.sessionValidation = sessionValidation;
         this.userService = userService;
         this.projectService = projectService;
         this.milestoneService = milestoneService;
@@ -41,8 +42,11 @@ public class TaskController {
     }
 
     @GetMapping("")
-    public String showAllTasks(HttpSession session, Model model) {
-        if (!sessionValidator.isSessionValid(session)) {
+    public String showAllTasks(
+            HttpSession session,
+            Model model
+    ) {
+        if (!sessionValidation.isSessionValid(session)) {
             return "redirect:/loginform";
         }
         model.addAttribute("tasks", taskService.getAllTasks());
@@ -51,19 +55,22 @@ public class TaskController {
 
 
     @GetMapping("/update/{id}")
-    public String showUpdateForm(HttpSession session, @PathVariable int id, Model model) {
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+    public String showUpdateForm(
+            HttpSession session,
+            @PathVariable int id,
+            Model model
+    ) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             throw new AccessDeniedException("Only project managers can edit tasks");
         }
 
         Task task = taskService.getTaskById(id);
         MilestoneDTO milestone = milestoneService.getMilestoneWithDetails(task.getMilestoneId());
-        Project project = projectService.getProjectById(milestone.getProjectId());
-
+        ProjectDTO project = projectService.getProjectWithDetails(milestone.getProjectId());
         Integer userId = (Integer) session.getAttribute("userId");
-        Role role = userService.getUserById(userId).getRole();
+        Role userRole = userService.getUserById(userId).getRole();
 
-        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, project);
         if (!isOwner) {
             throw new AccessDeniedException("You must be the project owner to edit tasks.");
         }
@@ -71,7 +78,7 @@ public class TaskController {
         model.addAttribute("task", task);
         model.addAttribute("status", Status.values());
         model.addAttribute("employees", userService.getAllEmployees());
-        model.addAttribute("assignedEmployees", taskCoworkerService.getAllCoworkersIdsForTask(id));
+        model.addAttribute("assignedEmployees", taskCoworkerService.getAllCoworkersIdsFromTask(id));
 
         return "projectmanager/updateTask";
     }
@@ -81,22 +88,22 @@ public class TaskController {
     public String updateTask(
             HttpSession session,
             @ModelAttribute Task task,
-            @RequestParam (required = false) List<Integer> userIds,
+            @RequestParam(required = false) List<Integer> userIds,
             RedirectAttributes redirectAttributes
 
     ) {
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             throw new AccessDeniedException("Only project managers can update tasks");
         }
 
         Task currentTask = taskService.getTaskById(task.getId());
         MilestoneDTO milestone = milestoneService.getMilestoneWithDetails(task.getMilestoneId());
-        Project project = projectService.getProjectById(milestone.getProjectId());
+        ProjectDTO project = projectService.getProjectWithDetails(milestone.getProjectId());
 
         Integer userId = (Integer) session.getAttribute("userId");
-        Role role = userService.getUserById(userId).getRole();
+        Role userRole = userService.getUserById(userId).getRole();
 
-        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, project);
         if (!isOwner) {
             throw new AccessDeniedException("You must be the project owner to update tasks.");
         }
@@ -104,7 +111,7 @@ public class TaskController {
 
         try {
             taskService.updateTask(task);
-            taskCoworkerService.removeCoworkersFromTask(task.getId(), taskCoworkerService.getAllCoworkersIdsForTask(task.getId()));
+            taskCoworkerService.removeCoworkersFromTask(task.getId(), taskCoworkerService.getAllCoworkersIdsFromTask(task.getId()));
             taskCoworkerService.addCoworkersToTask(task.getId(), userIds);
 
             logger.info("Task with ID: {} was successfully updated by user {}", task.getId(), userId);
@@ -118,19 +125,22 @@ public class TaskController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteTask(HttpSession session, @PathVariable int id) {
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+    public String deleteTask(
+            HttpSession session,
+            @PathVariable int id
+    ) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             throw new AccessDeniedException("Only project managers can delete tasks");
         }
 
         Task task = taskService.getTaskById(id);
         MilestoneDTO milestone = milestoneService.getMilestoneWithDetails(task.getMilestoneId());
-        Project project = projectService.getProjectById(milestone.getProjectId());
+        ProjectDTO project = projectService.getProjectWithDetails(milestone.getProjectId());
 
         Integer userId = (Integer) session.getAttribute("userId");
-        Role role = userService.getUserById(userId).getRole();
+        Role userRole = userService.getUserById(userId).getRole();
 
-        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, project);
         if (!isOwner) {
             throw new AccessDeniedException("You must be the project owner to delete tasks.");
         }
@@ -148,15 +158,15 @@ public class TaskController {
             HttpSession session,
             Model model
     ) {
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             throw new AccessDeniedException("Only project managers can create tasks");
         }
 
         Milestone milestone = milestoneService.getMilestoneById(milestoneId);
         Integer userId = (Integer) session.getAttribute("userId");
         ProjectDTO project = projectService.getProjectWithDetails(milestone.getProjectId());
-        Role role = userService.getUserById(userId).getRole();
-        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+        Role userRole = userService.getUserById(userId).getRole();
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, project);
 
         if (isOwner) {
             Task task = new Task();
@@ -179,7 +189,7 @@ public class TaskController {
             @RequestParam(required = false) List<Integer> userIds,
             RedirectAttributes redirectAttributes
     ) {
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             throw new AccessDeniedException("Only project managers can create tasks");
         }
 
@@ -189,8 +199,8 @@ public class TaskController {
             Milestone milestone = milestoneService.getMilestoneById(milestoneId);
             Integer userId = (Integer) session.getAttribute("userId");
             ProjectDTO project = projectService.getProjectWithDetails(milestone.getProjectId());
-            Role role = userService.getUserById(userId).getRole();
-            boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+            Role userRole = userService.getUserById(userId).getRole();
+            boolean isOwner = AccessValidation.isOwner(userId, userRole, project);
 
             if (!isOwner) {
                 throw new AccessDeniedException("Access denied: User does not own the project");
@@ -205,18 +215,17 @@ public class TaskController {
             logger.warn("Task creation failed: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/tasks/create/" + milestoneId;
-        } catch (Exception e) {
-            logger.error("Unexpected error during task creation", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Unexpected error occurred.");
-            return "redirect:/tasks/create/" + milestoneId;
         }
     }
 
 
-
     @GetMapping("/view/{id}")
-    public String viewTask(@PathVariable int id, Model model, HttpSession session) {
-        if (!sessionValidator.isSessionValid(session)) {
+    public String viewTask(
+            @PathVariable int id,
+            Model model,
+            HttpSession session
+    ) {
+        if (!sessionValidation.isSessionValid(session)) {
             return "redirect:/loginform";
         }
 
@@ -227,9 +236,9 @@ public class TaskController {
         MilestoneDTO milestone = milestoneService.getMilestoneWithDetails(task.getMilestoneId());
         ProjectDTO project = projectService.getProjectWithDetails(milestone.getProjectId());
 
-        Role role = userService.getUserById(userId).getRole();
-        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
-        boolean isEmployee = role == Role.EMPLOYEE && taskCoworkerService.isEmployee(userId,task.getId());
+        Role userRole = userService.getUserById(userId).getRole();
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, project);
+        boolean isEmployee = userRole == Role.EMPLOYEE && taskCoworkerService.isEmployee(userId, task.getId());
 
 
         model.addAttribute("task", task);
@@ -241,26 +250,60 @@ public class TaskController {
     }
 
     @GetMapping("/setHours/{id}")
-    public String showSetHours(@PathVariable int id, Model model){
-        System.out.println("showSetHours called with id = " + id);
+    public String showSetHours(
+            HttpSession session,
+            @PathVariable int id,
+            Model model
+    ) {
+        if (!sessionValidation.isSessionValid(session)) {
+            return "redirect:/loginform";
+        }
+
+        Integer userId = (Integer) session.getAttribute("userId");
         Task task = taskService.getTaskById(id);
-        model.addAttribute("task", task);
-        model.addAttribute("taskId", id);
-        model.addAttribute("HoursInput", 0);
-        return "setHours";
+        Role userRole = userService.getUserById(userId).getRole();
+        boolean isEmployee = userRole == Role.EMPLOYEE && taskCoworkerService.isEmployee(userId, task.getId());
+
+        if (isEmployee) {
+            model.addAttribute("task", task);
+            model.addAttribute("taskId", id);
+            model.addAttribute("HoursInput", 0);
+            logger.info("User with ID: {} successfully added hours to task with ID: {}", userId, id);
+            return "setHours";
+        } else {
+            logger.warn("Failed to get add-hours page because of missing employee ID: {}", userId);
+            throw new AccessDeniedException("Access denied: User with ID: " + userId + " is not a part of the project");
+        }
     }
 
     @PostMapping("/set-hours")
-    public String submitHours (@RequestParam int taskId, @RequestParam int hours){
+    public String submitHours(
+            HttpSession session,
+            @RequestParam int taskId,
+            @RequestParam int hours
+    ) {
 
+        if (!sessionValidation.isSessionValid(session)) {
+            return "redirect:/loginform";
+        }
+
+        Integer userId = (Integer) session.getAttribute("userId");
         Task task = taskService.getTaskById(taskId);
+        Role userRole = userService.getUserById(userId).getRole();
+        boolean isEmployee = userRole == Role.EMPLOYEE && taskCoworkerService.isEmployee(userId, task.getId());
+
+        if (isEmployee) {
         int updatedHours = task.getActualHoursUsed() + hours;
         task.setActualHoursUsed(updatedHours);
 
         int milestoneId = task.getMilestoneId();
 
-        taskService.setHours(updatedHours,taskId);
+        taskService.setHours(updatedHours, taskId);
 
-        return "redirect:/milestones/view/" + milestoneId;
+        return "redirect:/tasks/view/" + taskId;
+        } else {
+            logger.warn("Access denied: User ID {} attempted to add hours to task ID {} but is not assigned", userId, taskId);
+            throw new AccessDeniedException("Access denied: User with ID: " + userId + " is not a part of the project");
+        }
     }
 }

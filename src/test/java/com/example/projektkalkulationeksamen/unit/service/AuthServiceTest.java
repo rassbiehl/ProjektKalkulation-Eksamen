@@ -147,7 +147,7 @@ public class AuthServiceTest {
 
 
         // assert
-        assertEquals("User not found", userUpdateException.getMessage());
+        assertEquals("Could not update user. Reason: User not found", userUpdateException.getMessage());
 
     }
 

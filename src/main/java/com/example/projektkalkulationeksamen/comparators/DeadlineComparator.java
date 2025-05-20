@@ -1,4 +1,4 @@
-package com.example.projektkalkulationeksamen.service.comparators;
+package com.example.projektkalkulationeksamen.comparators;
 
 import com.example.projektkalkulationeksamen.model.Milestone;
 

@@ -6,15 +6,14 @@ import com.example.projektkalkulationeksamen.dto.TaskDTO;
 import com.example.projektkalkulationeksamen.exceptions.milestone.MilestoneUpdateException;
 import com.example.projektkalkulationeksamen.exceptions.security.AccessDeniedException;
 import com.example.projektkalkulationeksamen.exceptions.milestone.MilestoneCreationException;
-import com.example.projektkalkulationeksamen.exceptions.notfound.MilestoneNotFoundException;
 import com.example.projektkalkulationeksamen.model.Milestone;
 import com.example.projektkalkulationeksamen.model.Role;
 import com.example.projektkalkulationeksamen.model.Status;
-import com.example.projektkalkulationeksamen.repository.MilestoneRepository;
 import com.example.projektkalkulationeksamen.service.MilestoneService;
 import com.example.projektkalkulationeksamen.service.ProjectService;
 import com.example.projektkalkulationeksamen.service.UserService;
-import com.example.projektkalkulationeksamen.validator.SessionValidator;
+import com.example.projektkalkulationeksamen.validation.AccessValidation;
+import com.example.projektkalkulationeksamen.validation.SessionValidation;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,18 +32,16 @@ public class MilestoneController {
 
     private final MilestoneService milestoneService;
     private final ProjectService projectService;
-    private final SessionValidator sessionValidator;
+    private final SessionValidation sessionValidation;
     private final UserService userService;
-    private final MilestoneRepository milestoneRepository;
 
 
     @Autowired
-    public MilestoneController(MilestoneService milestoneService, ProjectService projectService, SessionValidator sessionValidator, UserService userService, MilestoneRepository milestoneRepository) {
+    public MilestoneController(MilestoneService milestoneService, ProjectService projectService, SessionValidation sessionValidation, UserService userService) {
         this.milestoneService = milestoneService;
         this.projectService = projectService;
-        this.sessionValidator = sessionValidator;
+        this.sessionValidation = sessionValidation;
         this.userService = userService;
-        this.milestoneRepository = milestoneRepository;
     }
 
 
@@ -56,27 +53,25 @@ public class MilestoneController {
     ) {
         logger.info("Attempting to load milestone page with milestone ID: {}", id);
 
-        if (!sessionValidator.isSessionValid(session)) {
+        if (!sessionValidation.isSessionValid(session)) {
             logger.warn("Invalid session. Redirecting to login.");
             return "redirect:/loginform";
         }
 
         Integer userId = (Integer) session.getAttribute("userId");
-
         MilestoneDTO milestoneDTO = milestoneService.getMilestoneWithDetails(id);
-
         ProjectDTO projectDTO = projectService.getProjectWithDetails(milestoneDTO.getProjectId());
+        Role userRole = userService.getUserById(userId).getRole();
 
-        Role role = userService.getUserById(userId).getRole();
-        boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
-        logger.debug("User ID {} has role {}. Is owner: {}", userId, role, isOwner);
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, projectDTO);
+        logger.debug("User ID {} has role {}. Is owner: {}", userId, userRole, isOwner);
 
         model.addAttribute("project", projectDTO);
         model.addAttribute("milestone", milestoneDTO);
         model.addAttribute("projectManager", userService.getUserById(projectDTO.getProjectManagerId()));
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("milestoneTasks", milestoneDTO.getTasks());
-        model.addAttribute("estimatedHours", milestoneRepository.estimatedHours(id));
+        model.addAttribute("estimatedHours", milestoneService.getEstimatedHours(id));
         model.addAttribute("actualHoursUsed", milestoneService.getActualHoursUsed(id));
 
         List<TaskDTO> ongoingTasks = milestoneService.getOngoingTasksFromMilestone(id);
@@ -89,7 +84,7 @@ public class MilestoneController {
         List<TaskDTO> completedTasks = milestoneService.getCompletedTasksFromMilestone(id);
 
         if (!completedTasks.isEmpty()) {
-            logger.debug("Found {} completed tasks.", ongoingTasks.size());
+            logger.debug("Found {} completed tasks.", completedTasks.size());
             model.addAttribute("completedTasks", completedTasks);
         }
 
@@ -104,19 +99,19 @@ public class MilestoneController {
             Model model
     ) {
 
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can add projects");
         }
 
         Integer userId = (Integer) session.getAttribute("userId");
-        Role role = userService.getUserById(userId).getRole();
+        Role userRole = userService.getUserById(userId).getRole();
         ProjectDTO projectDTO = projectService.getProjectWithDetails(projectId);
 
-        boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
-
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, projectDTO);
+        logger.debug("User ID {} has role {}. Is owner: {}", userId, userRole, isOwner);
         if (isOwner) {
-            model.addAttribute("userRole", role.toString().toLowerCase());
+            model.addAttribute("userRole", userRole.toString().toLowerCase());
 
             model.addAttribute("milestone", new Milestone());
             model.addAttribute("projectId", projectId);
@@ -125,7 +120,7 @@ public class MilestoneController {
             return "/projectmanager/addMilestone";
         } else {
             logger.warn("Failed retrieve add milestone form because of missing owner ID: {}", userId);
-            throw new AccessDeniedException("Access denied: User with ID: {} " + projectId + " does not own the project");
+            throw new AccessDeniedException("Access denied: User with ID: " + userId + " does not own the project");
         }
     }
 
@@ -137,16 +132,16 @@ public class MilestoneController {
             @RequestParam int projectId
     ) {
 
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can add projects");
         }
 
         Integer userId = (Integer) session.getAttribute("userId");
-        Role role = userService.getUserById(userId).getRole();
+        Role userRole = userService.getUserById(userId).getRole();
         ProjectDTO projectDTO = projectService.getProjectWithDetails(projectId);
 
-        boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, projectDTO);
 
         if (isOwner) {
             milestone.setProjectId(projectId);
@@ -171,7 +166,7 @@ public class MilestoneController {
             HttpSession session,
             @PathVariable int id
     ) {
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can delete milestones");
         }
@@ -179,8 +174,8 @@ public class MilestoneController {
         Integer userId = (Integer) session.getAttribute("userId");
         MilestoneDTO milestoneDTO = milestoneService.getMilestoneWithDetails(id);
         ProjectDTO projectDTO = projectService.getProjectWithDetails(milestoneDTO.getProjectId());
-        Role role = userService.getUserById(userId).getRole();
-        boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
+        Role userRole = userService.getUserById(userId).getRole();
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, projectDTO);
 
         if (isOwner) {
             milestoneService.deleteMilestone(id);
@@ -201,20 +196,26 @@ public class MilestoneController {
             HttpSession session
     ) {
 
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can add projects");
         }
 
-        try {
+        Integer userId = (Integer) session.getAttribute("userId");
+        MilestoneDTO milestoneDTO = milestoneService.getMilestoneWithDetails(id);
+        ProjectDTO projectDTO = projectService.getProjectWithDetails(milestoneDTO.getProjectId());
+        Role userRole = userService.getUserById(userId).getRole();
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, projectDTO);
+
+        if (isOwner) {
             Milestone milestone = milestoneService.getMilestoneById(id);
             model.addAttribute("milestone", milestone);
             model.addAttribute("status", Status.values());
-        } catch (MilestoneNotFoundException e) {
-            return "redirect:/loginform";
+            return "projectmanager/updateMilestone";
+        } else {
+            logger.warn("Access denied: User is not a project manager");
+            throw new AccessDeniedException("Only project managers can update projects");
         }
-
-        return "projectmanager/updateMilestone";
     }
 
     @PostMapping("/update")
@@ -223,7 +224,7 @@ public class MilestoneController {
             @ModelAttribute Milestone milestone,
             RedirectAttributes redirectAttributes) {
 
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can update projects");
         }
@@ -231,9 +232,8 @@ public class MilestoneController {
         Integer userId = (Integer) session.getAttribute("userId");
         MilestoneDTO milestoneDTO = milestoneService.getMilestoneWithDetails(milestone.getId());
         ProjectDTO projectDTO = projectService.getProjectWithDetails(milestoneDTO.getProjectId());
-
-        Role role = userService.getUserById(userId).getRole();
-        boolean isOwner = role == Role.PROJECTMANAGER && projectDTO.getProjectManagerId() == userId;
+        Role userRole = userService.getUserById(userId).getRole();
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, projectDTO);
 
         if (!isOwner) {
             logger.warn("User with ID {} is not the owner of project ID {}. Access denied.", userId, milestone.getId());

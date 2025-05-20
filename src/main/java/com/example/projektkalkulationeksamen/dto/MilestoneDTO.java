@@ -10,9 +10,6 @@ public class MilestoneDTO {
     private String milestoneName;
     private String milestoneDescription;
     private int projectId;
-    private int estimatedHours;
-    private int calculatedCost;
-    private int actualHoursUsed;
     private Status milestoneStatus;
     private LocalDateTime createdAt;
     private LocalDateTime deadline;
@@ -20,14 +17,11 @@ public class MilestoneDTO {
     private List<TaskDTO> tasks;
     private int progress;
 
-    public MilestoneDTO(int id, String milestoneName, String milestoneDescription, int projectId, int estimatedHours, int calculatedCost, int actualHoursUsed, Status milestoneStatus, LocalDateTime createdAt, LocalDateTime deadline, LocalDateTime completedAt, List<TaskDTO> tasks, int progress) {
+    public MilestoneDTO(int id, String milestoneName, String milestoneDescription, int projectId, Status milestoneStatus, LocalDateTime createdAt, LocalDateTime deadline, LocalDateTime completedAt, List<TaskDTO> tasks, int progress) {
         this.id = id;
         this.milestoneName = milestoneName;
         this.milestoneDescription = milestoneDescription;
         this.projectId = projectId;
-        this.estimatedHours = estimatedHours;
-        this.calculatedCost = calculatedCost;
-        this.actualHoursUsed = actualHoursUsed;
         this.milestoneStatus = milestoneStatus;
         this.createdAt = createdAt;
         this.deadline = deadline;
@@ -66,30 +60,6 @@ public class MilestoneDTO {
 
     public void setProjectId(int projectId) {
         this.projectId = projectId;
-    }
-
-    public int getEstimatedHours() {
-        return estimatedHours;
-    }
-
-    public void setEstimatedHours(int estimatedHours) {
-        this.estimatedHours = estimatedHours;
-    }
-
-    public int getCalculatedCost() {
-        return calculatedCost;
-    }
-
-    public void setCalculatedCost(int calculatedCost) {
-        this.calculatedCost = calculatedCost;
-    }
-
-    public int getActualHoursUsed() {
-        return actualHoursUsed;
-    }
-
-    public void setActualHoursUsed(int actualHoursUsed) {
-        this.actualHoursUsed = actualHoursUsed;
     }
 
     public Status getMilestoneStatus() {

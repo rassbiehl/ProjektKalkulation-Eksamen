@@ -27,11 +27,9 @@ public class RowMapperUtil {
             String name = rs.getString("milestone_name");
             String description = rs.getString("milestone_description");
             int project_id = rs.getInt("project_id");
-            int estimatedHours = rs.getInt("estimated_hours");
-            int calculatedCost = rs.getInt("calculated_cost");
             LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
-            int actualHoursUsed = rs.getInt("actual_hours_used");
             Status status = Status.valueOf(rs.getString("milestone_status"));
+
             //Null safe handler af deadline
             LocalDateTime deadline = null;
             Timestamp deadlineTs = rs.getTimestamp("deadline");
@@ -45,7 +43,7 @@ public class RowMapperUtil {
             }
 
 
-            return new Milestone(id,name ,description,project_id,estimatedHours,calculatedCost,createdAt,actualHoursUsed,status,deadline,completedAt);
+            return new Milestone(id,name ,description,project_id, createdAt, status,deadline,completedAt);
         };
     }
 
@@ -56,9 +54,6 @@ public class RowMapperUtil {
             String description = rs.getString("project_description");
             LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
             int projectManagerId = rs.getInt("project_manager_id");
-            int actualHoursUsed = rs.getInt("actual_hours_used");
-            int estimatedHours = rs.getInt("estimated_hours");
-            int calculatedCost = rs.getInt("calculated_cost");
             Status status = Status.valueOf(rs.getString("project_status"));
 
             LocalDateTime deadline = null;
@@ -78,7 +73,7 @@ public class RowMapperUtil {
             if (completedAtTs != null){
                 completedAt = completedAtTs.toLocalDateTime();
             }
-            return new Project(id, projectName, description, createdAt, projectManagerId,actualHoursUsed, estimatedHours, calculatedCost, status, deadline, startDate, completedAt);
+            return new Project(id, projectName, description, createdAt, projectManagerId, status, deadline, startDate, completedAt);
         };
     }
     public static RowMapper<Task> taskRowMapper() {
@@ -114,10 +109,5 @@ public class RowMapperUtil {
                     startedAt, deadline, completedAt);
         };
     }
-
-    public static RowMapper<Integer> estimatedHours() {
-        return (rs, rowNum) -> rs.getInt("estimated_hours");
-    }
-
 
 }

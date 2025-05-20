@@ -72,8 +72,8 @@ public class ProjectRepository {
     public Project addProject(Project project) {
         try {
             String sql = "INSERT INTO projects " +
-                    "(project_name, project_description, project_manager_id, estimated_hours, deadline, start_date) " +
-                    "VALUES(?, ?, ?, ?, ?, ?) ";
+                    "(project_name, project_description, project_manager_id, deadline, start_date) " +
+                    "VALUES(?, ?, ?, ?, ?)";
 
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -83,9 +83,8 @@ public class ProjectRepository {
                 ps.setString(1, project.getProjectName());
                 ps.setString(2, project.getDescription());
                 ps.setInt(3, project.getProjectManagerId());
-                ps.setInt(4, project.getEstimatedHours());
-                ps.setTimestamp(5, Timestamp.valueOf(project.getDeadline()));
-                ps.setTimestamp(6, Timestamp.valueOf(project.getStartDate()));
+                ps.setTimestamp(4, Timestamp.valueOf(project.getDeadline()));
+                ps.setTimestamp(5, Timestamp.valueOf(project.getStartDate()));
                 return ps;
             }, keyHolder);
 
@@ -124,7 +123,7 @@ public class ProjectRepository {
 
     public boolean updateProject(Project updatedProject) {
         try {
-            String sql = "UPDATE projects set project_name = ?, project_description = ?, project_manager_id = ?, actual_hours_used = ?, estimated_hours = ?, calculated_cost = ?, project_status = ?, deadline = ?, start_date = ?, completed_at = ? " +
+            String sql = "UPDATE projects set project_name = ?, project_description = ?, project_manager_id = ?, project_status = ?, deadline = ?, start_date = ?, completed_at = ? " +
                     "WHERE id = ?";
 
             Timestamp ifCompleted = null;
@@ -137,9 +136,6 @@ public class ProjectRepository {
                     updatedProject.getProjectName(),
                     updatedProject.getDescription(),
                     updatedProject.getProjectManagerId(),
-                    updatedProject.getActualHoursUsed(),
-                    updatedProject.getEstimatedHours(),
-                    updatedProject.getCalculatedCost(),
                     updatedProject.getStatus().toString(),
                     Timestamp.valueOf(updatedProject.getDeadline()),
                     Timestamp.valueOf(updatedProject.getStartDate()),

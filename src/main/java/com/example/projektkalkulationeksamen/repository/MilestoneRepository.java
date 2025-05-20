@@ -27,12 +27,6 @@ public class MilestoneRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Milestone> getAllMilestones() {
-        String sql = "SELECT * FROM milestones";
-
-        return jdbcTemplate.query(sql, RowMapperUtil.milestoneRowMapper());
-    }
-
     public List<Milestone> getMilestonesByProjectId(int projectId) {
         String sql = "SELECT * FROM milestones " +
                 "WHERE project_id = ?";
@@ -40,17 +34,17 @@ public class MilestoneRepository {
         return jdbcTemplate.query(sql, RowMapperUtil.milestoneRowMapper(), projectId);
     }
 
-    public Optional<Milestone> getMilestoneById(int id) {
+    public Optional<Milestone> getMilestoneById(int milestoneId) {
         try {
             String sql = "SELECT * FROM milestones WHERE id = ?";
 
-            Milestone milestone = jdbcTemplate.queryForObject(sql, RowMapperUtil.milestoneRowMapper(), id);
+            Milestone milestone = jdbcTemplate.queryForObject(sql, RowMapperUtil.milestoneRowMapper(), milestoneId);
 
             return Optional.of(milestone);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         } catch (IncorrectResultSizeDataAccessException e) {
-            throw new DatabaseException("More milestones found with same ID " + id, e);
+            throw new DatabaseException("More milestones found with same ID " + milestoneId, e);
         }
     }
 
@@ -105,16 +99,16 @@ public class MilestoneRepository {
         }
     }
 
-    public boolean deleteMilestone(int id) {
+    public boolean deleteMilestone(int milestoneId) {
         try {
             String sql = "DELETE FROM milestones WHERE id = ?";
 
-            int affectedRows = jdbcTemplate.update(sql, id);
+            int affectedRows = jdbcTemplate.update(sql, milestoneId);
 
             return affectedRows > 0;
 
         } catch (DataAccessException e) {
-            throw new DatabaseException("Failed to delete milestone with ID " + id, e);
+            throw new DatabaseException("Failed to delete milestone with ID " + milestoneId, e);
         }
     }
 
@@ -146,6 +140,7 @@ public class MilestoneRepository {
         }
     }
 
+    // Total estimated hours for tasks under a milestone
     public int estimatedHours(int milestoneId) {
 
         String sql = "SELECT SUM(estimated_hours) FROM tasks WHERE milestone_id = ?";
@@ -158,12 +153,13 @@ public class MilestoneRepository {
         return estimatedHours;
     }
 
+    // Total actual hours used for tasks under a milestone
     public int actualHoursUsed(int milestoneId){
         String sql = "SELECT SUM(actual_hours_used) FROM tasks WHERE milestone_id = ?";
 
         Integer actualHoursUsed = jdbcTemplate.queryForObject(sql,Integer.class, milestoneId);
 
-        if (actualHoursUsed == null){
+        if (actualHoursUsed == null) {
             return 0;
         }
         return actualHoursUsed;

@@ -5,7 +5,7 @@ import com.example.projektkalkulationeksamen.exceptions.security.AuthenticationF
 import com.example.projektkalkulationeksamen.exceptions.user.*;
 import com.example.projektkalkulationeksamen.model.Role;
 import com.example.projektkalkulationeksamen.model.User;
-import com.example.projektkalkulationeksamen.validator.UserValidator;
+import com.example.projektkalkulationeksamen.validation.UserValidator;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ public class AuthService {
             return user;
 
         } catch (UserNotFoundException e) {
-            logger.error("Failed login attempt: no user found with username: {}", username, e);
+            logger.warn("Failed login attempt: no user found with username: {}", username, e);
             throw new AuthenticationFailedException("Invalid username or password", e);
         }
     }
@@ -80,7 +80,7 @@ public class AuthService {
 
         } catch (UserNotFoundException | UserCreationException e) {
             logger.error("Failed to update user with ID: {}", id, e);
-            throw new UserUpdateException(e.getMessage(), e);
+            throw new UserUpdateException("Could not update user. Reason: " + e.getMessage(), e);
         }
     }
 

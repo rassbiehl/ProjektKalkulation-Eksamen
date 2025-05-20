@@ -1,4 +1,4 @@
-package com.example.projektkalkulationeksamen.validator;
+package com.example.projektkalkulationeksamen.validation;
 
 import com.example.projektkalkulationeksamen.exceptions.user.UserCreationException;
 import com.example.projektkalkulationeksamen.exceptions.user.UserUpdateException;

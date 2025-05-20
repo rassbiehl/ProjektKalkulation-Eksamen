@@ -30,7 +30,7 @@ public class TaskRepository {
         try {
             String sql = "INSERT INTO tasks (task_name, task_description, milestone_id, estimated_hours, " +
                     " start_date, deadline) " +
-                    "VALUES (?, ?, ?, ?, ?, ?   )";
+                    "VALUES (?, ?, ?, ?, ?, ?)";
 
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -151,12 +151,12 @@ public class TaskRepository {
             throw new DatabaseException("Failed to update task with ID: " + updatedTask.getId(), e);
         }
     }
-    public boolean setHours(int hours, int taskId){
-        String sql ="UPDATE tasks SET actual_hours_used = ? WHERE id = ?";
+
+    public boolean setHours(int hours, int taskId) {
+        String sql = "UPDATE tasks SET actual_hours_used = ? WHERE id = ?";
 
 
-
-        int affectedRows =jdbcTemplate.update(sql,hours,taskId);
+        int affectedRows = jdbcTemplate.update(sql, hours, taskId);
 
         return affectedRows > 0;
     }

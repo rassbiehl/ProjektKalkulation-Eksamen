@@ -1,4 +1,4 @@
-package com.example.projektkalkulationeksamen.validator;
+package com.example.projektkalkulationeksamen.validation;
 
 import com.example.projektkalkulationeksamen.model.Role;
 import com.example.projektkalkulationeksamen.service.UserService;
@@ -7,12 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SessionValidator {
+public class SessionValidation {
 
     private UserService userService;
 
     @Autowired
-    public SessionValidator(UserService userService) {
+    public SessionValidation(UserService userService) {
         this.userService = userService;
     }
 

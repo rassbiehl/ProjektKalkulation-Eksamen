@@ -10,7 +10,8 @@ import com.example.projektkalkulationeksamen.model.Role;
 import com.example.projektkalkulationeksamen.model.Status;
 import com.example.projektkalkulationeksamen.service.ProjectService;
 import com.example.projektkalkulationeksamen.service.UserService;
-import com.example.projektkalkulationeksamen.validator.SessionValidator;
+import com.example.projektkalkulationeksamen.validation.AccessValidation;
+import com.example.projektkalkulationeksamen.validation.SessionValidation;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,14 +29,14 @@ import java.util.List;
 public class ProjectController {
     public static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
     private final UserService userService;
-    private final SessionValidator sessionValidator;
+    private final SessionValidation sessionValidation;
     private final ProjectService projectService;
 
 
     @Autowired
-    public ProjectController(UserService userService, SessionValidator sessionValidator, ProjectService projectService) {
+    public ProjectController(UserService userService, SessionValidation sessionValidation, ProjectService projectService) {
         this.userService = userService;
-        this.sessionValidator = sessionValidator;
+        this.sessionValidation = sessionValidation;
         this.projectService = projectService;
     }
 
@@ -46,7 +47,7 @@ public class ProjectController {
             Model model
     ) {
 
-        if (!sessionValidator.isSessionValid(session)) {
+        if (!sessionValidation.isSessionValid(session)) {
             logger.info("User is not logged in for current session. Redirecting to loginform.html");
             return "redirect:/loginform";
         }
@@ -61,7 +62,7 @@ public class ProjectController {
             throw new AccessDeniedException("Invalid role");
         }
 
-        if (!sessionValidator.isSessionValid(session, requiredRole)) {
+        if (!sessionValidation.isSessionValid(session, requiredRole)) {
             logger.info("Access denied: user with ID {} lacks {} privileges", userId, requiredRole);
             throw new AccessDeniedException("User lacks " + requiredRole + " privileges");
         }
@@ -104,7 +105,7 @@ public class ProjectController {
     ) {
         logger.info("Attempting to load project page with project ID: {}", id);
 
-        if (!sessionValidator.isSessionValid(session)) {
+        if (!sessionValidation.isSessionValid(session)) {
             logger.warn("Invalid session. Redirecting to login.");
             return "redirect:/loginform";
         }
@@ -112,14 +113,12 @@ public class ProjectController {
         Integer userId = (Integer) session.getAttribute("userId");
 
         ProjectDTO project = projectService.getProjectWithDetails(id);
-
-
-        Role role = userService.getUserById(userId).getRole();
-        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
-        logger.debug("User ID {} has role {}. Is owner: {}", userId, role, isOwner);
+        Role userRole = userService.getUserById(userId).getRole();
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, project);
+        logger.debug("User ID {} has role {}. Is owner: {}", userId, userRole, isOwner);
 
         model.addAttribute("project", project);
-        model.addAttribute("userRole", role.toString().toLowerCase());
+        model.addAttribute("userRole", userRole.toString().toLowerCase());
         model.addAttribute("projectManager", userService.getUserById(project.getProjectManagerId()));
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("projectMilestones", project.getMilestones());
@@ -148,7 +147,7 @@ public class ProjectController {
             Model model
     ) {
         logger.debug("Attempting to load add project page");
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can add projects");
         }
@@ -173,7 +172,7 @@ public class ProjectController {
     ) {
         logger.debug("Attempting to add new project");
 
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can add projects");
         }
@@ -200,15 +199,15 @@ public class ProjectController {
             @PathVariable int id
     ) {
         logger.debug("Attempting to delete project with ID: {}", id);
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can delete projects");
         }
 
         Integer userId = (Integer) session.getAttribute("userId");
         ProjectDTO project = projectService.getProjectWithDetails(id);
-        Role role = userService.getUserById(userId).getRole();
-        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+        Role userRole = userService.getUserById(userId).getRole();
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, project);
 
         if (isOwner) {
             projectService.deleteProject(id);
@@ -218,7 +217,7 @@ public class ProjectController {
             throw new AccessDeniedException("Access denied: User does not own the project");
         }
 
-        return "redirect:/projects/" + role.toString().toLowerCase() + "Startpage";
+        return "redirect:/projects/" + userRole.toString().toLowerCase() + "Startpage";
     }
 
     @GetMapping("/update/{id}")
@@ -228,15 +227,15 @@ public class ProjectController {
             Model model
     ) {
         logger.debug("Attempting to get update page for project with ID: {}", id);
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("Access denied: User is not a project manager");
             throw new AccessDeniedException("Only project managers can update projects");
         }
 
         Integer userId = (Integer) session.getAttribute("userId");
         ProjectDTO project = projectService.getProjectWithDetails(id);
-        Role role = userService.getUserById(userId).getRole();
-        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+        Role userRole = userService.getUserById(userId).getRole();
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, project);
 
         if (isOwner) {
 
@@ -264,15 +263,15 @@ public class ProjectController {
     ) {
         logger.debug("Trying to update project with ID: {}", id);
 
-        if (!sessionValidator.isSessionValid(session, Role.PROJECTMANAGER)) {
+        if (!sessionValidation.isSessionValid(session, Role.PROJECTMANAGER)) {
             logger.warn("User is not a project manager. Access denied.");
             throw new AccessDeniedException("Only project managers can update projects");
         }
 
         Integer userId = (Integer) session.getAttribute("userId");
         ProjectDTO project = projectService.getProjectWithDetails(id);
-        Role role = userService.getUserById(userId).getRole();
-        boolean isOwner = role == Role.PROJECTMANAGER && project.getProjectManagerId() == userId;
+        Role userRole = userService.getUserById(userId).getRole();
+        boolean isOwner = AccessValidation.isOwner(userId, userRole, project);
 
         if (isOwner) {
             Project projectToUpdate = projectService.getProjectById(id);

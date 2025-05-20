@@ -10,7 +10,7 @@ import com.example.projektkalkulationeksamen.exceptions.task.TaskUpdateException
 import com.example.projektkalkulationeksamen.model.Status;
 import com.example.projektkalkulationeksamen.model.Task;
 import com.example.projektkalkulationeksamen.repository.TaskRepository;
-import com.example.projektkalkulationeksamen.validator.ProjectDataValidator;
+import com.example.projektkalkulationeksamen.validation.ProjectDataValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class TaskService {
     }
 
     public Task getTaskById(int id) {
-        logger.debug("Sends task with ID: " + id);
+        logger.debug("Sends task with ID: {}", id);
         Optional<Task> foundTask = taskRepository.getTaskById(id);
 
         return foundTask.orElseThrow(() -> {
@@ -101,7 +101,7 @@ public class TaskService {
             String currentName = currentTask.getTaskName().trim();
 
             if (!newName.equalsIgnoreCase(currentName) && tasksExistsByNameInMilestoneExludeId(newName, task.getMilestoneId(), task.getId())) {
-                logger.warn("Dupliate taskname: {}", newName);
+                logger.warn("Duplicate task name: {}", newName);
                 throw new TaskUpdateException("Task name already exists for this milestone");
             }
 
@@ -130,10 +130,6 @@ public class TaskService {
         }
     }
 
-    public boolean taskExistsById(int id) {
-        return taskRepository.getTaskById(id).isPresent();
-    }
-
     public boolean tasksExistsByNameInMilestoneExludeId(String name, int milestone, int excludeId) {
         String target = name.trim();
 
@@ -158,7 +154,7 @@ public class TaskService {
     public TaskDTO getTaskWithDetails(int id) {
         Task task = getTaskById(id);
 
-        List<Integer> coworkerIds = taskCoworkerService.getAllCoworkersIdsForTask(id);
+        List<Integer> coworkerIds = taskCoworkerService.getAllCoworkersIdsFromTask(id);
 
         return new TaskDTO(
                 task.getId(),
@@ -176,17 +172,6 @@ public class TaskService {
         );
     }
 
-    public List<TaskDTO> getAllTasksWithDetails() {
-        List<Task> allTasks = getAllTasks();
-
-        List<TaskDTO> allTasksWithDetails = new ArrayList<>();
-
-        for (Task task : allTasks) {
-            allTasksWithDetails.add(getTaskWithDetails(task.getId()));
-        }
-        return allTasksWithDetails;
-    }
-
     public List<TaskDTO> getTasksByMilestoneIdWithDetails(int milestoneId) {
         List<Task> tasksByMileStoneId = taskRepository.getTasksByMilestoneId(milestoneId);
         List<TaskDTO> tasksByMileStoneIdWithDetails = new ArrayList<>();
@@ -199,26 +184,13 @@ public class TaskService {
         return tasksByMileStoneIdWithDetails;
     }
 
-    public List<TaskDTO> getAllTasksForCoworker(int userId) {
+    public void setHours(int hours, int taskId){
+        boolean success = taskRepository.setHours(hours, taskId);
 
-        List<TaskDTO> allTasksWithDetails = getAllTasksWithDetails();
-
-        List<TaskDTO> selectedTasks = new ArrayList<>();
-
-        for (TaskDTO taskDTO : allTasksWithDetails) {
-            List<Integer> taskCoworkersIds = taskDTO.getCoworkerIds();
-
-            for (Integer id : taskCoworkersIds) {
-                if (id == userId) {
-                    selectedTasks.add(taskDTO);
-                }
-            }
+        if (!success) {
+            logger.error("Failed to update task with ID: {} due to database error", taskId);
+            throw new TaskNotFoundException("Failed to update actual hours for task with ID:" + taskId);
         }
-
-        return selectedTasks;
-    }
-    public boolean setHours(int hours, int taskId){
-        return taskRepository.setHours(hours, taskId);
     }
 
 }

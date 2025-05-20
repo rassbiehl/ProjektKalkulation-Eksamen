@@ -45,31 +45,24 @@ public class UserService {
     }
 
     public User getUserById(int id) {
-            logger.debug("Sends user with ID: {}", id);
+        logger.debug("Sends user with ID: {}", id);
 
-            Optional<User> foundUser = userRepository.getUserById(id);
+        Optional<User> foundUser = userRepository.getUserById(id);
 
-            return foundUser.orElseThrow(() -> {
-                logger.warn("User not found with ID: {}", id);
-                return new UserNotFoundException("Failed to find user with ID: " + id);
-            });
+        return foundUser.orElseThrow(() -> {
+            logger.warn("User not found with ID: {}", id);
+            return new UserNotFoundException("Failed to find user with ID: " + id);
+        });
     }
 
     public User getUserByUsername(String username) {
         logger.debug("Attempting to send user with username: {}", username);
+        Optional<User> foundUser = userRepository.getUserByUsername(username);
 
-        try {
-            Optional<User> foundUser = userRepository.getUserByUsername(username);
-
-            return foundUser.orElseThrow(() -> {
-                logger.warn("User not found with username: {}", username);
-                return new UserNotFoundException("Failed to find user by username: " + username);
-            });
-
-        } catch (DatabaseException e) {
-            logger.error("Failed to retrieve user from Database with username {}", username, e);
-            throw new DatabaseException("Database error while fetching project with ID: " + username, e);
-        }
+        return foundUser.orElseThrow(() -> {
+            logger.warn("User not found with username: {}", username);
+            return new UserNotFoundException("Failed to find user by username: " + username);
+        });
     }
 
     public User addUser(User user) {

@@ -42,7 +42,7 @@ public class TaskCoworkerRepository {
 
             return affectedRows > 0;
         } catch (DataAccessException e) {
-            throw new DatabaseException("Failed to delete coworker with ID: " + userId + " to task with ID: " + taskId, e);
+            throw new DatabaseException("Failed to delete coworker with ID: " + userId + " from task with ID: " + taskId, e);
         }
     }
 

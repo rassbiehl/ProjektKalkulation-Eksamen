@@ -10,8 +10,8 @@ import com.example.projektkalkulationeksamen.exceptions.notfound.MilestoneNotFou
 import com.example.projektkalkulationeksamen.model.Milestone;
 import com.example.projektkalkulationeksamen.model.Status;
 import com.example.projektkalkulationeksamen.repository.MilestoneRepository;
-import com.example.projektkalkulationeksamen.service.comparators.DeadlineComparator;
-import com.example.projektkalkulationeksamen.validator.ProjectDataValidator;
+import com.example.projektkalkulationeksamen.comparators.DeadlineComparator;
+import com.example.projektkalkulationeksamen.validation.ProjectDataValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +24,8 @@ import java.util.Optional;
 
 @Service
 public class MilestoneService {
-    private final MilestoneRepository milestoneRepository;
     private final static Logger logger = LoggerFactory.getLogger(MilestoneService.class);
+    private final MilestoneRepository milestoneRepository;
     private final TaskService taskService;
 
     @Autowired
@@ -43,58 +43,50 @@ public class MilestoneService {
         return milestones;
     }
 
-    public Milestone getMilestoneById(int id) {
+    public Milestone getMilestoneById(int milestoneId) {
         try {
-            logger.debug("Sends milestone with id " + id);
-            Optional<Milestone> foundMilestone = milestoneRepository.getMilestoneById(id);
+            logger.debug("Sends milestone with id " + milestoneId);
+            Optional<Milestone> foundMilestone = milestoneRepository.getMilestoneById(milestoneId);
 
-            return foundMilestone.orElseThrow(() -> new MilestoneNotFoundException("Could not find milestone with ID " + id));
+            return foundMilestone.orElseThrow(() -> new MilestoneNotFoundException("Could not find milestone with ID " + milestoneId));
         } catch (DatabaseException e) {
-            throw new MilestoneNotFoundException("Could not find milestone with ID " + id, e);
+            logger.error("Failed to retrieve milestone with ID: {}", milestoneId);
+            throw new MilestoneNotFoundException("Could not find milestone with ID: " + milestoneId, e);
         }
     }
 
-    public Milestone getMilestoneByName(String name) {
-        try {
-            logger.debug("Finds milestone with name " + name);
-            Optional<Milestone> foundMilestone = milestoneRepository.getMilestoneByName(name);
-
-            return foundMilestone.orElseThrow(() -> new MilestoneNotFoundException("Could not find milestone with name " + name));
-        } catch (DatabaseException e) {
-            throw new MilestoneNotFoundException("Could not find milestone with name " + name, e);
-        }
-    }
-
-    public Milestone addMilestone(Milestone milestone) {
-        logger.debug("Adds milestone with id " + milestone.getId());
+    public void addMilestone(Milestone milestone) {
+        logger.debug("Adds milestone with ID: {}", milestone.getId());
 
 
         if (milestoneExistsByNameInProject(milestone.getMilestoneName(), milestone.getProjectId())) {
+            logger.warn("Failed to add milestone because of duplicated name: {}", milestone.getMilestoneName());
             throw new MilestoneCreationException("Milestone name already taken in this project");
         }
         try {
             ProjectDataValidator.validateName(milestone.getMilestoneName());
             ProjectDataValidator.validateDescription(milestone.getMilestoneDescription());
-            return milestoneRepository.addMilestone(milestone);
+            Milestone saved = milestoneRepository.addMilestone(milestone);
+            logger.info("Milestone created with ID: {}", saved.getId());
         } catch (DatabaseException e) {
-            logger.error("Failed to add milestone with ID " + milestone.getId(), e);
+            logger.error("Failed to add milestone with ID: {}", milestone.getId(), e);
             throw new MilestoneCreationException("Failed to create milestone with name " + milestone.getMilestoneName());
         }
     }
 
-    public void deleteMilestone(int id) {
+    public void deleteMilestone(int milestoneId) {
 
         try {
-            boolean deleted = milestoneRepository.deleteMilestone(id);
+            boolean deleted = milestoneRepository.deleteMilestone(milestoneId);
 
             if (!deleted) {
-                logger.warn("Failed to delete milestone with ID " + id);
-                throw new MilestoneNotFoundException("Failed to delete milestone with ID " + id);
+                logger.warn("Failed to delete milestone with ID " + milestoneId);
+                throw new MilestoneNotFoundException("Failed to delete milestone with ID " + milestoneId);
             }
-            logger.info("Succesfully deleted milestone with id " + id);
+            logger.info("Succesfully deleted milestone with id " + milestoneId);
         } catch (DatabaseException e) {
-            logger.error("Failed to delete project with ID: {}", id, e);
-            throw new DeletionException("Failed to delete milestone with ID: " + id, e);
+            logger.error("Failed to delete project with ID: {}", milestoneId, e);
+            throw new DeletionException("Failed to delete milestone with ID: " + milestoneId, e);
         }
     }
 
@@ -121,8 +113,10 @@ public class MilestoneService {
                 throw new MilestoneUpdateException("Deadline cannot be empty");
             }
 
+            // When changing the milestone status to "COMPLETED", update completed_at to the current LocalDateTime.
             if (milestone.getStatus().equals(Status.COMPLETED) && currentMilestone.getCompletedAt() == null) {
                 milestone.setCompletedAt(LocalDateTime.now());
+                // If changed back from "COMPLETED" to "In progress" or "Not started" remove the completed_at value.
             } else if (milestone.getStatus() != Status.COMPLETED) {
                 milestone.setCompletedAt(null);
             }
@@ -141,6 +135,7 @@ public class MilestoneService {
         }
     }
 
+    // returns true if a milestone name already exists for a milestone linked to a given project id
     public boolean milestoneExistsByNameInProject(String name, int projectId) {
 
         List<Milestone> allMilestonesForProject = milestoneRepository.getMilestonesByProjectId(projectId);
@@ -154,6 +149,7 @@ public class MilestoneService {
         return false;
     }
 
+    // Ensures no duplicate names (ignoring its own name when updating)
     public boolean milestoneExistsByNameInProjectExcludeId(String name, int projectId, int excludeId) {
         String target = name.trim();
 
@@ -171,10 +167,8 @@ public class MilestoneService {
         return false;
     }
 
-    //DTO
-
+    // returns a list of tasks from a milestone dto object that has the status of "in progress" or "not started".
     public List<TaskDTO> getOngoingTasksFromMilestone(int milestoneId) {
-
         MilestoneDTO milestoneDTO = getMilestoneWithDetails(milestoneId);
         List<TaskDTO> allTasksFromMileStone = milestoneDTO.getTasks();
 
@@ -185,7 +179,7 @@ public class MilestoneService {
                 ongoingTasks.add(taskDTO);
             }
         }
-
+        logger.debug("Found {} ongoing tasks for milestone {}", ongoingTasks.size(), milestoneId);
         return ongoingTasks;
     }
 
@@ -205,7 +199,9 @@ public class MilestoneService {
         return completedTasks;
     }
 
+    // Calculates percentage of completed tasks for the given milestone
     public int getMilestoneProgress(int milestoneId) {
+
         List<TaskDTO> tasksWithDetails = taskService.getTasksByMilestoneIdWithDetails(milestoneId);
 
 
@@ -221,10 +217,11 @@ public class MilestoneService {
             }
         }
 
-        return (int) Math.round((finishedTasks * 100.0) / tasksWithDetails.size());
+        int progress = (int) Math.round((finishedTasks * 100.0) / tasksWithDetails.size());
+        logger.debug("Progress for milestone {}: {}%", milestoneId, progress);
+        return progress;
     }
 
-    // DTO Object methods
     public MilestoneDTO getMilestoneWithDetails(int milestoneId) {
         List<TaskDTO> milestoneTasksWithDetails = taskService.getTasksByMilestoneIdWithDetails(milestoneId);
         Milestone milestone = getMilestoneById(milestoneId);
@@ -234,9 +231,6 @@ public class MilestoneService {
                 milestone.getMilestoneName(),
                 milestone.getMilestoneDescription(),
                 milestone.getProjectId(),
-                milestone.getEstimatedHours(),
-                milestone.getCalculatedCost(),
-                milestone.getActualHoursUsed(),
                 milestone.getStatus(),
                 milestone.getCreatedAt(),
                 milestone.getDeadline(),
@@ -246,6 +240,7 @@ public class MilestoneService {
         );
     }
 
+    // finds all milestones linked to a project ID and transforms them into milestone dto objects
     public List<MilestoneDTO> getMilestonesByProjectIdWithDetails(int projectId) {
         List<MilestoneDTO> milestonesByProjectIdWithDetails = new ArrayList<>();
         List<Milestone> milestonesByProjectId = milestoneRepository.getMilestonesByProjectId(projectId);
@@ -253,12 +248,26 @@ public class MilestoneService {
         for (Milestone milestone : milestonesByProjectId) {
             milestonesByProjectIdWithDetails.add(getMilestoneWithDetails(milestone.getId()));
         }
+
+        logger.info("Found {} milestones with details for project {}", milestonesByProjectIdWithDetails.size(), projectId);
         return milestonesByProjectIdWithDetails;
     }
-    public int getEstimatedHours(int milestoneId){
-        return milestoneRepository.estimatedHours(milestoneId);
+
+
+    // returns total estimated hours for all tasks linked to a milestone ID
+    public int getEstimatedHours(int milestoneId) {
+
+        int hours = milestoneRepository.estimatedHours(milestoneId);
+
+        logger.debug("Estimated hours for milestone {}: {}", milestoneId, hours);
+        return hours;
+
     }
-    public int getActualHoursUsed(int milestoneId){
-        return milestoneRepository.actualHoursUsed(milestoneId);
+
+    // returns the total of actual hours used for all tasks linked to a milestone id
+    public int getActualHoursUsed(int milestoneId) {
+        int hours = milestoneRepository.actualHoursUsed(milestoneId);
+        logger.debug("Actual hours for milestone {}: {}", milestoneId, hours);
+        return hours;
     }
 }
