@@ -1,9 +1,9 @@
 package com.example.projektkalkulationeksamen.integration.user;
-import com.example.projektkalkulationeksamen.Model.Role;
-import com.example.projektkalkulationeksamen.Model.User;
-import com.example.projektkalkulationeksamen.Repository.UserRepository;
-import com.example.projektkalkulationeksamen.Service.AuthService;
-import com.example.projektkalkulationeksamen.Service.UserService;
+import com.example.projektkalkulationeksamen.model.Role;
+import com.example.projektkalkulationeksamen.model.User;
+import com.example.projektkalkulationeksamen.repository.UserRepository;
+import com.example.projektkalkulationeksamen.service.AuthService;
+import com.example.projektkalkulationeksamen.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

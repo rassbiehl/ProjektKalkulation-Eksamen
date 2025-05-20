@@ -1,14 +1,14 @@
 package com.example.projektkalkulationeksamen.unit.service;
 
 
-import com.example.projektkalkulationeksamen.Exceptions.notfound.UserNotFoundException;
-import com.example.projektkalkulationeksamen.Exceptions.security.AuthenticationFailedException;
-import com.example.projektkalkulationeksamen.Exceptions.user.*;
-import com.example.projektkalkulationeksamen.Model.Role;
-import com.example.projektkalkulationeksamen.Model.User;
-import com.example.projektkalkulationeksamen.Repository.UserRepository;
-import com.example.projektkalkulationeksamen.Service.AuthService;
-import com.example.projektkalkulationeksamen.Service.UserService;
+import com.example.projektkalkulationeksamen.exceptions.notfound.UserNotFoundException;
+import com.example.projektkalkulationeksamen.exceptions.security.AuthenticationFailedException;
+import com.example.projektkalkulationeksamen.exceptions.user.*;
+import com.example.projektkalkulationeksamen.model.Role;
+import com.example.projektkalkulationeksamen.model.User;
+import com.example.projektkalkulationeksamen.repository.UserRepository;
+import com.example.projektkalkulationeksamen.service.AuthService;
+import com.example.projektkalkulationeksamen.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -147,7 +147,7 @@ public class AuthServiceTest {
 
 
         // assert
-        assertEquals("User not found", userUpdateException.getMessage());
+        assertEquals("Could not update user. Reason: User not found", userUpdateException.getMessage());
 
     }
 
