@@ -57,7 +57,6 @@ public class AuthServiceTest {
         mockUsers.add(new User(3, "charlie", "password3", createdTime, Role.EMPLOYEE));
     }
 
-    // adminupdate, logout
 
     @Test
     void login_shouldThrowException_whenInvalid() {

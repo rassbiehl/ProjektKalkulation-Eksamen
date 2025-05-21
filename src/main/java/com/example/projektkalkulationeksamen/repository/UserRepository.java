@@ -66,7 +66,7 @@ public class UserRepository {
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(sql, new String[] { "id" });
+                PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
 
                 ps.setString(1, user.getUsername());
                 ps.setString(2, user.getPasswordHash());
@@ -87,7 +87,7 @@ public class UserRepository {
             return optionalUser
                     .orElseThrow(() ->
                             new DatabaseException("Failed to retrieve created user with generated ID " + generatedId)
-            );
+                    );
 
         } catch (DataAccessException e) {
             throw new DatabaseException("Failed to create user in Database: ", e);
@@ -105,7 +105,7 @@ public class UserRepository {
         }
     }
 
-    public boolean updateUser (User newUser) {
+    public boolean updateUser(User newUser) {
         try {
             String sql = "UPDATE users set username = ?, password_hash = ?, user_role = ? " +
                     "WHERE id = ?";
@@ -123,5 +123,6 @@ public class UserRepository {
             throw new DatabaseException("Failed to update user with ID: " + newUser.getId(), e);
         }
     }
+
 }
 
