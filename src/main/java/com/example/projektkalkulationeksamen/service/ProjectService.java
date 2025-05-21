@@ -51,7 +51,7 @@ public class ProjectService {
                 });
     }
 
-    public Project addProject(Project newProject) {
+    public void addProject(Project newProject) {
         logger.debug("Attempting to create new project with project name: {}", newProject.getProjectName());
 
         if (projectExistsByName(newProject.getProjectName())) {
@@ -63,7 +63,7 @@ public class ProjectService {
         ProjectDataValidator.validateDescription(newProject.getDescription());
 
         try {
-            return projectRepository.addProject(newProject);
+            projectRepository.addProject(newProject);
         } catch (DatabaseException e) {
             logger.error("Failed to create project with project name: {}", newProject.getProjectName(), e);
             throw new ProjectCreationException("Failed to create project with project name: " + newProject.getProjectName(), e);
@@ -78,7 +78,7 @@ public class ProjectService {
 
             if (!deleted) {
                 logger.warn("Failed to delete project with ID: {}", id);
-                throw new ProjectNotFoundException("Failed to delete project with ID:" + id);
+                throw new ProjectNotFoundException("Failed to delete project with ID: " + id);
             }
         } catch (DatabaseException e) {
             logger.error("Failed to delete project with ID: {}", id, e);

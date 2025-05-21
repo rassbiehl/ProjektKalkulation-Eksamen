@@ -70,7 +70,7 @@ public class MilestoneService {
             logger.info("Milestone created with ID: {}", saved.getId());
         } catch (DatabaseException e) {
             logger.error("Failed to add milestone with ID: {}", milestone.getId(), e);
-            throw new MilestoneCreationException("Failed to create milestone with name " + milestone.getMilestoneName());
+            throw new MilestoneCreationException("Failed to create milestone with name: " + milestone.getMilestoneName());
         }
     }
 
@@ -81,11 +81,11 @@ public class MilestoneService {
 
             if (!deleted) {
                 logger.warn("Failed to delete milestone with ID " + milestoneId);
-                throw new MilestoneNotFoundException("Failed to delete milestone with ID " + milestoneId);
+                throw new MilestoneNotFoundException("Failed to delete milestone with ID: " + milestoneId);
             }
             logger.info("Succesfully deleted milestone with id " + milestoneId);
         } catch (DatabaseException e) {
-            logger.error("Failed to delete project with ID: {}", milestoneId, e);
+            logger.error("Failed to delete milestone with ID: {}", milestoneId, e);
             throw new DeletionException("Failed to delete milestone with ID: " + milestoneId, e);
         }
     }

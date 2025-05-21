@@ -135,6 +135,8 @@ public class UserServiceTest {
 
     @Test
     void addUser_shouldAddUser_whenUserIsValid() {
+
+        // arrange
         List<User> users = mockUsers;
         User rasmus = new User(4, "rasmus", "password4", createdTime, Role.ADMIN);
 
@@ -157,6 +159,7 @@ public class UserServiceTest {
 
     @Test
     void addUser_shouldThrowUserCreationException_whenUserIsInvalid() {
+        // arrange
         User messi = new User();
 
         // Mock Behavior
@@ -172,6 +175,7 @@ public class UserServiceTest {
 
     @Test
     void deleteUser_shouldDeleteUser_whenUserIsValid() {
+        // arrange
         List<User> users = mockUsers;
 
         // Mock behavior
@@ -205,6 +209,8 @@ public class UserServiceTest {
 
     @Test
     void userExistsByUsername_returnsTrue_whenUserIsFound() {
+
+        //arrange
         List<User> users = mockUsers;
 
         // Mock behavior
@@ -222,6 +228,7 @@ public class UserServiceTest {
 
     @Test
     void userExistsById_returnsTrue_whenUserIsFound() {
+        // arrange
         List<User> users = mockUsers;
 
         // Mock behavior
