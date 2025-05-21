@@ -104,15 +104,15 @@ public class UserFlowIntegrationTest {
     @Test
     void shouldDeleteUserCorrectly() throws SQLException {
         // arrange
-        List<User> allUsers = userService.getAllUsers();
-        User userToBeDeleted = userService.getUserByUsername("projectmanager");
+        String username = "userToBeDeleted";
+        authService.adminRegister(username, "password", Role.ADMIN);
+        User userToBeDeleted = userService.getUserByUsername(username);
 
         // act
         userService.deleteUser(userToBeDeleted.getId());
 
         // assert
         assertFalse(userService.userExistsById(userToBeDeleted.getId()));
-
     }
 
 
