@@ -56,6 +56,11 @@ Login system that redirects the user to the dashboard with functionality based o
 - Projects estimated hours and total hours spent are calculated based on the project's assigned milestones total hours.
 - The progress will be calculated in percentage.
 
+### 🧠 Domain Model
+
+Below is a domain model for our projecture, that gives an insight in the relationships between the core entities of AlphaManager:
+
+![Domain Model](docs/domainmodel.png)
 ___ 
 
 ### 🔐 Security
@@ -241,6 +246,10 @@ The project uses two database setups:
 
 - `src/main/resources/sql/init.sql` - for development
 - `src/test/resources/h2init.sql` - for tests
+
+### 🗺️ Er Diagram
+Belov is an overview of the database schema, that provides an understanding of the relational structure of the database used in AlphaManager:
+![ER Diagram](docs/er-diagram.png)
 
 ___ 
 
