@@ -18,7 +18,7 @@
         <input type="hidden" th:field="*{id}" />
         <input type="hidden" th:field="*{milestoneId}" />
         <a th:href="@{/tasks/view/{id}(id=${task.id})}" class="back-button">← Back</a>
-
+        <input type="hidden" th:field="*{actualHoursUsed}" />
 
 
         <div style="margin-top: 30px;">
