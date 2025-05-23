@@ -117,7 +117,7 @@ public class MilestoneController {
             model.addAttribute("projectId", projectId);
             model.addAttribute("status", Status.values());
 
-            return "/projectmanager/addMilestone";
+            return "projectmanager/addMilestone";
         } else {
             logger.warn("Failed retrieve add milestone form because of missing owner ID: {}", userId);
             throw new AccessDeniedException("Access denied: User with ID: " + userId + " does not own the project");
