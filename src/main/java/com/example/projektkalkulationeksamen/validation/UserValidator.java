@@ -30,7 +30,7 @@ if (password == null || password.length() < 6){
         String finalPassword = currentUser.getPasswordHash();
 
         if (!currentUser.getUsername().equals(newUsername)) {
-            if (userService.userExistsByUsername(newUsername)) {
+            if (userService.userExistsByUsernameExcludeId(newUsername, currentUser.getId())) {
                 throw new UserUpdateException("Username already taken");
             }
             validateUsername(newUsername);

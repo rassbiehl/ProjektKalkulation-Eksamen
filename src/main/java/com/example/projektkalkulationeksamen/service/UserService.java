@@ -113,6 +113,12 @@ public class UserService {
         }
     }
 
+    public boolean userExistsByUsernameExcludeId(String username, int excludedId) {
+        Optional<User> user = userRepository.getUserByUsername(username);
+
+        return user.isPresent() && user.get().getId() != excludedId;
+    }
+
     public boolean userExistsByUsername(String username) {
         return userRepository.getUserByUsername(username).isPresent();
     }
