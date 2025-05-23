@@ -62,12 +62,11 @@ CREATE TABLE tasks (
 
 -- join table: assigns users for tasks.
 CREATE TABLE task_coworkers (
-    id INT NOT NULL AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    task_id INT NOT NULL,
-    assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+                                user_id INT NOT NULL,
+                                task_id INT NOT NULL,
+                                assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                PRIMARY KEY (user_id, task_id),
+                                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                                FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
 );
 
