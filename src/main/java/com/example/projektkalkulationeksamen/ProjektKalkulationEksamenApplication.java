@@ -9,8 +9,6 @@ public class ProjektKalkulationEksamenApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ProjektKalkulationEksamenApplication.class, args);
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        System.out.println(encoder.encode("123"));
     }
 
 }
