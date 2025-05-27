@@ -17,6 +17,7 @@ public class SessionValidation {
     }
 
     // bruges ved session og rolle validering
+
     public boolean isSessionValid(HttpSession session, Role requiredRole) {
         Integer userId = (Integer) session.getAttribute("userId");
         if (userId == null || !userService.userExistsById(userId)) return false;
