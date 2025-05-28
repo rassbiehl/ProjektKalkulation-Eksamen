@@ -8,3 +8,10 @@ exclude:
   - name: All
     paths:
       - src
+
+licenseAudit:
+  allowedLicenses:
+    - Apache-2.0
+    - MPL-2.0
+    - EPL-1.0
+    - LGPL-2.1-only
